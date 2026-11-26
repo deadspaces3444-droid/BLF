@@ -29,6 +29,21 @@ const state = {
   priceQuery: '', priceCat: 'all', priceCond: 'all', priceSort: 'cheap', priceMin: '', priceMax: '',
   builder: { cpu:'cpu-i5-12400f', gpu:'gpu-rtx4070', motherboard:'mb-b660m', ram:'ram-kingston32', ssd:'ssd-nv2-1tb', psu:'psu-rm750', case:'case-matrexx', cooling:'cool-peerless' },
   buildsFilter: 'all',
+  // ИИ-подбор сборки (цена, город, во что играть / задачи)
+  aiBudget: 80000,
+  aiGameQuery: '',
+  aiTask: 'gaming',
+  aiRes: 'default',
+  aiCondition: 'new',
+  aiResult: null,
+  aiError: '',
+  aiName: '',
+  aiKey: '',
+  aiModel: 'deepseek-chat',
+  aiPrompt: '',
+  aiAnswer: '',
+  aiAnswerErr: '',
+  aiBusy: false,
   // приоритетная игра для подбора и оценки сборок
   priorityGame: 'all',
   priorityRes: '1080p',
@@ -520,6 +535,7 @@ function renderHome() {
   const homeList = typeof buildPrioritySort === 'function' ? buildPrioritySort(BUILDS) : BUILDS;
   $('#homeBuilds').innerHTML = homeList.map(buildCard).join('');
   if (typeof renderPriorityBars === 'function') renderPriorityBars();
+  if (typeof renderAi === 'function') renderAi();
 
   const cities = topCities(12);
   $('#regionIndex').innerHTML = cities.map(r => {
@@ -1453,6 +1469,7 @@ function render() {
   else if (state.page === 'builder') renderBuilder();
   else if (state.page === 'fps') renderFps();
   else if (state.page === 'saved') renderSavedPage();
+  else if (state.page === 'ai') { if (typeof renderAi === 'function') renderAi(); }
   else if (state.page === 'servers') renderServers();
   else if (state.page === 'server-os') renderServerOs();
   else if (state.page === 'pc-os') renderPcOs();

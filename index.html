@@ -13,6 +13,7 @@
     <a class="logo" href="#" onclick="navigate('home');return false"><span class="mark">BLF</span><span>Build<span style="color:var(--accent)">Lab</span><small>сравнение · цены · FPS · совместимость</small></span></a>
     <nav class="tabs">
       <button class="tab active" data-page="home" onclick="navigate('home')">Главная</button>
+      <button class="tab" data-page="ai" onclick="navigate('ai')">🤖 ИИ-подбор</button>
       <button class="tab" data-page="builds" onclick="navigate('builds')">Сборки</button>
       <button class="tab" data-page="compare-builds" onclick="navigate('compare-builds')">Сравнение сборок</button>
       <button class="tab" data-page="components" onclick="navigate('components')">Комплектующие</button>
@@ -63,6 +64,15 @@
     <div class="note"><b>Как это работает:</b> нажмите на город в шапке и выберите любой из 1 080 городов и регионов России — все цены, сравнение и конструктор пересчитаются под него. Поиск понимает и сленг: «видяха», «проц», «оперативка ddr3», «бп 750».</div>
   </div></div>
   <div class="wrap">
+    <div class="ai-home" id="homeAi">
+      <div class="ai-home-head">
+        <h2 style="margin:0">🤖 ИИ-подбор: цена + город + во что играть</h2>
+        <button class="btn ghost small" onclick="navigate('ai')">Открыть полностью →</button>
+      </div>
+      <p class="sub" style="margin:6px 0 14px">Укажите бюджет, город и игры или задачи — сайт сам соберёт совместимый ПК и объяснит выбор.</p>
+      <div id="homeAiForm"></div>
+      <div id="homeAiResult"></div>
+    </div>
     <div class="fps-highlight" id="homeFps"></div>
     <div id="homePriority"></div>
     <h2>🔥 Готовые сборки</h2>
@@ -73,6 +83,16 @@
     <div class="region-prices" id="regionIndex" style="max-width:620px"></div>
   </div>
 </section>
+
+<!-- ИИ-ПОДБОР -->
+<section class="page" id="page-ai"><div class="wrap">
+  <h2>🤖 ИИ-подбор сборки ПК</h2>
+  <p class="sub">Заполните три поля — <b>цена</b>, <b>город</b> и <b>во что хотите играть или для каких задач ПК</b>. ИИ-консультант BLF переберёт процессоры и видеокарты по всему каталогу, доберёт совместимые плату, память, диск, БП, корпус и охлаждение, посчитает FPS и объяснит каждый выбор. Кнопка «Спросить у DeepSeek» открывает <a href="https://chat.deepseek.com/" target="_blank" rel="noopener">chat.deepseek.com</a> с готовым запросом, чтобы продолжить диалог там.</p>
+  <div class="ai-layout">
+    <div id="aiForm"></div>
+    <div id="aiResult"></div>
+  </div>
+</div></section>
 
 <!-- СБОРКИ -->
 <section class="page" id="page-builds"><div class="wrap">
@@ -351,6 +371,7 @@
 <script src="compat-ui.js"></script>
 <script src="compare-ui.js"></script>
 <script src="build-priority.js"></script>
+<script src="ai-build.js"></script>
 <script src="servers.js"></script>
 <script src="desktop-os.js"></script>
 <script src="catalog.js"></script>
