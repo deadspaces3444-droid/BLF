@@ -182,3 +182,45 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 #builderFps{position:static}
 #builderFps .fps-table{grid-template-columns:1fr 1fr}
 @media(max-width:900px){#builderFps .fps-table{grid-template-columns:1fr}}
+
+/* ===== v3: сохранение сборок, серверы, ОС ===== */
+.tab{white-space:nowrap}
+.save-box{background:var(--bg2);border:1px dashed var(--line);border-radius:12px;padding:12px;margin-top:14px;display:flex;flex-direction:column;gap:8px}
+.save-box label{font-weight:700}
+.save-box input,.save-box textarea{background:var(--bg);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:9px 11px;font-size:.9rem;font-family:inherit;resize:vertical}
+.save-box input:focus,.save-box textarea:focus{outline:none;border-color:var(--accent)}
+.saved-actions{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+.btn.danger{color:var(--err);border-color:rgba(248,113,113,.4)}
+.saved-card h3{margin-top:4px}
+.toast{position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);background:var(--card2);border:1px solid var(--accent);
+  color:var(--text);padding:12px 20px;border-radius:12px;box-shadow:var(--shadow);font-weight:700;font-size:.9rem;
+  opacity:0;pointer-events:none;transition:.25s;z-index:200;max-width:90vw;text-align:center}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+/* Серверы */
+.srv-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin-top:14px}
+.srv-grid>div{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:10px 12px}
+.srv-grid b{display:block;font-size:1.15rem;color:var(--accent2)}
+.srv-grid span{color:var(--muted);font-size:.76rem}
+.srv-load{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:10px;font-size:.85rem;color:var(--muted)}
+.srv-load b{color:var(--text)}
+.slot input[type=number]{width:100%;background:var(--bg2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:9px 11px;font-size:.95rem}
+
+/* ОС */
+.os-card .os-price{color:var(--price);font-weight:800;margin:2px 0 8px}
+.os-desc{color:var(--muted);font-size:.9rem}
+.os-desc.clamped{display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.os-card.open{border-color:var(--accent)}
+.os-block{margin-top:8px;border-top:1px dashed var(--line);padding-top:10px}
+.os-block h4{margin:12px 0 4px;font-size:.85rem;text-transform:uppercase;letter-spacing:.5px;color:var(--accent)}
+.os-block ul{margin:0;padding-left:18px;color:var(--muted);font-size:.88rem}
+.os-block li{margin:3px 0}
+.os-picked{display:flex;gap:14px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+@media(max-width:700px){.srv-grid{grid-template-columns:1fr}.srv-load{grid-template-columns:1fr}}
+
+/* быстрые ссылки на главной */
+.quick-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:12px;margin:6px 0 4px}
+.quick-card{display:flex;flex-direction:column;gap:3px;background:var(--card);border:1px solid var(--line);border-radius:14px;padding:14px 16px;cursor:pointer;transition:.15s}
+.quick-card:hover{border-color:var(--accent);transform:translateY(-2px);text-decoration:none}
+.quick-card b{font-size:1rem}
+.quick-card span{color:var(--muted);font-size:.83rem}

@@ -19,8 +19,11 @@
       <button class="tab" data-page="compare-components" onclick="navigate('compare-components')">Сравнение</button>
       <button class="tab" data-page="fps" onclick="navigate('fps')">FPS в играх</button>
       <button class="tab" data-page="prices" onclick="navigate('prices')">Поиск цен</button>
+      <button class="tab" data-page="servers" onclick="navigate('servers')">Серверы</button>
+      <button class="tab" data-page="server-os" onclick="navigate('server-os')">ОС для серверов</button>
       <button class="tab" data-page="compat" onclick="navigate('compat')">Совместимость</button>
       <button class="tab" data-page="builder" onclick="navigate('builder')">Конструктор</button>
+      <button class="tab" data-page="saved" onclick="navigate('saved')">💾 Мои сборки</button>
     </nav>
     <button class="region-btn" id="regionBtn" onclick="openRegionModal()" title="Выбрать город — цены пересчитаются">
       <span style="opacity:.7">📍</span> <span id="regionBtnLabel">Новосибирск</span> <span style="opacity:.5">▾</span>
@@ -52,8 +55,10 @@
       <input id="heroSearch" placeholder="🔍 Что искать: RTX 4070, i5-10400F, 32 ГБ DDR5, бп 750…" onkeydown="if(event.key==='Enter'){goPrice(this.value)}">
       <button class="btn" onclick="goPrice(document.getElementById('heroSearch').value)">Найти цены</button>
       <button class="btn ghost" onclick="navigate('fps')">🎮 Рассчитать FPS</button>
+      <button class="btn ghost" onclick="navigate('servers')">🗄️ Серверы</button>
     </div>
     <div class="stats" id="homeStats"></div>
+    <div class="quick-grid" id="homeQuick"></div>
     <div class="note"><b>Как это работает:</b> нажмите на город в шапке и выберите любой из 1 080 городов и регионов России — все цены, сравнение и конструктор пересчитаются под него. Поиск понимает и сленг: «видяха», «проц», «оперативка ddr3», «бп 750».</div>
   </div></div>
   <div class="wrap">
@@ -185,6 +190,94 @@
   <div id="priceResults"></div>
 </div></section>
 
+
+<!-- МОИ СБОРКИ -->
+<section class="page" id="page-saved"><div class="wrap">
+  <h2>💾 Мои сохранённые сборки</h2>
+  <p class="sub">Сборки сохраняются прямо в браузере (localStorage) — регистрация не нужна, данные никуда не отправляются. Можно переименовать, сделать копию, удалить, а также выгрузить все сборки в JSON-файл и перенести на другое устройство.</p>
+  <div class="toolbar">
+    <div class="chips" id="savedFilter"></div>
+  </div>
+  <div class="toolbar">
+    <select id="saveKind" onchange="state.saveKind=this.value;render()"></select>
+    <button class="btn" onclick="saveCurrentBuild()">💾 Сохранить текущую сборку</button>
+    <button class="btn ghost" onclick="navigate(state.saveKind==='server'?'servers':'builder')">Открыть конструктор</button>
+    <button class="btn ghost" onclick="exportSavedBuilds()">⬇️ Выгрузить JSON</button>
+    <label class="btn ghost" style="display:inline-flex;align-items:center">⬆️ Загрузить JSON
+      <input type="file" accept="application/json,.json" style="display:none" onchange="importSavedBuilds(event)">
+    </label>
+  </div>
+  <p class="muted" id="savedCount"></p>
+  <div class="grid" id="savedGrid"></div>
+</div></section>
+
+<!-- СЕРВЕРЫ -->
+<section class="page" id="page-servers"><div class="wrap">
+  <h2>🗄️ Серверы: сборки и комплектующие</h2>
+  <p class="sub">Серверные конфигурации под NAS, веб, базы данных, виртуализацию и ИИ — с ECC-памятью, IPMI, RAID и резервированием питания. Соберите свой сервер: цена считается по вашему городу, совместимость и нагрузка проверяются на лету.</p>
+
+  <div class="builder-grid">
+    <div id="serverSlots"></div>
+    <div class="summary" id="serverSummary"></div>
+  </div>
+
+  <h2 style="margin-top:36px">🏁 Готовые серверные сборки</h2>
+  <p class="sub">Нажмите «Открыть в конструкторе», чтобы доработать конфигурацию, или «Сохранить», чтобы оставить её в «Моих сборках».</p>
+  <div class="grid" id="serverBuilds"></div>
+
+  <h2 style="margin-top:36px">⚖️ Сравнение серверов</h2>
+  <div class="compare-cols" id="serverComparePicks"></div>
+  <div id="serverCompareBody"></div>
+
+  <h2 style="margin-top:36px">🔧 Серверные комплектующие</h2>
+  <p class="sub">Процессоры Xeon/EPYC, платы Supermicro, память ECC RDIMM, NVMe U.2, SAS/HDD, RAID-контроллеры, сетевые карты 1/10/25GbE, БП с резервированием и шасси 1U/2U.</p>
+  <div class="toolbar"><div class="chips" id="serverChips"></div></div>
+  <div class="toolbar">
+    <input placeholder="🔍 Поиск: EPYC, DDR5 ECC, U.2, 25GbE, 2U…" oninput="state.serverQuery=this.value;render()">
+    <select onchange="state.serverSort=this.value;render()">
+      <option value="price">Сначала дешёвые</option>
+      <option value="priceDesc">Сначала дорогие</option>
+      <option value="perf">По производительности</option>
+      <option value="year">Сначала новые</option>
+    </select>
+  </div>
+  <div class="grid" id="serverGrid"></div>
+</div></section>
+
+<!-- ОС ДЛЯ СЕРВЕРОВ -->
+<section class="page" id="page-server-os"><div class="wrap">
+  <h2>🖥️ Операционные системы для серверов</h2>
+  <p class="sub">14 серверных ОС с подробным описанием: что это, кому подходит, плюсы и минусы, минимальные требования, пакетный менеджер, виртуализация и лицензия. Выберите свою серверную сборку — сайт проверит, хватает ли ей ресурсов для выбранной ОС.</p>
+  <div class="toolbar">
+    <div class="chips" id="osFamilyChips"></div>
+  </div>
+  <div class="toolbar">
+    <input placeholder="🔍 Поиск по ОС: NAS, гипервизор, сертифицированная, Windows, Debian…" oninput="state.osQuery=this.value;render()">
+    <select id="osBuildPick" onchange="state.osPickFor=this.value;render()"></select>
+    <select onchange="state.osSort=this.value;render()">
+      <option value="name">По названию</option>
+      <option value="fit">Сначала подходящие</option>
+      <option value="price">Сначала бесплатные</option>
+      <option value="ram">По требованиям к RAM</option>
+    </select>
+  </div>
+  <div class="fps-inline" id="osSelected"></div>
+  <div class="grid" id="osGrid"></div>
+  <h2 style="margin-top:36px">📊 Сравнение ОС</h2>
+  <p class="sub">Сводная таблица по текущему фильтру. Подробности — в карточках выше (кнопка «Подробнее»).</p>
+  <div id="osTable"></div>
+</div></section>
+
+<!-- СОВМЕСТИМОСТЬ СЕРВЕРОВ -->
+<section class="page" id="page-server-compat"><div class="wrap">
+  <h2>🧩 Совместимость серверной сборки</h2>
+  <p class="sub">Проверяем сокет и TDP, тип памяти ECC и число слотов, U.2/SAS/SATA, мощность и резервирование БП, форм-фактор шасси, число дисковых корзин, наличие IPMI и сетевые порты.</p>
+  <div class="builder-grid">
+    <div id="serverCompatForm"></div>
+    <div class="summary" id="serverCompatResult"></div>
+  </div>
+</div></section>
+
 <!-- СОВМЕСТИМОСТЬ -->
 <section class="page" id="page-compat"><div class="wrap">
   <h2>✅ Проверка совместимости</h2>
@@ -214,6 +307,8 @@
 
 <script src="data.js"></script>
 <script src="compat.js"></script>
+<script src="servers.js"></script>
 <script src="app.js"></script>
+<div class="toast" id="toast"></div>
 </body>
 </html>
