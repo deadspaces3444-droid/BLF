@@ -35,7 +35,11 @@ const state = {
   serverBuild: { servercpu:'sc-xeon-silver4310', servermb:'smb-x12spl', serverram:'sram-ddr4ecc64', serverstorage:'sst-pm9a3m2', servernic:'snic-x710', serverpsu:'spsu-800wredundant', serverchassis:'sch-2u' },
   serverDrives: 4,
   serverRamModules: 2,
-  serverCompare: ['srv-web', 'srv-db'],
+  serverCompare: ['srv-beginner', 'srv-web'],
+  serverLevel: 'all',
+  serverBudget: false,
+  serverUse: 'all',
+  serverMaxPrice: '',
   osQuery: '',
   osFamily: 'all',
   osSort: 'name',
@@ -446,9 +450,12 @@ function renderHome() {
   }).join('') + `<div class="rp"><span>🌍 Все города</span><b><button class="btn small ghost" onclick="openRegionModal()">Выбрать · ${CITIES.length}</button></b></div>`;
 
   const savedAll = loadSavedBuilds();
+  const cheapSrv = [...SERVER_BUILDS].sort((a, b) => serverBuildPrice(a, state.region) - serverBuildPrice(b, state.region))[0];
   $('#homeQuick').innerHTML = `
     <a class="quick-card" onclick="navigate('builder')"><b>🧩 Конструктор</b><span>Собрать ПК и сохранить конфигурацию</span></a>
-    <a class="quick-card" onclick="navigate('servers')"><b>🗄️ Серверы</b><span>NAS, веб, БД, виртуализация, ИИ</span></a>
+    <a class="quick-card" onclick="navigate('servers')"><b>🗄️ Серверы</b><span>${SERVER_BUILDS.length} сборок · от ${fmt(serverBuildPrice(cheapSrv, state.region))}</span></a>
+    <a class="quick-card" onclick="state.serverUse='cctv';navigate('servers')"><b>📹 Видеонаблюдение</b><span>Сервер для 4–8 камер</span></a>
+    <a class="quick-card" onclick="state.serverUse='one-site';navigate('servers')"><b>🌐 Сервер для сайта</b><span>Один сайт или блог</span></a>
     <a class="quick-card" onclick="navigate('server-os')"><b>🖥️ ОС для серверов</b><span>14 систем с подробным описанием</span></a>
     <a class="quick-card" onclick="navigate('saved')"><b>💾 Мои сборки</b><span>${savedAll.length ? 'Сохранено: ' + savedAll.length : 'Пока пусто — сохраните первую'}</span></a>`;
   $('#homeFps').innerHTML = `
@@ -811,6 +818,29 @@ function renderSavedPage() {
 }
 
 // ---------- Серверы ----------
+const SERVER_LEVELS = {
+  beginner: { name: 'Для начинающих', icon: '🌱', desc: 'дешёвый старт, дом, один сайт' },
+  intermediate: { name: 'Средний уровень', icon: '⚙️', desc: 'небольшой офис и продакшн' },
+  advanced: { name: 'Продвинутый', icon: '🚀', desc: 'ЦОД, БД, виртуализация, ИИ' },
+};
+const SERVER_USES = {
+  'cctv': { name: 'Видеонаблюдение', icon: '📹' },
+  'one-site': { name: 'Один сайт', icon: '🌐' },
+  'home-nas': { name: 'Домашний NAS', icon: '🏠' },
+  'self-hosted': { name: 'Свои сервисы / Docker', icon: '🧩' },
+};
+function serverLevelBadge(level) {
+  const l = SERVER_LEVELS[level];
+  return l ? `<span class="lvl-badge lvl-${level}">${l.icon} ${l.name}</span>` : '';
+}
+function filteredServerBuilds() {
+  return SERVER_BUILDS.filter(b => {
+    if (state.serverLevel !== 'all' && (b.level || 'intermediate') !== state.serverLevel) return false;
+    if (state.serverUse !== 'all' && !(b.uses || []).includes(state.serverUse)) return false;
+    if (state.serverMaxPrice !== '' && !isNaN(Number(state.serverMaxPrice)) && serverBuildPrice(b, state.region) > Number(state.serverMaxPrice)) return false;
+    return true;
+  }).sort((a, b) => serverBuildPrice(a, state.region) - serverBuildPrice(b, state.region));
+}
 function serverPartPriceLine(part) {
   if (!part) return '—';
   const now = serverPrice(part, state.region, 'new');
@@ -821,7 +851,7 @@ function serverCompCard(part) {
   const cat = serverCatById(part.cat);
   const wl = serverWorkload({ servercpu: part.cat === 'servercpu' ? part.id : 'sc-xeon-silver4310', serverram: part.cat === 'serverram' ? part.id : 'sram-ddr4ecc64', serverstorage: part.cat === 'serverstorage' ? part.id : 'sst-cd6', ramModules: 2 });
   return `<article class="card">
-    <div class="tag">${cat.icon} ${cat.name} · ${esc(part.brand)} · ${part.year}</div>
+    <div class="tag">${cat.icon} ${cat.name} · ${esc(part.brand)} · ${part.year}${part.budget ? ' · 💸 бюджет' : ''}</div>
     <h3>${esc(part.name)}</h3>
     <div class="specs-mini">${Object.entries(part.specs).map(([k, v]) => `<div>${k}: <b>${esc(v)}</b></div>`).join('')}</div>
     <div class="row">
@@ -841,6 +871,7 @@ function useServerPart(id) {
 }
 function renderServers() {
   const cats = [{ id: 'all', name: 'Все', icon: '🗂️' }, ...SERVER_CATEGORIES];
+  const budgetCount = SERVER_COMPONENTS.filter(x => x.budget).length;
   $('#serverChips').innerHTML = cats.map(c =>
     `<button class="chip ${state.serverCat === c.id ? 'active' : ''}" onclick="state.serverCat='${c.id}';render()">${c.icon} ${c.name}</button>`).join('');
 
@@ -867,6 +898,7 @@ function renderServers() {
       </div><div class="p small muted">шт.</div></div>`;
 
   const parts = serverBuildParts({ parts: state.serverBuild, drives: state.serverDrives, ramModules: state.serverRamModules });
+  const topBuilds = [...SERVER_BUILDS].sort((a, b) => serverBuildPrice(a, state.region) - serverBuildPrice(b, state.region)).slice(0, 3);
   const total = serverBuildPrice({ parts: state.serverBuild, drives: state.serverDrives, ramModules: state.serverRamModules }, state.region);
   const used = serverBuildPrice({ parts: state.serverBuild, drives: state.serverDrives, ramModules: state.serverRamModules }, state.region, 'used');
   const compat = checkServerCompatibility(parts);
@@ -918,8 +950,25 @@ function renderServers() {
     <button class="btn ghost" style="width:100%;margin-top:8px" onclick="navigate('server-compat')">Детальная проверка совместимости →</button>`;
 
   // ----- готовые серверные сборки -----
-  const game = null;
-  $('#serverBuilds').innerHTML = SERVER_BUILDS.map(b => {
+  const visibleBuilds = filteredServerBuilds();
+  $('#serverFilters').innerHTML = `
+    <button class="chip ${state.serverLevel === 'all' ? 'active' : ''}" onclick="state.serverLevel='all';render()">🗂️ Все · ${SERVER_BUILDS.length}</button>
+    ${Object.entries(SERVER_LEVELS).map(([id, l]) => {
+      const n = SERVER_BUILDS.filter(b => (b.level || 'intermediate') === id).length;
+      return `<button class="chip ${state.serverLevel === id ? 'active' : ''}" onclick="state.serverLevel='${id}';render()">${l.icon} ${l.name} · ${n}</button>`;
+    }).join('')}
+    <span class="chip-sep"></span>
+    <button class="chip ${state.serverUse === 'all' ? 'active' : ''}" onclick="state.serverUse='all';render()">Любая задача</button>
+    ${Object.entries(SERVER_USES).map(([id, u]) => `<button class="chip ${state.serverUse === id ? 'active' : ''}" onclick="state.serverUse='${id}';render()">${u.icon} ${u.name}</button>`).join('')}
+    <span class="chip-sep"></span>
+    <input class="price-input" inputmode="numeric" placeholder="до ₽" value="${esc(state.serverMaxPrice)}" oninput="state.serverMaxPrice=this.value;render()">`;
+  const cheapest = filteredServerBuilds()[0];
+  $('#serverStarter').innerHTML = `<div class="starter-row">
+    <div class="small muted">С чего начать:</div>
+    ${topBuilds.map(b => `<button class="chip" onclick="loadServerBuild('${b.id}')">${serverLevelBadge(b.level || 'intermediate')} ${esc(b.name)} · ${fmt(serverBuildPrice(b, state.region))}</button>`).join('')}
+    <button class="chip" onclick="state.serverLevel='beginner';state.serverUse='all';state.serverMaxPrice='';render()">🌱 Все для начинающих</button>
+  </div>`;
+  $('#serverBuilds').innerHTML = visibleBuilds.length ? visibleBuilds.map(b => {
     const bp = serverBuildParts(b);
     const st = checkServerCompatibility(bp);
     const os = SERVER_OS.find(o => o.id === b.os);
@@ -927,7 +976,8 @@ function renderServers() {
     const wlb = serverWorkload(bp);
     return `<article class="card">
       <div class="tag">${esc(b.tag)} · ${b.parts ? serverPartById(b.parts.servercpu)?.specs.socket : ''}</div>
-      <h3>${esc(b.name)}</h3>
+      <h3>${esc(b.name)} ${cheapest && cheapest.id === b.id ? '<span class="cheapest">самая дешёвая</span>' : ''}</h3>
+      <div style="margin:4px 0 8px">${serverLevelBadge(b.level || 'intermediate')} ${(b.uses || []).map(u => `<span class="chip mini">${SERVER_USES[u]?.icon || ''} ${SERVER_USES[u]?.name || u}</span>`).join(' ')}</div>
       <p>${esc(b.desc)}</p>
       <div class="specs-mini">
         <div>CPU: <b>${esc(serverPartById(b.parts.servercpu)?.name || '—')}</b></div>
@@ -946,16 +996,18 @@ function renderServers() {
         </div>
       </div>
     </article>`;
-  }).join('');
+  }).join('') : `<div class="empty">Под эти фильтры сборок нет. Сбросьте уровень, задачу или лимит цены.</div>`;
 
   // ----- каталог серверных комплектующих -----
   let list = SERVER_COMPONENTS.filter(p => state.serverCat === 'all' || p.cat === state.serverCat);
+  if (state.serverBudget) list = list.filter(p => p.budget);
   if (state.serverQuery) list = list.filter(p => matchesQuery(p, state.serverQuery) || Object.values(p.specs).join(' ').toLowerCase().includes(state.serverQuery.toLowerCase()));
   if (state.serverSort === 'price') list = list.sort((a, b) => serverPrice(a, state.region) - serverPrice(b, state.region));
   else if (state.serverSort === 'priceDesc') list = list.sort((a, b) => serverPrice(b, state.region) - serverPrice(a, state.region));
   else if (state.serverSort === 'year') list = list.sort((a, b) => b.year - a.year);
   else list = list.sort((a, b) => b.perf - a.perf);
   $('#serverGrid').innerHTML = list.length ? list.map(serverCompCard).join('') : '<div class="empty">Ничего не найдено. Попробуйте «EPYC», «DDR5», «U.2», «10GbE».</div>';
+  $('#serverBudgetLabel').innerHTML = `<label class="check-inline"><input type="checkbox" ${state.serverBudget ? 'checked' : ''} onchange="state.serverBudget=this.checked;render()"> Только бюджетные (${budgetCount})</label>`;
 
   // ----- сравнение серверных сборок -----
   $('#serverComparePicks').innerHTML = [0, 1].map(i => {
@@ -1017,7 +1069,7 @@ function osCard(os, build) {
   const fit = build ? osFitsBuild(os, build) : null;
   const open = state.osOpen === os.id;
   const fitBadge = fit
-    ? (fit.ok ? `<span class="fps-badge ok">подходит</span>` : `<span class="fps-badge err">не подходит</span>`)
+    ? (fit.ok ? `<span class="fps-badge ok">подходит${fit.notes && fit.notes.length ? ' с оговорками' : ''}</span>` : `<span class="fps-badge err">не подходит</span>`)
     : '';
   return `<article class="card os-card ${open ? 'open' : ''}">
     <div class="tag">${os.familyIcon} ${os.family} · ${esc(os.vendor)}</div>
@@ -1046,6 +1098,7 @@ function osCard(os, build) {
         <div class="small">${esc(os.install)}</div>
         ${fit && !fit.ok ? `<div class="verdict error small" style="margin-top:10px">Не хватает ресурсов: ${fit.problems.map(esc).join(', ')}</div>` : ''}
         ${fit && fit.ok && fit.tight ? `<div class="verdict warn small" style="margin-top:10px">Подходит, но RAM впритык — лучше увеличить.</div>` : ''}
+        ${fit && fit.notes && fit.notes.length ? `<div class="verdict warn small" style="margin-top:10px">Замечания: ${fit.notes.map(esc).join('; ')}.</div>` : ''}
       </div>` : ''}
     <div class="row">
       <button class="btn small ghost" onclick="state.osOpen = state.osOpen === '${os.id}' ? '' : '${os.id}';render()">${open ? 'Свернуть' : 'Подробнее'}</button>
@@ -1141,6 +1194,7 @@ function renderServerCompat() {
       <input type="number" min="1" max="16" value="${state.serverRamModules}" oninput="state.serverRamModules=Math.max(1,Math.min(16,+this.value||1));render()"></div></div>`;
 
   const parts = serverBuildParts({ parts: state.serverBuild, drives: state.serverDrives, ramModules: state.serverRamModules });
+  const topBuilds = [...SERVER_BUILDS].sort((a, b) => serverBuildPrice(a, state.region) - serverBuildPrice(b, state.region)).slice(0, 3);
   const res = checkServerCompatibility(parts);
   const icon = res.status === 'ok' ? '✅' : res.status === 'warn' ? '⚠️' : '❌';
   const title = res.status === 'ok' ? 'Сервер совместим!' : res.status === 'warn' ? 'Совместимо, но есть замечания' : 'Есть несовместимости';

@@ -32,11 +32,23 @@ const SERVER_COMPONENTS = [
   { id:'sc-epyc-9754', cat:'servercpu', name:'AMD EPYC 9754 (Bergamo)', brand:'AMD', basePrice:690000, year:2023, perf:100, power:360,
     specs:{ socket:'SP5', cores:128, threads:256, baseFreq:'2.25 ГГц', boostFreq:'3.1 ГГц', tdp:360, memType:'DDR5 ECC RDIMM', channels:12, maxMem:'6 ТБ', pcie:'PCIe 5.0', priceNote:'максимум ядер для облака' },
     aliases:['9754','bergamo','epyc 9754'] },
+  { id:'sc-cpu-lite', cat:'servercpu', name:'Intel Core i3-12100 (серверный минимум)', brand:'Intel', basePrice:13500, year:2022, perf:30, power:60, budget:true,
+    specs:{ socket:'LGA1700', cores:4, threads:8, baseFreq:'3.3 ГГц', boostFreq:'4.3 ГГц', tdp:60, memType:'DDR4/DDR5 ECC (W680)', channels:2, maxMem:'128 ГБ', pcie:'PCIe 4.0', priceNote:'домашний сервер / один сайт' },
+    aliases:['i3 12100','i3-12100 сервер','бюджетный сервер'] },
+  { id:'sc-cpu-am4', cat:'servercpu', name:'AMD Ryzen 5 5600G (серверный минимум)', brand:'AMD', basePrice:9500, year:2021, perf:26, power:65, budget:true,
+    specs:{ socket:'AM4', cores:6, threads:12, baseFreq:'3.9 ГГц', boostFreq:'4.4 ГГц', tdp:65, memType:'DDR4', channels:2, maxMem:'128 ГБ', pcie:'PCIe 3.0', priceNote:'дешёвый домашний сервер' },
+    aliases:['5600g','ryzen 5600','am4 минимум'] },
   { id:'sc-xeon-e52680v4', cat:'servercpu', name:'Intel Xeon E5-2680 v4 (Б/У)', brand:'Intel', basePrice:9000, year:2016, perf:22, power:120,
     specs:{ socket:'LGA2011-3', cores:14, threads:28, baseFreq:'2.4 ГГц', boostFreq:'3.3 ГГц', tdp:120, memType:'DDR4 ECC RDIMM', channels:4, maxMem:'1.5 ТБ', pcie:'PCIe 3.0', priceNote:'домашний сервер за копейки' },
     aliases:['2680v4','e5 2680 v4','2680 v4'] },
 
   // ---------- Платы ----------
+  { id:'smb-b760-atx', cat:'servermb', name:'ASUS PRIME B760M-A (потребительская, mATX)', brand:'ASUS', basePrice:16000, year:2023, perf:10, power:25, budget:true,
+    specs:{ socket:'LGA1700', formFactor:'microATX', ramType:'DDR5', ramSlots:4, maxRam:'192 ГБ', maxCpuTdp:150, sata:4, m2:3, nvmeU2:0, nic:'1× 2.5GbE', raid:'SATA RAID 0/1/5/10', ipmi:'нет (Wake-on-LAN)' },
+    aliases:['b760','потребительская плата','бюджетная серверная плата'] },
+  { id:'smb-b450m-server', cat:'servermb', name:'MSI B450M-A Pro Max (Б/У, Ryzen 3/5)', brand:'MSI', basePrice:5500, year:2019, perf:6, power:20, budget:true,
+    specs:{ socket:'AM4', formFactor:'microATX', ramType:'DDR4', ramSlots:2, maxRam:'64 ГБ', maxCpuTdp:105, sata:4, m2:1, nvmeU2:0, nic:'1× 1GbE', raid:'SATA RAID 0/1/10', ipmi:'нет (Wake-on-LAN)' },
+    aliases:['b450','am4 сервер','ryzen сервер'] },
   { id:'smb-x12stl', cat:'servermb', name:'Supermicro X12STL-F', brand:'Supermicro', basePrice:52000, year:2021, perf:20, power:35,
     specs:{ socket:'LGA1200', formFactor:'microATX', ramType:'DDR4 ECC', ramSlots:4, maxRam:'128 ГБ', maxCpuTdp:95, sata:6, m2:1, nvmeU2:0, nic:'2× 1GbE', raid:'нет (программный)', ipmi:'есть (IPMI 2.0)' },
     aliases:['x12stl','supermicro x12'] },
@@ -57,6 +69,12 @@ const SERVER_COMPONENTS = [
     aliases:['x10srl','x10srl-f'] },
 
   // ---------- Память ----------
+  { id:'sram-ddr4-8-non', cat:'serverram', name:'DDR4 8 ГБ 2666 (потребительская)', brand:'Kingston', basePrice:1900, year:2019, perf:10, budget:true,
+    specs:{ type:'DDR4 (без ECC)', capacityGb:8, modules:1, speed:'2666 МТ/с', ecc:'нет', rank:'1Rx8', voltage:'1.2 В' }, aliases:['ddr4 8gb','8gb ddr4'] },
+  { id:'sram-ddr4-16-non', cat:'serverram', name:'DDR4 16 ГБ 3200 (потребительская)', brand:'Crucial', basePrice:3400, year:2021, perf:12, budget:true,
+    specs:{ type:'DDR4 (без ECC)', capacityGb:16, modules:1, speed:'3200 МТ/с', ecc:'нет', rank:'2Rx8', voltage:'1.2 В' }, aliases:['ddr4 16gb','16gb ddr4'] },
+  { id:'sram-ddr5-16-non', cat:'serverram', name:'DDR5 16 ГБ 5600 (потребительская)', brand:'Kingston', basePrice:4300, year:2023, perf:14, budget:true,
+    specs:{ type:'DDR5 (без ECC)', capacityGb:16, modules:1, speed:'5600 МТ/с', ecc:'нет', rank:'1Rx8', voltage:'1.1 В' }, aliases:['ddr5 16gb','16gb ddr5'] },
   { id:'sram-ddr4ecc32', cat:'serverram', name:'DDR4 ECC RDIMM 32 ГБ 3200', brand:'Samsung', basePrice:16500, year:2021, perf:30,
     specs:{ type:'DDR4 ECC RDIMM', capacityGb:32, modules:1, speed:'3200 МТ/с', ecc:'ECC (RDIMM)', rank:'2Rx4', voltage:'1.2 В' }, aliases:['ddr4 ecc 32','rdimm 32'] },
   { id:'sram-ddr4ecc64', cat:'serverram', name:'DDR4 ECC RDIMM 64 ГБ 3200', brand:'Micron', basePrice:31000, year:2021, perf:34,
@@ -67,6 +85,14 @@ const SERVER_COMPONENTS = [
     specs:{ type:'DDR4 ECC RDIMM', capacityGb:16, modules:1, speed:'2666 МТ/с', ecc:'ECC (RDIMM)', rank:'1Rx4', voltage:'1.2 В' }, aliases:['ddr4 ecc 16','rdimm 16'] },
 
   // ---------- Накопители ----------
+  { id:'sst-sata240', cat:'serverstorage', name:'Kingston A400 240 ГБ SATA SSD', brand:'Kingston', basePrice:1900, year:2019, perf:14, power:2, budget:true,
+    specs:{ type:'SATA SSD', interface:'SATA 6 Гбит/с', capacityGb:240, tbw:'80 TBW', read:'500 МБ/с', write:'350 МБ/с', formFactor:'2.5" 7 мм', workload:'система для дома/офиса' }, aliases:['a400','ssd 240'] },
+  { id:'sst-nv2-1tb', cat:'serverstorage', name:'Kingston NV2 1 ТБ NVMe', brand:'Kingston', basePrice:6200, year:2022, perf:46, power:5, budget:true,
+    specs:{ type:'NVMe', interface:'M.2 / PCIe 4.0', capacityGb:1000, tbw:'320 TBW', read:'3500 МБ/с', write:'2100 МБ/с', formFactor:'M.2 2280', workload:'система + данные для начинающих' }, aliases:['nv2','nvme 1tb'] },
+  { id:'sst-wdpurple2tb', cat:'serverstorage', name:'WD Purple 2 ТБ (для видеонаблюдения)', brand:'Western Digital', basePrice:7200, year:2021, perf:18, power:5, budget:true,
+    specs:{ type:'HDD SATA', interface:'SATA 6 Гбит/с', capacityGb:2000, tbw:'—', read:'180 МБ/с', write:'180 МБ/с', formFactor:'3.5" (24/7 видеозапись)', workload:'NVR/DVR, постоянная запись' }, aliases:['wd purple','purple 2tb','диск для видеонаблюдения'] },
+  { id:'sst-skyhawk4tb', cat:'serverstorage', name:'Seagate SkyHawk 4 ТБ (видеонаблюдение)', brand:'Seagate', basePrice:11500, year:2021, perf:20, power:6, budget:true,
+    specs:{ type:'HDD SATA', interface:'SATA 6 Гбит/с', capacityGb:4000, tbw:'—', read:'190 МБ/с', write:'190 МБ/с', formFactor:'3.5" (64 камеры)', workload:'NVR, 24/7 запись' }, aliases:['skyhawk','диск nvr'] },
   { id:'sst-pm9a3', cat:'serverstorage', name:'Samsung PM9A3 1.92 ТБ U.2 NVMe (enterprise)', brand:'Samsung', basePrice:56000, year:2021, perf:70, power:12,
     specs:{ type:'NVMe', interface:'U.2 / PCIe 4.0', capacityGb:1920, tbw:'3.5 PBW', read:'6800 МБ/с', write:'3700 МБ/с', formFactor:'U.2 15 мм', workload:'серверные нагрузки 24/7' }, aliases:['pm9a3','u.2 nvme'] },
   { id:'sst-pm9a3m2', cat:'serverstorage', name:'Samsung PM9A3 960 ГБ M.2 NVMe (enterprise)', brand:'Samsung', basePrice:32000, year:2021, perf:64, power:8,
@@ -87,10 +113,16 @@ const SERVER_COMPONENTS = [
     specs:{ type:'10GbE', ports:'2× SFP+', interface:'PCIe 3.0 ×8', speed:'10 Гбит/с', offload:'SR-IOV, VXLAN, iSCSI', drivers:'Linux / Windows / VMware' }, aliases:['x710','10gbe'] },
   { id:'snic-e810', cat:'servernic', name:'Intel E810-XXVDA2 2× 25GbE SFP28', brand:'Intel', basePrice:58000, year:2021, perf:65, power:18,
     specs:{ type:'25GbE', ports:'2× SFP28', interface:'PCIe 4.0 ×8', speed:'25 Гбит/с', offload:'SR-IOV, RDMA (RoCEv2), PTP', drivers:'Linux / Windows / VMware' }, aliases:['e810','25gbe','sfp28'] },
+  { id:'snic-2port', cat:'servernic', name:'TP-Link TG-3468 1× 1GbE', brand:'TP-Link', basePrice:1200, year:2016, perf:6, power:3, budget:true,
+    specs:{ type:'1GbE', ports:'1× RJ-45', interface:'PCIe 2.1 ×1', speed:'1 Гбит/с', offload:'VLAN', drivers:'Linux / Windows' }, aliases:['сетевая карта','1gbe дешево'] },
   { id:'snic-i350', cat:'servernic', name:'Intel I350-T4 4× 1GbE', brand:'Intel', basePrice:7800, year:2014, perf:12, power:8,
     specs:{ type:'1GbE', ports:'4× RJ-45', interface:'PCIe 2.1 ×4', speed:'1 Гбит/с', offload:'SR-IOV, VLAN', drivers:'Linux / Windows / FreeBSD' }, aliases:['i350','4x 1gbe'] },
 
   // ---------- БП ----------
+  { id:'spsu-450w', cat:'serverpsu', name:'Chieftec 450 Вт 80+ Bronze (ATX)', brand:'Chieftec', basePrice:3600, year:2019, perf:20, power:450, budget:true,
+    specs:{ wattage:450, formFactor:'ATX', efficiency:'80+ Bronze', redundancy:'нет', connectors:'24-pin, 1× EPS, 3× SATA', cooling:'120 мм' }, aliases:['450w','дешевый бп'] },
+  { id:'spsu-650w', cat:'serverpsu', name:'DeepCool PF650 650 Вт 80+', brand:'DeepCool', basePrice:5500, year:2021, perf:26, power:650, budget:true,
+    specs:{ wattage:650, formFactor:'ATX', efficiency:'80+', redundancy:'нет', connectors:'24-pin, 1× EPS, 4× SATA', cooling:'120 мм' }, aliases:['650w','pf650'] },
   { id:'spsu-500w', cat:'serverpsu', name:'Sea Sonic SS-500U 500 Вт (1U, Gold)', brand:'Seasonic', basePrice:18000, year:2020, perf:30, power:500,
     specs:{ wattage:500, formFactor:'1U / Flex ATX', efficiency:'80+ Gold', redundancy:'нет', connectors:'24-pin, 2× EPS, 4× SATA', cooling:'40 мм вентилятор' }, aliases:['500w 1u','ss-500u'] },
   { id:'spsu-800wredundant', cat:'serverpsu', name:'Delta 800 Вт ×2 (RPS, Platinum)', brand:'Delta', basePrice:42000, year:2021, perf:50, power:1600,
@@ -105,6 +137,12 @@ const SERVER_COMPONENTS = [
     specs:{ formFactor:'1U', boardSupport:'ATX, microATX, mini-ITX', driveBays:'4× 3.5" горячая замена', maxPsu:'1U / RPS', heightU:1, depth:'647 мм', fans:'4× 40 мм' }, aliases:['cse-815','1u atx'] },
   { id:'sch-2u', cat:'serverchassis', name:'Supermicro CSE-825 2U (8× 3.5")', brand:'Supermicro', basePrice:62000, year:2019, perf:36, power:0,
     specs:{ formFactor:'2U', boardSupport:'ATX, microATX, E-ATX', driveBays:'8× 3.5" + 2× 2.5"', maxPsu:'2U RPS', heightU:2, depth:'647 мм', fans:'3× 80 мм' }, aliases:['2u chassis','cse-825'] },
+  { id:'sch-matx-lite', cat:'serverchassis', name:'Zalman I3 Neo (microATX, 4× 3.5")', brand:'Zalman', basePrice:4200, year:2022, perf:10, power:0, budget:true,
+    specs:{ formFactor:'Tower', boardSupport:'microATX, mini-ITX', driveBays:'4× 3.5" + 2× 2.5"', maxPsu:'ATX', heightU:0, depth:'430 мм', fans:'4× 120 мм' }, aliases:['zalman','бюджетный корпус'] },
+  { id:'sch-itx-nas', cat:'serverchassis', name:'Fractal Node 304 (ITX, 6× 3.5")', brand:'Fractal Design', basePrice:10500, year:2019, perf:14, power:0, budget:true,
+    specs:{ formFactor:'NAS', boardSupport:'mini-ITX', driveBays:'6× 3.5" + 2× 2.5"', maxPsu:'ATX (до 160 мм)', heightU:0, depth:'374 мм', fans:'3× 92 мм' }, aliases:['node 304','itx nas'] },
+  { id:'sch-nvr8', cat:'serverchassis', name:'Корпус NVR на 8 HDD (видеонаблюдение)', brand:'Generic', basePrice:9800, year:2022, perf:12, power:0, budget:true,
+    specs:{ formFactor:'NVR', boardSupport:'microATX, mini-ITX', driveBays:'8× 3.5" (горячая замена)', maxPsu:'ATX / 1U', heightU:0, depth:'400 мм', fans:'2× 120 мм' }, aliases:['nvr','корпус видеонаблюдения'] },
   { id:'sch-tower', cat:'serverchassis', name:'Fractal Design Define 7 XL (tower)', brand:'Fractal Design', basePrice:22000, year:2020, perf:24, power:0,
     specs:{ formFactor:'Tower', boardSupport:'E-ATX, ATX, microATX, mini-ITX', driveBays:'6× 3.5" + 2× 5.25"', maxPsu:'ATX', heightU:0, depth:'604 мм', fans:'3× 140 мм' }, aliases:['tower server','define 7 xl'] },
   { id:'sch-nas4', cat:'serverchassis', name:'Jonsbo N4 NAS (4× 3.5", ITX)', brand:'Jonsbo', basePrice:12500, year:2022, perf:16, power:0,
@@ -114,28 +152,54 @@ const SERVER_COMPONENTS = [
 // ---------- Готовые серверные сборки ----------
 const SERVER_BUILDS = [
   { id:'srv-home', name:'Домашний сервер / NAS', tag:'NAS · Дом', budget:180000,
-    desc:'Тихий домашний сервер: файлы, бэкапы, медиатека, Docker-контейнеры. Низкое потребление, 4 диска с горячей заменой.',
-    purpose:'Файлы, бэкапы, медиасервер, Home Assistant',
+    level:'intermediate', desc:'Тихий домашний сервер: файлы, бэкапы, медиатека, Docker-контейнеры. Низкое потребление, 4 диска с горячей заменой.',
+    uses:['home-nas'], purpose:'Файлы, бэкапы, медиасервер, Home Assistant',
     parts:{ servercpu:'sc-xeon-e2336', servermb:'smb-x12stlif', serverram:'sram-ddr4ecc32', serverstorage:'sst-sata4tb', servernic:'snic-i350', serverpsu:'spsu-500w', serverchassis:'sch-nas4' },
     drives:3, ramModules:1, os:'truenas', note:'TrueNAS SCALE или Unraid — идеальная пара к этой сборке.' },
-  { id:'srv-web', name:'Веб-сервер / хостинг', tag:'Web · 1U', desc:'Сборка под сайты и API: nginx + PHP/Python, десятки сайтов, TLS, контейнеры. Экономичная и ремонтопригодная.',
-    purpose:'Сайты, API, reverse-proxy, CI', budget:430000,
+  { id:'srv-web', name:'Веб-сервер / хостинг', tag:'Web · 1U', level:'intermediate', desc:'Сборка под сайты и API: nginx + PHP/Python, десятки сайтов, TLS, контейнеры. Экономичная и ремонтопригодная.',
+    uses:['one-site','self-hosted'], purpose:'Сайты, API, reverse-proxy, CI', budget:430000,
     parts:{ servercpu:'sc-xeon-silver4310', servermb:'smb-x12spl', serverram:'sram-ddr4ecc32', serverstorage:'sst-pm9a3m2', servernic:'snic-x710', serverpsu:'spsu-800wredundant', serverchassis:'sch-1u-atx' },
     drives:2, ramModules:2, os:'ubuntu-server', note:'Ubuntu Server LTS + nginx — самый предсказуемый стек для веба.' },
-  { id:'srv-db', name:'Сервер базы данных', tag:'БД · NVMe', desc:'База данных под нагрузку: 12 ядер, 128 ГБ ECC, быстрый NVMe U.2 и резервный БП. Низкие задержки важнее числа ядер.',
-    purpose:'PostgreSQL/MySQL, 1С, Redis', budget:730000,
+  { id:'srv-db', name:'Сервер базы данных', tag:'БД · NVMe', level:'advanced', desc:'База данных под нагрузку: 12 ядер, 128 ГБ ECC, быстрый NVMe U.2 и резервный БП. Низкие задержки важнее числа ядер.',
+    uses:['self-hosted'], purpose:'PostgreSQL/MySQL, 1С, Redis', budget:730000,
     parts:{ servercpu:'sc-xeon-silver4310', servermb:'smb-x12spl', serverram:'sram-ddr4ecc64', serverstorage:'sst-pm9a3m2', servernic:'snic-x710', serverpsu:'spsu-800wredundant', serverchassis:'sch-2u' },
     drives:4, ramModules:2, os:'almalinux', note:'AlmaLinux или Ubuntu LTS + PostgreSQL; RAID 10 на NVMe.' },
-  { id:'srv-virt', name:'Гипервизор / виртуализация', tag:'Виртуализация · 2U', desc:'Хост под виртуальные машины и контейнеры: 32 ядра, 256 ГБ памяти, 8 дисковых корзин — десятки ВМ на одной машине.',
+  { id:'srv-virt', name:'Гипервизор / виртуализация', tag:'Виртуализация · 2U', level:'advanced', desc:'Хост под виртуальные машины и контейнеры: 32 ядра, 256 ГБ памяти, 8 дисковых корзин — десятки ВМ на одной машине.',
     purpose:'Proxmox, KVM, VMs, VDI', budget:850000,
     parts:{ servercpu:'sc-xeon-gold6338', servermb:'smb-x12spl', serverram:'sram-ddr4ecc64', serverstorage:'sst-pm9a3m2', servernic:'snic-e810', serverpsu:'spsu-800wredundant', serverchassis:'sch-2u' },
     drives:6, ramModules:4, os:'proxmox', note:'Proxmox VE — бесплатный гипервизор с HA и бэкапами.' },
-  { id:'srv-ai', name:'ИИ / рендер-ферма', tag:'GPU-сервер', desc:'Сервер под обучение и инференс: 128 ядер EPYC, DDR5, PCIe 5.0 — база под несколько ускорителей и быстрые NVMe.',
+  { id:'srv-ai', name:'ИИ / рендер-ферма', tag:'GPU-сервер', level:'advanced', desc:'Сервер под обучение и инференс: 128 ядер EPYC, DDR5, PCIe 5.0 — база под несколько ускорителей и быстрые NVMe.',
     purpose:'ML, рендер, HPC, анализ данных', budget:1350000,
     parts:{ servercpu:'sc-epyc-9754', servermb:'smb-h13ssl', serverram:'sram-ddr5ecc64', serverstorage:'sst-cd6', servernic:'snic-e810', serverpsu:'spsu-1200w', serverchassis:'sch-tower' },
     drives:4, ramModules:4, os:'ubuntu-server', note:'Ubuntu Server LTS — стандарт для CUDA и контейнеров ML.' },
-  { id:'srv-budget', name:'Бюджетный сервер на Б/У', tag:'Б/У · Дом', desc:'Классика вторичного рынка: Xeon E5-2680 v4 + плата Supermicro X10. 14 ядер за цену офисного ПК — для дома и тестов.',
-    purpose:'Тесты, CI, домашние сервисы', budget:100000,
+  // ---------- Бюджетные и частные серверы (для начинающих) ----------
+  { id:'srv-beginner', name:'Сервер для начинающих', tag:'Старт · Минимум', level:'beginner', budget:45000,
+    desc:'Самый дешёвый путь в серверы: мини-ПК или старый ПК с i3 и 16 ГБ памяти. Хватит на один сайт, домашнее облако, Docker и первые эксперименты.',
+    purpose:'Один сайт, домашние сервисы, обучение Linux', uses:['one-site','self-hosted'],
+    parts:{ servercpu:'sc-cpu-lite', servermb:'smb-b760-atx', serverram:'sram-ddr5-16-non', serverstorage:'sst-sata240', servernic:'snic-2port', serverpsu:'spsu-450w', serverchassis:'sch-matx-lite' },
+    drives:1, ramModules:2, os:'ubuntu-server', note:'Ubuntu Server или Debian. Питание без резерва и без ECC — для дома и тестов это нормально.' },
+  { id:'srv-cctv', name:'Видеонаблюдение (4–8 камер)', tag:'CCTV · NVR', level:'beginner', budget:65000,
+    desc:'Частный сервер под камеры: Frigate или Shinobi в Docker, аппаратное декодирование, диск WD Purple под непрерывную запись. 8 камер, архив 2–4 недели.',
+    purpose:'4–8 IP-камер, детекция объектов, архив', uses:['cctv'],
+    parts:{ servercpu:'sc-cpu-lite', servermb:'smb-b760-atx', serverram:'sram-ddr5-16-non', serverstorage:'sst-wdpurple2tb', servernic:'snic-2port', serverpsu:'spsu-450w', serverchassis:'sch-nvr8' },
+    drives:2, ramModules:2, os:'ubuntu-server', note:'Ubuntu Server + Frigate/Shinobi в Docker; диск WD Purple рассчитан на запись 24/7.' },
+  { id:'srv-one-site', name:'Сервер для одного сайта', tag:'1 сайт · Дёшево', level:'beginner', budget:50000,
+    desc:'Личный сайт, блог или лендинг: nginx + PHP/Node, TLS, база данных и бэкапы. С запасом по памяти, чтобы рядом жили Docker-контейнеры.',
+    purpose:'Один сайт или блог, до 10 тыс. посетителей в день', uses:['one-site'],
+    parts:{ servercpu:'sc-cpu-lite', servermb:'smb-b760-atx', serverram:'sram-ddr5-16-non', serverstorage:'sst-nv2-1tb', servernic:'snic-2port', serverpsu:'spsu-450w', serverchassis:'sch-matx-lite' },
+    drives:1, ramModules:2, os:'ubuntu-server', note:'Ubuntu Server + nginx + Certbot; бэкап сайта — на второй диск или в облако.' },
+  { id:'srv-nas-home', name:'Домашний NAS на 6 дисков', tag:'NAS · Дом', level:'intermediate', budget:175000,
+    desc:'Домашний файловый сервер и медиатека: 6 корзин, 32 ГБ ECC, TrueNAS с ZFS и снапшотами. Надёжнее и тише «обычного ПК с дисками».',
+    purpose:'Файлы, бэкапы, Jellyfin/Plex, фотоархив', uses:['home-nas'],
+    parts:{ servercpu:'sc-xeon-e2336', servermb:'smb-x12stlif', serverram:'sram-ddr4ecc32', serverstorage:'sst-skyhawk4tb', servernic:'snic-i350', serverpsu:'spsu-450w', serverchassis:'sch-itx-nas' },
+    drives:4, ramModules:1, os:'truenas', note:'TrueNAS SCALE + ZFS RAIDZ1; SkyHawk/WD Red — диски для постоянной работы.' },
+  { id:'srv-budget-vps', name:'Тестовый стенд / CI', tag:'CI · Тесты', level:'beginner', budget:35000,
+    desc:'Сервер для учёбы и тестов: GitLab Runner, базы в Docker, пара виртуалок. Собран на Б/У-платформе AM4 — дешевле нового мини-ПК.',
+    purpose:'Тесты, CI, обучение, песочницы', uses:['self-hosted'],
+    parts:{ servercpu:'sc-cpu-am4', servermb:'smb-b450m-server', serverram:'sram-ddr4-16-non', serverstorage:'sst-sata240', servernic:'snic-2port', serverpsu:'spsu-450w', serverchassis:'sch-matx-lite' },
+    drives:1, ramModules:2, os:'debian', note:'Debian + Docker; для CI добавьте второй SSD под кэш.' },
+  { id:'srv-budget', name:'Бюджетный сервер на Б/У', tag:'Б/У · Дом', level:'beginner', desc:'Классика вторичного рынка: Xeon E5-2680 v4 + плата Supermicro X10. 14 ядер за цену офисного ПК — для дома и тестов.',
+    uses:['self-hosted','home-nas'], purpose:'Тесты, CI, домашние сервисы', budget:100000,
     parts:{ servercpu:'sc-xeon-e52680v4', servermb:'smb-x10srl', serverram:'sram-ddr4ecc16', serverstorage:'sst-sata4tb', servernic:'snic-i350', serverpsu:'spsu-500w', serverchassis:'sch-tower' },
     drives:2, ramModules:4, os:'debian', note:'Debian стабильно живёт на старом железе; шумно и горячо — учитывайте при домашней установке.' },
 ];
@@ -344,7 +408,9 @@ function checkServerCompatibility(parts) {
 
   // 2. Память
   if (ram && mb) {
-    if (!String(ram.specs.type).startsWith(mb.specs.ramType.split(' ').slice(0, 2).join(' '))) {
+    const ramGen = (String(ram.specs.type).match(/DDR\d/) || [''])[0];
+    const mbGens = String(mb.specs.ramType).match(/DDR\d/g) || [];
+    if (!mbGens.includes(ramGen)) {
       add('error', 'Тип памяти не совпадает', `Память ${ram.specs.type}, плата поддерживает ${mb.specs.ramType}.`, `Возьмите ${mb.specs.ramType}.`);
     } else {
       add('ok', 'Память ECC совместима', `${ram.specs.type} — плата поддерживает.`);
@@ -359,7 +425,11 @@ function checkServerCompatibility(parts) {
       add('ok', 'Слоты памяти в порядке', `${parts.ramModules || 1} из ${mb.specs.ramSlots} слотов занято.`);
     }
     if (!ram.specs.ecc || !/ECC/.test(ram.specs.ecc)) {
-      add('warn', 'Память без ECC', 'Для сервера желательна ECC-память: она исправляет одиночные ошибки и не даёт тихо испортить данные.', 'Выберите ECC RDIMM.');
+      if (/RDIMM|R-?DIMM|LRDIMM/.test(String(mb.specs.ramType))) {
+        add('warn', 'Память без ECC', 'Для сервера желательна ECC-память: она исправляет одиночные ошибки и не даёт тихо испортить данные.', 'Выберите ECC RDIMM.');
+      } else {
+        add('info', 'Память без ECC — допустимо для дома', 'Плата потребительская и ECC не поддерживает: для домашнего сервера, сайта и камер это нормально, для БД и виртуализации лучше ECC.', 'Для критичных данных возьмите серверную плату с ECC.');
+      }
     } else {
       add('ok', 'ECC включён', 'Память с коррекцией ошибок — обязательный минимум для сервера.');
     }
@@ -390,6 +460,8 @@ function checkServerCompatibility(parts) {
     }
     if (psu.specs.redundancy === 'нет' && ch && ch.specs.heightU > 0) {
       add('warn', 'Нет резервирования питания', 'Для стоечного сервера 24/7 желателен второй БП (RPS): выход из строя одного не остановит систему.', 'Возьмите шасси и БП с горячей заменой.');
+    } else if (psu.specs.redundancy === 'нет') {
+      add('info', 'Без резервирования питания', 'Один блок питания: для дома, сайта и камер приемлемо, для ЦОД и БД нужен второй БП.', 'Для критичных задач — шасси с RPS.');
     } else {
       add('ok', 'Питание резервировано', psu.specs.redundancy);
     }
@@ -418,7 +490,11 @@ function checkServerCompatibility(parts) {
   // 6. Сеть и IPMI
   if (mb) {
     if (!/IPMI/.test(mb.specs.ipmi)) {
-      add('warn', 'Нет IPMI/out-of-band', 'Без IPMI удалённая переустановка и диагностика возможны только «руками».', 'Выбирайте плату с IPMI/BMC.');
+      if (ch && ch.specs.heightU > 0) {
+        add('warn', 'Нет IPMI/out-of-band', 'Без IPMI удалённая переустановка и диагностика возможны только «руками».', 'Выбирайте плату с IPMI/BMC.');
+      } else {
+        add('info', 'Нет IPMI — для дома не критично', 'Потребительская плата не имеет BMC: переустановка и диагностика — только физически. Для домашнего сервера это приемлемо.', 'Для удалённого ЦОД выбирайте плату с IPMI.');
+      }
     } else {
       add('ok', 'IPMI есть', 'Удалённое управление сервером доступно.');
     }
@@ -453,5 +529,12 @@ function osFitsBuild(os, build) {
   if (ramGb < os.minRamGb) problems.push(`нужно RAM ≥ ${os.minRamGb} ГБ (есть ${ramGb})`);
   if (disk < os.minDiskGb) problems.push(`нужно диска ≥ ${os.minDiskGb} ГБ (есть ${disk})`);
   const tight = ramGb < os.minRamGb * 2;
-  return { ok: problems.length === 0, problems, tight };
+  const notes = [];
+  const drives = Math.max(1, build.drives || 1);
+  if (os.family === 'NAS' && drives < 2) notes.push('для NAS нужно минимум 2 диска (сейчас 1)');
+  if (os.family === 'NAS' && ramGb < 8) notes.push('NAS на ZFS требует ≥ 8 ГБ RAM');
+  if (os.family === 'Windows' && cores < 4) notes.push('Windows Server комфортнее от 4 ядер');
+  if (os.family === 'Firewall' && !/2×|4×/.test(String(serverPartById(build.parts.servernic)?.specs.ports || ''))) notes.push('для шлюза желательно 2+ сетевых порта');
+  if (os.id === 'esxi' && ramGb < 16) notes.push('ESXi для нескольких ВМ лучше от 16 ГБ RAM');
+  return { ok: problems.length === 0, problems, tight, notes };
 }
