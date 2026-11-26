@@ -29,6 +29,10 @@ const state = {
   priceQuery: '', priceCat: 'all', priceCond: 'all', priceSort: 'cheap', priceMin: '', priceMax: '',
   builder: { cpu:'cpu-i5-12400f', gpu:'gpu-rtx4070', motherboard:'mb-b660m', ram:'ram-kingston32', ssd:'ssd-nv2-1tb', psu:'psu-rm750', case:'case-matrexx', cooling:'cool-peerless' },
   buildsFilter: 'all',
+  // приоритетная игра для подбора и оценки сборок
+  priorityGame: 'all',
+  priorityRes: '1080p',
+  priorityTarget: 60,
   onlyCompatible: true,
   builderFpsRes: '1080p',
   builderOs: '',
@@ -311,10 +315,12 @@ function savedBuildCard(item) {
     <h3>${esc(item.name)}</h3>
     ${item.note ? `<p>${esc(item.note)}</p>` : ''}
     ${summary}
+    ${!isServer && typeof priorityCardLine === 'function' ? priorityCardLine(item) : ''}
     <div class="row">
       <div><span class="price">${fmt(price)}</span> <span class="muted small">в ${esc(regionById(state.region).name)}</span></div>
       <div class="saved-actions">
         <button class="btn small" onclick="openSavedBuild('${item.id}')">Открыть</button>
+        ${!isServer && typeof priorityIsAll === 'function' && priorityIsAll() ? `<button class="btn small ghost" onclick="setPriorityGame('cs2')">🎯 Под игру</button>` : ''}
         <button class="btn small ghost" onclick="duplicateSavedBuild('${item.id}')">Копия</button>
         <button class="btn small ghost" onclick="promptRename('${item.id}', ${JSON.stringify(item.name).replace(/"/g, '&quot;')})">✏️</button>
         <button class="btn small ghost danger" onclick="if(confirm('Удалить сборку «${esc(item.name)}»?'))deleteSavedBuild('${item.id}')">🗑️</button>
@@ -386,6 +392,7 @@ function buildCard(b) {
   const used = buildPrice(b, state.region, 'used').total;
   const perf = buildPerf(b), power = buildPower(b);
   const fps = estimateBuildFps(b.parts, state.compFpsGame === 'all' ? 'cyberpunk' : state.compFpsGame, state.compFpsRes);
+  const prioLine = typeof priorityCardLine === 'function' ? priorityCardLine(b) : '';
   return `<article class="card">
     <div class="tag">${b.tag}</div>
     <h3>${esc(b.name)}</h3>
@@ -399,6 +406,7 @@ function buildCard(b) {
     <div class="meter-label"><span>Игровой индекс</span><b>${perf}/100</b></div>
     <div class="bar"><i style="width:${perf}%"></i></div>
     <div class="fps-inline">🎯 <b>${fps} FPS</b> <span class="muted small">· ${state.compFpsGame === 'all' ? 'Cyberpunk 2077' : esc(GAMES.find(g => g.id === state.compFpsGame)?.name || '')} ${state.compFpsRes}</span></div>
+    ${prioLine}
     <div class="row">
       <div><span class="price" style="font-size:1.2rem">${fmt(total)}</span> <span class="muted small">новые · ${esc(regionById(state.region).name)}</span><br>
       <span class="small" style="color:#fda4af">БУ ≈ ${fmt(used)}</span> <span class="muted small">· ${power} Вт</span></div>
@@ -486,11 +494,13 @@ function applyBuildToCompat(id) {
 
 // ---------- FPS-таблица ----------
 function fpsTable(parts, res = '1080p', settings = 'ultra', limit = GAMES.length) {
+  const prioIds = (typeof priorityInfo === 'function' ? priorityInfo().games : []).map(g => g.id);
   const rows = GAMES.slice(0, limit).map(g => {
     const fps = estimateBuildFps(parts, g.id, res, settings);
     const v = fpsVerdict(fps);
-    return `<div class="fps-line">
-      <div class="fps-line-head"><b>${esc(g.name)}</b><span class="muted small">${esc(g.genre)}</span></div>
+    const isPrio = prioIds.includes(g.id) && typeof priorityIsAll === 'function' && !priorityIsAll();
+    return `<div class="fps-line${isPrio ? ' prio' : ''}">
+      <div class="fps-line-head"><b>${isPrio ? '🎯 ' : ''}${esc(g.name)}</b><span class="muted small">${esc(g.genre)}</span></div>
       <div class="fps-track"><i class="${v.cls}" style="width:${pct(fps, 240)}%"></i></div>
       <div class="fps-line-val"><b>${fps}</b> <span class="muted small">FPS</span><br><span class="fps-badge ${v.cls}">${v.label}</span></div>
     </div>`;
@@ -507,7 +517,9 @@ function renderHome() {
     <div class="stat"><b>${COMPONENTS.length}</b><span>комплектующих, включая старые модели</span></div>
     <div class="stat"><b>${GAMES.length}</b><span>игр с расчётом FPS</span></div>
     <div class="stat"><b>${BUILDS.length}</b><span>готовых сборок</span></div>`;
-  $('#homeBuilds').innerHTML = BUILDS.map(buildCard).join('');
+  const homeList = typeof buildPrioritySort === 'function' ? buildPrioritySort(BUILDS) : BUILDS;
+  $('#homeBuilds').innerHTML = homeList.map(buildCard).join('');
+  if (typeof renderPriorityBars === 'function') renderPriorityBars();
 
   const cities = topCities(12);
   $('#regionIndex').innerHTML = cities.map(r => {
@@ -546,7 +558,9 @@ const BUILD_GROUPS = {
 };
 function filteredBuilds() {
   const g = BUILD_GROUPS[state.buildsFilter] || BUILD_GROUPS.all;
-  return BUILDS.filter(g.test);
+  const list = BUILDS.filter(g.test);
+  // если выбрана приоритетная игра — сильнейшие под неё сборки идут первыми
+  return typeof buildPrioritySort === 'function' ? buildPrioritySort(list) : list;
 }
 function renderBuilds() {
   const chips = $('#buildsChips');
@@ -554,6 +568,7 @@ function renderBuilds() {
     const n = BUILDS.filter(g.test).length;
     return `<button class="chip ${state.buildsFilter === id ? 'active' : ''}" onclick="state.buildsFilter='${id}';render()">${g.name} · ${n}</button>`;
   }).join('');
+  if (typeof renderPriorityBars === 'function') renderPriorityBars();
   $('#buildsGrid').innerHTML = filteredBuilds().map(buildCard).join('');
 }
 
@@ -583,8 +598,10 @@ function renderCompareBuilds() {
       ${pool.filter(b => !state.compareBuilds.includes(b.id)).map(b => `<option value="${b.id}">${esc(b.name)}</option>`).join('')}
       </select><div class="small muted" style="margin-top:8px">Свои сборки со звёздочкой ⭐ сохраняются в разделе «Мои сборки».</div></div>` : '');
 
+  if (typeof renderPriorityBars === 'function') renderPriorityBars();
   const builds = state.compareBuilds.map(resolveBuild).filter(Boolean);
   const game = GAMES.find(g => g.id === 'cyberpunk');
+  const prio = typeof priorityInfo === 'function' ? priorityInfo() : null;
   const rows = [
     ['Цена (новые)', b => fmt(buildPrice(b, state.region, 'new').total), b => buildPrice(b, state.region, 'new').total, true],
     ['Цена (БУ)', b => fmt(buildPrice(b, state.region, 'used').total), b => buildPrice(b, state.region, 'used').total, true],
@@ -594,6 +611,11 @@ function renderCompareBuilds() {
     [`FPS · ${game.name} 1080p`, b => estimateBuildFps(b.parts, game.id, '1080p') + '', b => estimateBuildFps(b.parts, game.id, '1080p'), false],
     [`FPS · ${game.name} 1440p`, b => estimateBuildFps(b.parts, game.id, '1440p') + '', b => estimateBuildFps(b.parts, game.id, '1440p'), false],
     [`FPS · Counter-Strike 2 1080p`, b => estimateBuildFps(b.parts, 'cs2', '1080p') + '', b => estimateBuildFps(b.parts, 'cs2', '1080p'), false],
+    ...(prio && prio.kind !== 'all' ? [
+      [`🎯 FPS · ${prio.name} (${state.priorityRes})`, b => (priorityFps(b) ?? '—') + '', b => priorityFps(b) || 0, false],
+      [`🎯 Вердикт к цели ${state.priorityTarget} FPS`, b => { const f = priorityFps(b); if (f == null) return '—'; const v = priorityVerdict(f); return `${v.label} · ${v.delta}`; }, b => (priorityFps(b) || 0) - state.priorityTarget, false],
+      [`🎯 ₽ за 1 FPS`, b => { const v = priorityPricePerFps(b); return v == null ? '—' : fmt(v); }, b => -(priorityPricePerFps(b) || 0), false],
+    ] : []),
     ['Процессор', b => esc(byId(b.parts.cpu).name), null, null],
     ['Видеокарта', b => esc(byId(b.parts.gpu).name), null, null],
     ['Материнская плата', b => esc(byId(b.parts.motherboard).name), null, null],
@@ -874,7 +896,9 @@ function renderBuilder() {
         ${['1080p','1440p','4K'].map(r => `<option value="${r}" ${state.builderFpsRes === r ? 'selected' : ''}>${r}</option>`).join('')}
       </select>
     </div>
+    ${typeof priorityBuilderPanel === 'function' ? priorityBuilderPanel() : ''}
     ${fpsTable(state.builder, state.builderFpsRes)}`;
+  if (typeof renderPriorityBars === 'function') renderPriorityBars();
 }
 
 function renderFps() {

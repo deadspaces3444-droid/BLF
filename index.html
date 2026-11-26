@@ -64,6 +64,7 @@
   </div></div>
   <div class="wrap">
     <div class="fps-highlight" id="homeFps"></div>
+    <div id="homePriority"></div>
     <h2>🔥 Готовые сборки</h2>
     <p class="sub">Проверенные конфигурации под разные бюджеты и задачи — от современных до сборок на старых комплектующих с Avito. Нажмите «Сравнить», чтобы положить до трёх сборок рядом.</p>
     <div class="grid" id="homeBuilds"></div>
@@ -77,6 +78,8 @@
 <section class="page" id="page-builds"><div class="wrap">
   <h2>🖥️ Готовые сборки ПК</h2>
   <p class="sub">Цены — минимальные по магазинам вашего города (новые). Рядом — ориентировочная цена на БУ-комплектующих с Avito. В каталоге — классические сборки и 18 сборок на Xeon (в том числе двухпроцессорные и серверные платформы в роли ПК).</p>
+  <div id="buildsPriority"></div>
+  <div id="buildsPriorityTop"></div>
   <div class="toolbar"><div class="chips" id="buildsChips"></div></div>
   <div class="grid" id="buildsGrid"></div>
 </div></section>
@@ -85,6 +88,7 @@
 <section class="page" id="page-compare-builds"><div class="wrap">
   <h2>⚖️ Сравнение сборок</h2>
   <p class="sub">Выберите до трёх сборок — сравним цены, производительность, потребление, FPS, совместимость и стоимость в разных городах.</p>
+  <div id="compareBuildsPriority"></div>
   <div class="compare-cols" id="compareBuildPicks"></div>
   <div id="compareBuildsBody"></div>
 </div></section>
@@ -328,6 +332,7 @@
 <section class="page" id="page-builder"><div class="wrap">
   <h2>🧩 Конструктор ПК</h2>
   <p class="sub">Соберите свою конфигурацию: цена пересчитывается по городам, совместимость проверяется на лету, а FPS считается по 20 играм. Выберите процессор — списки плат, памяти, охлаждения, корпуса и БП сразу сузятся до совместимых.</p>
+  <div id="builderPriority"></div>
   <div class="toolbar compat-bar" id="builderCompatBar"></div>
   <div class="builder-grid">
     <div id="builderSlots"></div>
@@ -345,6 +350,7 @@
 <script src="compat.js"></script>
 <script src="compat-ui.js"></script>
 <script src="compare-ui.js"></script>
+<script src="build-priority.js"></script>
 <script src="servers.js"></script>
 <script src="desktop-os.js"></script>
 <script src="catalog.js"></script>
