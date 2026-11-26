@@ -56,6 +56,7 @@ const state = {
   guideOpen: 'plan',
   guideLevel: 'Все',
   guideQuery: '',
+  socket: '',
   // приоритетная игра для подбора и оценки сборок
   priorityGame: 'all',
   priorityRes: '1080p',
@@ -686,6 +687,7 @@ function renderCompareBuilds() {
 }
 
 function renderComponents() {
+  if (typeof renderSocketBars === 'function') renderSocketBars();
   $('#compChips').innerHTML = [{ id: 'all', name: 'Все', icon: '🗂️' }, ...CATEGORIES].map(c =>
     `<button class="chip ${state.compCat === c.id ? 'active' : ''}" onclick="state.compCat='${c.id}';state.compBrand='all';render()">${c.icon} ${c.name}</button>`).join('');
 
@@ -698,14 +700,22 @@ function renderComponents() {
     GAMES.map(g => `<option value="${g.id}" ${state.compFpsGame === g.id ? 'selected' : ''}>${esc(g.name)}</option>`).join('');
 
   let list = searchComponents(state.compQuery, { cat: state.compCat, brand: state.compBrand, yearFilter: state.compYear, cityId: state.region });
+  // платформа по сокету: в каталоге остаются только подходящие комплектующие
+  if (state.socket && typeof socketMatchesCategory === 'function') {
+    list = list.filter(c => socketMatchesCategory(c, state.socket));
+  }
   if (state.compSort === 'cheap') list = list.sort((a, b) => (minPrice(a.id, state.region) ?? a.basePrice) - (minPrice(b.id, state.region) ?? b.basePrice));
   else if (state.compSort === 'expensive') list = list.sort((a, b) => (minPrice(b.id, state.region) ?? b.basePrice) - (minPrice(a.id, state.region) ?? a.basePrice));
   else if (state.compSort === 'fps') list = list.sort((a, b) => (compFps(b) || 0) - (compFps(a) || 0));
   else if (state.compSort === 'year') list = list.sort((a, b) => b.year - a.year);
   else list = list.sort((a, b) => b.perf - a.perf);
 
-  $('#compCount').textContent = `Найдено: ${list.length} из ${COMPONENTS.length} · в каталоге старых моделей (до 2020): ${COMPONENTS.filter(c => c.year < 2020).length}`;
-  $('#compGrid').innerHTML = list.length ? list.map(compCard).join('') : '<div class="empty">Ничего не найдено. Попробуйте проще: «4060», «ddr3», «бп 750», «видяха», «ssd 1tb».</div>';
+  $('#compCount').textContent = state.socket
+    ? `Сокет ${state.socket}: найдено ${list.length} · от сокета не зависят видеокарты, БП, корпуса и диски`
+    : `Найдено: ${list.length} из ${COMPONENTS.length} · в каталоге старых моделей (до 2020): ${COMPONENTS.filter(c => c.year < 2020).length}`;
+  $('#compGrid').innerHTML = list.length ? list.map(compCard).join('') : `<div class="empty">${state.socket
+    ? `Под сокет ${esc(state.socket)} в категории «${esc((catById(state.compCat) || {}).name || 'все')}» ничего нет — это нормально: например, кулеры и платы есть не под каждый сокет. <button class="btn small ghost" onclick="state.compCat='all';render()">Показать все категории</button>`
+    : 'Ничего не найдено. Попробуйте проще: «4060», «ddr3», «бп 750», «видяха», «ssd 1tb».'}</div>`;
 }
 
 function setCompareComp(i, id) {
@@ -849,6 +859,7 @@ function optionsFor(cat, build, selected) {
 }
 
 function renderBuilder() {
+  if (typeof renderSocketBars === 'function') renderSocketBars();
   const cur0 = byId(state.builder.cpu);
   const bar = $('#builderCompatBar');
   if (bar) bar.innerHTML = `

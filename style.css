@@ -508,3 +508,26 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .guide-table th{background:var(--bg2);font-size:.78rem;text-transform:uppercase;letter-spacing:.4px;color:var(--muted)}
 .guide-foot{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;padding-top:14px;border-top:1px solid var(--line)}
 @media (max-width:900px){.guide-layout{grid-template-columns:1fr}.guide-nav{position:static;flex-direction:row;overflow-x:auto;padding-bottom:4px}.guide-nav-item{min-width:220px}}
+
+/* ===== Выбор по сокету ===== */
+.socket-bar{margin:14px 0;padding:14px;border:1px solid var(--line,#2a2f3a);border-radius:14px;background:rgba(255,255,255,.02)}
+.socket-bar-head{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;margin-bottom:10px}
+.socket-row{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-bottom:10px}
+.socket-row select{min-width:320px;max-width:100%}
+.socket-family{display:flex;gap:10px;align-items:flex-start;margin:8px 0;flex-wrap:wrap}
+.socket-fam-name{min-width:110px;font-size:12px;text-transform:uppercase;letter-spacing:.06em;opacity:.6;padding-top:6px}
+.socket-chips{display:flex;flex-wrap:wrap;gap:6px;flex:1}
+.socket-chip{display:inline-flex;gap:6px;align-items:center}
+.socket-chip.active{border-color:var(--lime,#b6ff3c);box-shadow:0 0 0 1px var(--lime,#b6ff3c) inset}
+.socket-info{display:flex;flex-wrap:wrap;gap:12px;justify-content:space-between;margin-top:12px;padding-top:12px;border-top:1px dashed rgba(255,255,255,.12)}
+.socket-counts{display:flex;flex-wrap:wrap;gap:6px}
+.socket-count{padding:4px 8px;border-radius:999px;background:rgba(255,255,255,.06);font-size:12px}
+.socket-count.filtered{border:1px solid rgba(182,255,60,.45)}
+.socket-kit{margin-top:12px;padding:12px;border-radius:12px;background:rgba(182,255,60,.05);border:1px solid rgba(182,255,60,.25)}
+.socket-kit-head{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;margin-bottom:8px}
+.socket-kit-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:8px}
+.socket-kit-card{padding:10px;border-radius:10px;background:rgba(0,0,0,.25);border:1px solid rgba(255,255,255,.08);display:flex;flex-direction:column;gap:4px}
+.socket-kit-name{font-weight:600;font-size:13px;line-height:1.3}
+.socket-kit-price{color:var(--lime,#b6ff3c);font-weight:700}
+.socket-kit-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
+@media(max-width:700px){.socket-fam-name{min-width:100%}.socket-row select{min-width:0;width:100%}}

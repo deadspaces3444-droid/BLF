@@ -198,7 +198,10 @@ function aiChooseCandidates(budget, profile, limit = 6) {
   const cpus = aiPricedAll('cpu').filter(x => (x.c.perf || 0) > 0).sort((a, b) => a.price - b.price);
   const gpus = aiPricedAll('gpu').filter(x => (x.c.perf || 0) > 0 && (x.c.specs.vramGb || 0) >= 2).sort((a, b) => a.price - b.price);
   if (!cpus.length || !gpus.length) return [];
-  const cpuSteps = aiThin(cpus.filter(x => x.price <= budget * 0.65), 16);
+  // если пользователь выбрал сокет — ИИ собирает только на нём
+  const sock = typeof socketNorm === 'function' ? socketNorm(state.socket || '') : '';
+  const cpuPool = sock ? cpus.filter(x => socketNorm(x.c.specs.socket) === sock) : cpus;
+  const cpuSteps = aiThin(cpuPool.filter(x => x.price <= budget * 0.65), 16);
   const gpuSteps = aiThin(gpus.filter(x => x.price <= budget * 0.78), 20);
   if (!cpuSteps.length || !gpuSteps.length) return [];
   const gw = Math.min(0.9, Math.max(0.4, 0.35 + profile.gpuWeight * 0.55));
@@ -1197,6 +1200,7 @@ function aiLaptopOnlyHtml() {
 
 function renderAi() {
   initAiState();
+  if (typeof renderSocketBars === 'function') renderSocketBars();
   const formEl = $('#aiForm'), resEl = $('#aiResult');
   const laptopMode = state.aiDevice === 'laptop';
   const resHtml = laptopMode ? aiLaptopOnlyHtml() : aiResultHtml();

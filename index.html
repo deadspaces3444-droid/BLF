@@ -112,6 +112,7 @@
 <section class="page" id="page-ai"><div class="wrap">
   <h2>🤖 ИИ-подбор сборки ПК</h2>
   <p class="sub">Заполните три поля — <b>цена</b>, <b>город</b> и <b>во что хотите играть или для каких задач ПК</b>. ИИ-консультант BLF переберёт процессоры и видеокарты по всему каталогу, доберёт совместимые плату, память, диск, БП, корпус и охлаждение, посчитает FPS и объяснит каждый выбор. Кнопка «Спросить у DeepSeek» открывает <a href="https://chat.deepseek.com/" target="_blank" rel="noopener">chat.deepseek.com</a> с готовым запросом, чтобы продолжить диалог там.</p>
+  <div id="socketBarAi"></div>
   <div class="ai-layout">
     <div id="aiForm"></div>
     <div id="aiResult"></div>
@@ -141,6 +142,7 @@
 <section class="page" id="page-components"><div class="wrap">
   <h2>🔧 Каталог комплектующих</h2>
   <p class="sub">Все типы комплектующих: процессоры (Intel 2–14 поколений, Core Ultra, AMD Phenom II/FX/Ryzen/Threadripper, все Xeon — E3, E5 v1–v4, E7, W, E и Scalable), материнские платы под каждый сокет (включая китайские X58/X79/X99 и двухпроцессорные), видеокарты, память от DDR2 до DDR5 ECC, HDD/SSD/NVMe, блоки питания, корпуса и охлаждение.</p>
+  <div id="socketBarComponents"></div>
   <div class="toolbar"><div class="chips" id="compChips"></div></div>
   <div class="toolbar">
     <input id="compSearch" placeholder="🔍 Гибкий поиск: «видяха 4060», «проц i5», «ddr3», «бп 750», «ssd 1tb», «hdd»…">
@@ -388,6 +390,7 @@
 <section class="page" id="page-builder"><div class="wrap">
   <h2>🧩 Конструктор ПК</h2>
   <p class="sub">Соберите свою конфигурацию: цена пересчитывается по городам, совместимость проверяется на лету, а FPS считается по 20 играм. Выберите процессор — списки плат, памяти, охлаждения, корпуса и БП сразу сузятся до совместимых.</p>
+  <div id="socketBarBuilder"></div>
   <div id="builderPriority"></div>
   <div class="toolbar compat-bar" id="builderCompatBar"></div>
   <div class="builder-grid">
@@ -410,6 +413,7 @@
 <script src="build-priority.js"></script>
 <script src="ai-build.js"></script>
 <script src="laptops.js"></script>
+<script src="socket-ui.js"></script>
 <script src="upgrade-ui.js"></script>
 <script src="server-guide.js"></script>
 <script src="servers.js"></script>
