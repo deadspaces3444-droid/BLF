@@ -4,6 +4,14 @@ const REF_CPU = 'cpu-i5-12400f';
 const REF_GPU = 'gpu-rtx4070';
 const REF_RAM = 'ram-kingston32';
 
+// Расширенный каталог (catalog.js): все процессоры/Xeon, платы под каждый сокет, БП, диски, корпуса и Xeon-сборки.
+if (typeof EXTRA_COMPONENTS !== 'undefined') COMPONENTS.push(...EXTRA_COMPONENTS);
+if (typeof EXTRA_BUILDS !== 'undefined') {
+  EXTRA_BUILDS.forEach(b => { if (!BUILDS.some(x => x.id === b.id)) BUILDS.push(b); });
+}
+// Прогреваем цены ключевых городов уже с полным каталогом
+if (typeof prewarmOffers === 'function') prewarmOffers();
+
 const state = {
   region: 'nsk',
   page: 'home',
@@ -20,6 +28,7 @@ const state = {
   compareBuilds: ['build-mid', 'build-high'],
   priceQuery: '', priceCat: 'all', priceCond: 'all', priceSort: 'cheap', priceMin: '', priceMax: '',
   builder: { cpu:'cpu-i5-12400f', gpu:'gpu-rtx4070', motherboard:'mb-b660m', ram:'ram-kingston32', ssd:'ssd-nv2-1tb', psu:'psu-rm750', case:'case-matrexx', cooling:'cool-peerless' },
+  buildsFilter: 'all',
   builderFpsRes: '1080p',
   builderOs: '',
   fps: { cpu: 'cpu-i5-12400f', gpu: 'gpu-rtx4070', ram: 'ram-kingston32', game: 'cyberpunk', res: '1080p', settings: 'ultra' },
@@ -462,6 +471,8 @@ function renderHome() {
     <a class="quick-card" onclick="state.serverUse='cctv';navigate('servers')"><b>📹 Видеонаблюдение</b><span>Сервер для 4–8 камер</span></a>
     <a class="quick-card" onclick="state.serverUse='one-site';navigate('servers')"><b>🌐 Сервер для сайта</b><span>Один сайт или блог</span></a>
     <a class="quick-card" onclick="navigate('server-os')"><b>🖥️ ОС для серверов</b><span>14 систем с подробным описанием</span></a>
+    <a class="quick-card" onclick="state.buildsFilter='xeon';navigate('builds')"><b>🔩 Сборки на Xeon</b><span>${BUILDS.filter(b => /xeon/i.test(b.tag || '')).length} конфигураций · от ${fmt(Math.min(...BUILDS.filter(b => /xeon/i.test(b.tag || '')).map(b => buildPrice(b, state.region, 'new').total)))}</span></a>
+    <a class="quick-card" onclick="state.compCat='cpu';navigate('components')"><b>🧠 Процессоры</b><span>${COMPONENTS.filter(c => c.cat === 'cpu').length} процессоров Intel, AMD и Xeon</span></a>
     <a class="quick-card" onclick="navigate('saved')"><b>💾 Мои сборки</b><span>${savedAll.length ? 'Сохранено: ' + savedAll.length : 'Пока пусто — сохраните первую'}</span></a>`;
   $('#homeFps').innerHTML = `
     <div class="fps-hero">
@@ -474,7 +485,25 @@ function renderHome() {
     </div>`;
 }
 
-function renderBuilds() { $('#buildsGrid').innerHTML = BUILDS.map(buildCard).join(''); }
+const BUILD_GROUPS = {
+  all: { name: 'Все сборки', test: () => true },
+  xeon: { name: 'Xeon', test: b => /xeon/i.test(b.tag || '') || /xeon/i.test(b.parts?.cpu || '') },
+  gaming: { name: 'Игровые', test: b => /1080p|1440p|4K|игров/i.test(b.tag || '') },
+  work: { name: 'Работа и рендер', test: b => /работа|рендер|workstation|hedt|nas/i.test(b.tag || '') },
+  budget: { name: 'До 40 000 ₽', test: b => buildPrice(b, state.region, 'new').total <= 40000 },
+};
+function filteredBuilds() {
+  const g = BUILD_GROUPS[state.buildsFilter] || BUILD_GROUPS.all;
+  return BUILDS.filter(g.test);
+}
+function renderBuilds() {
+  const chips = $('#buildsChips');
+  if (chips) chips.innerHTML = Object.entries(BUILD_GROUPS).map(([id, g]) => {
+    const n = BUILDS.filter(g.test).length;
+    return `<button class="chip ${state.buildsFilter === id ? 'active' : ''}" onclick="state.buildsFilter='${id}';render()">${g.name} · ${n}</button>`;
+  }).join('');
+  $('#buildsGrid').innerHTML = filteredBuilds().map(buildCard).join('');
+}
 
 function allPcBuilds() {
   const saved = loadSavedBuilds().filter(x => x.kind === 'pc').map(x => ({

@@ -76,7 +76,8 @@
 <!-- СБОРКИ -->
 <section class="page" id="page-builds"><div class="wrap">
   <h2>🖥️ Готовые сборки ПК</h2>
-  <p class="sub">Цены — минимальные по магазинам вашего города (новые). Рядом — ориентировочная цена на БУ-комплектующих с Avito.</p>
+  <p class="sub">Цены — минимальные по магазинам вашего города (новые). Рядом — ориентировочная цена на БУ-комплектующих с Avito. В каталоге — классические сборки и 18 сборок на Xeon (в том числе двухпроцессорные и серверные платформы в роли ПК).</p>
+  <div class="toolbar"><div class="chips" id="buildsChips"></div></div>
   <div class="grid" id="buildsGrid"></div>
 </div></section>
 
@@ -91,7 +92,7 @@
 <!-- КОМПЛЕКТУЮЩИЕ -->
 <section class="page" id="page-components"><div class="wrap">
   <h2>🔧 Каталог комплектующих</h2>
-  <p class="sub">Все типы комплектующих — процессоры, видеокарты, платы, память, накопители, блоки питания, корпуса и охлаждение. Включая старые модели: DDR3, LGA1151/LGA1150, GTX 10-й серии, B450/H81, HDD.</p>
+  <p class="sub">Все типы комплектующих: процессоры (Intel 2–14 поколений, Core Ultra, AMD Phenom II/FX/Ryzen/Threadripper, все Xeon — E3, E5 v1–v4, E7, W, E и Scalable), материнские платы под каждый сокет (включая китайские X58/X79/X99 и двухпроцессорные), видеокарты, память от DDR2 до DDR5 ECC, HDD/SSD/NVMe, блоки питания, корпуса и охлаждение.</p>
   <div class="toolbar"><div class="chips" id="compChips"></div></div>
   <div class="toolbar">
     <input id="compSearch" placeholder="🔍 Гибкий поиск: «видяха 4060», «проц i5», «ddr3», «бп 750», «ssd 1tb», «hdd»…">
@@ -343,6 +344,7 @@
 <script src="compat.js"></script>
 <script src="servers.js"></script>
 <script src="desktop-os.js"></script>
+<script src="catalog.js"></script>
 <script src="app.js"></script>
 <div class="toast" id="toast"></div>
 </body>

@@ -1252,8 +1252,10 @@ function ensureCityOffers(cityId) {
   });
   OFFER_INDEX.forEach(arr => arr.sort((a, b) => a.price - b.price));
 }
-// Предгенерируем для ключевых городов, остальные — по запросу
-['nsk', 'msk', 'spb', 'online'].forEach(ensureCityOffers);
+// Предгенерация цен для ключевых городов выполняется в app.js — уже после
+// подключения расширенного каталога (catalog.js), чтобы цены были у всех позиций.
+const PREWARM_CITIES = ['nsk', 'msk', 'spb', 'online'];
+function prewarmOffers() { PREWARM_CITIES.forEach(ensureCityOffers); }
 
 const byId = id => COMPONENTS.find(c => c.id === id);
 const cityById = id => CITIES.find(c => c.id === id);

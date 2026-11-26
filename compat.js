@@ -21,14 +21,20 @@ function checkCompatibility(parts) {
     }
   }
 
-  // 2. Тип памяти DDR4/DDR5
+  // 2. Тип памяти DDR3/DDR4/DDR5 (учитываем ECC/REG-варианты серверных платформ)
   if (ram && mb) {
-    if (ram.specs.type !== mb.specs.ramType) {
+    const baseType = t => String(t || '').replace(/\s*(ECC|REG)\b/g, '').replace(/\s+/g, ' ').trim();
+    const ramT = ram.specs.type, mbT = mb.specs.ramType;
+    if (baseType(ramT) !== baseType(mbT)) {
       add('error', 'Тип памяти не совпадает',
-        `Память ${ram.name} — ${ram.specs.type}, а плата ${mb.name} поддерживает ${mb.specs.ramType}.`,
-        `Подберите память ${mb.specs.ramType} или плату под ${ram.specs.type}.`);
+        `Память ${ram.name} — ${ramT}, а плата ${mb.name} поддерживает ${mbT}.`,
+        `Подберите память ${mbT} или плату под ${ramT}.`);
+    } else if (/ECC|REG/.test(mbT) && !/ECC|REG/.test(ramT)) {
+      add('warn', 'Серверной плате нужна ECC/REG-память',
+        `${mb.name} рассчитана на ${mbT}; обычная ${ramT} может не заработать.`,
+        `Возьмите модули ${mbT}.`);
     } else {
-      add('ok', 'Тип памяти совпадает', `${ram.specs.type} — плата поддерживает.`);
+      add('ok', 'Тип памяти совпадает', `${ramT} — плата поддерживает.`);
     }
   }
 
