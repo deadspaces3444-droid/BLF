@@ -21,6 +21,7 @@
       <button class="tab" data-page="prices" onclick="navigate('prices')">Поиск цен</button>
       <button class="tab" data-page="servers" onclick="navigate('servers')">Серверы</button>
       <button class="tab" data-page="server-os" onclick="navigate('server-os')">ОС для серверов</button>
+      <button class="tab" data-page="pc-os" onclick="navigate('pc-os')">ОС для ПК</button>
       <button class="tab" data-page="compat" onclick="navigate('compat')">Совместимость</button>
       <button class="tab" data-page="builder" onclick="navigate('builder')">Конструктор</button>
       <button class="tab" data-page="saved" onclick="navigate('saved')">💾 Мои сборки</button>
@@ -269,6 +270,9 @@
   <h2 style="margin-top:36px">📊 Сравнение ОС</h2>
   <p class="sub">Сводная таблица по текущему фильтру. Подробности — в карточках выше (кнопка «Подробнее»).</p>
   <div id="osTable"></div>
+  <h2 style="margin-top:36px">⬇️ Скачать серверные ОС</h2>
+  <p class="sub">Официальные страницы загрузки. У Windows Server и ESXi нужна учётная запись, у Astra и ALT — лицензия.</p>
+  <div class="dl-grid" id="osServerDownloadList"></div>
 </div></section>
 
 <!-- СОВМЕСТИМОСТЬ СЕРВЕРОВ -->
@@ -279,6 +283,33 @@
     <div id="serverCompatForm"></div>
     <div class="summary" id="serverCompatResult"></div>
   </div>
+</div></section>
+
+
+<!-- ОС ДЛЯ ПК -->
+<section class="page" id="page-pc-os"><div class="wrap">
+  <h2>💻 Операционные системы для обычных ПК</h2>
+  <p class="sub">Windows, Linux-дистрибутивы и особые варианты — с подробным описанием, требованиями, плюсами и минусами и <b>прямыми ссылками на официальное скачивание</b>. Сортировка по простоте освоения поможет новичку выбрать систему, которая просто работает.</p>
+  <div class="toolbar"><div class="chips" id="pcOsFamilyChips"></div></div>
+  <div class="toolbar">
+    <input placeholder="🔍 Поиск: игры, старый ноутбук, офис, Linux, NVIDIA…" oninput="state.pcOsQuery=this.value;render()">
+    <select onchange="state.pcOsSort=this.value;render()">
+      <option value="easy">Сначала простые</option>
+      <option value="name">По названию</option>
+      <option value="price">Сначала бесплатные</option>
+      <option value="ram">По требованиям к RAM</option>
+    </select>
+    <a class="btn small ghost" href="https://rufus.ie/ru/" target="_blank" rel="noopener">🔧 Rufus (флешка)</a>
+    <a class="btn small ghost" href="https://www.ventoy.net/en/download.html" target="_blank" rel="noopener">🔧 Ventoy</a>
+  </div>
+  <div class="grid" id="pcOsGrid"></div>
+  <h2 style="margin-top:36px">📊 Сравнение ОС для ПК</h2>
+  <p class="sub">Сводная таблица по текущему фильтру — с колонкой «Скачать».</p>
+  <div id="pcOsTable"></div>
+  <h2 style="margin-top:36px">⬇️ Все ссылки на скачивание</h2>
+  <p class="sub">Официальные сайты и утилиты для записи загрузочной флешки. Открываются в новой вкладке.</p>
+  <div class="dl-grid" id="osDownloadList"></div>
+  <div class="note"><b>Как поставить ОС:</b> скачайте ISO → запишите на флешку 8 ГБ+ через Rufus (Windows) или balenaEtcher (macOS/Linux) → загрузитесь с флешки (F12/F8/Del при старте) → установите. Перед установкой второй системы сделайте резервную копию данных. Ventoy позволяет держать несколько ISO на одной флешке.</div>
 </div></section>
 
 <!-- СОВМЕСТИМОСТЬ -->
@@ -311,6 +342,7 @@
 <script src="data.js"></script>
 <script src="compat.js"></script>
 <script src="servers.js"></script>
+<script src="desktop-os.js"></script>
 <script src="app.js"></script>
 <div class="toast" id="toast"></div>
 </body>

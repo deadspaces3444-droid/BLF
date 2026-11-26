@@ -21,6 +21,7 @@ const state = {
   priceQuery: '', priceCat: 'all', priceCond: 'all', priceSort: 'cheap', priceMin: '', priceMax: '',
   builder: { cpu:'cpu-i5-12400f', gpu:'gpu-rtx4070', motherboard:'mb-b660m', ram:'ram-kingston32', ssd:'ssd-nv2-1tb', psu:'psu-rm750', case:'case-matrexx', cooling:'cool-peerless' },
   builderFpsRes: '1080p',
+  builderOs: '',
   fps: { cpu: 'cpu-i5-12400f', gpu: 'gpu-rtx4070', ram: 'ram-kingston32', game: 'cyberpunk', res: '1080p', settings: 'ultra' },
   regionQuery: '',
   // сохранение пользовательских сборок
@@ -47,6 +48,7 @@ const state = {
   osFitBuild: '',
   osOpen: 'ubuntu-server',
   osPickFor: '', // для какой сборки подбираем ОС
+  pcOsQuery: '', pcOsFamily: 'all', pcOsSort: 'easy', pcOsOpen: 'win11',
   serverOs: '', // выбранная ОС для серверной сборки
 };
 
@@ -162,7 +164,7 @@ function toast(text) {
   toast._t = setTimeout(() => box.classList.remove('show'), 3200);
 }
 function pcBuildSnapshot() {
-  return { parts: { ...state.builder } };
+  return { parts: { ...state.builder }, pcOs: state.builderOs || '' };
 }
 function serverSnapshot() {
   return { parts: { ...state.serverBuild }, drives: state.serverDrives, ramModules: state.serverRamModules, cpus: state.serverCpus || 1, os: state.serverOs || '' };
@@ -230,7 +232,7 @@ function importSavedBuilds(ev) {
       const clean = items.filter(x => x && (x.kind === 'server' || x.kind === 'pc') && x.parts).map(x => ({
         id: uid(), kind: x.kind, name: String(x.name || 'Импортированная сборка').slice(0, 80),
         note: String(x.note || '').slice(0, 300), created: x.created || new Date().toISOString(),
-        parts: x.parts, drives: x.drives, ramModules: x.ramModules,
+        parts: x.parts, drives: x.drives, ramModules: x.ramModules, os: x.os, pcOs: x.pcOs,
       }));
       if (!clean.length) throw new Error('empty');
       writeSavedBuilds([...clean, ...loadSavedBuilds()]);
@@ -256,6 +258,7 @@ function openSavedBuild(id) {
     toast(`Загружена серверная сборка «${item.name}»`);
   } else {
     state.builder = { ...item.parts };
+    state.builderOs = item.pcOs || '';
     navigate('builder');
     toast(`Загружена сборка «${item.name}»`);
   }
@@ -733,6 +736,7 @@ function renderBuilder() {
     <div class="meter-label"><span>Рабочий индекс</span><b>${work}/100</b></div><div class="bar"><i style="width:${work}%"></i></div>
     <div class="small muted" style="margin-top:10px">Потребление ≈ ${power} Вт · БП: ${byId(state.builder.psu)?.specs.wattage ?? '—'} Вт</div>
     <div class="fps-inline" style="margin-top:12px">🎯 Средний FPS по 20 играм (${state.builderFpsRes}): <b>${avg}</b></div>
+    ${state.builderOs ? (() => { const o = DESKTOP_OS.find(x => x.id === state.builderOs); return `<div class="fps-inline">💻 ОС: <b>${esc(o.name)}</b> · ${o.price ? fmt(o.price) : 'бесплатно'} <a href="${o.downloadUrl}" target="_blank" rel="noopener">скачать ↗</a></div>`; })() : ''}
     <div class="verdict ${compat.status}" style="margin-top:14px;padding:12px">
       <b>${compat.status === 'ok' ? '✅ Совместимо' : compat.status === 'warn' ? '⚠️ Есть замечания' : '❌ Несовместимо'}</b>
       <div class="small">${compat.issues.filter(i => i.level !== 'ok').map(i => '• ' + esc(i.title)).join('<br>') || 'Все проверки пройдены.'}</div>
@@ -740,6 +744,14 @@ function renderBuilder() {
     <h4 style="margin:16px 0 8px">Цена по городам</h4>
     <div class="region-prices">${topCities(8).map(r => `<div class="rp"><span>${r.icon} ${esc(r.name)}</span><b>${fmt(buildPrice(fakeBuild, r.id, 'new').total)}</b></div>`).join('')}</div>
     <button class="btn ghost" style="width:100%;margin-top:8px" onclick="openRegionModal()">Другой город (${CITIES.length})</button>
+    <div class="os-pick-line">
+      <label class="small muted">💻 ОС для ПК</label>
+      <select onchange="state.builderOs=this.value;render()">
+        <option value="">— не выбрана —</option>
+        ${DESKTOP_OS.map(o => `<option value="${o.id}" ${state.builderOs === o.id ? 'selected' : ''}>${esc(o.name)}${o.price ? ' · ' + fmt(o.price) : ' · бесплатно'}</option>`).join('')}
+      </select>
+      ${state.builderOs ? `<a class="btn small ghost" href="${DESKTOP_OS.find(o => o.id === state.builderOs)?.downloadUrl}" target="_blank" rel="noopener">⬇️ Скачать</a>` : ''}
+    </div>
     <div class="save-box">
       <label class="small muted">💾 Сохранить эту сборку</label>
       <input id="saveNameInput" placeholder="Название: «Моя игровая 1440p»" value="${esc(state.saveName)}" oninput="state.saveName=this.value">
@@ -1117,6 +1129,7 @@ function osCard(os, build) {
         ${fit && fit.ok && fit.tight ? `<div class="verdict warn small" style="margin-top:10px">Подходит, но RAM впритык — лучше увеличить.</div>` : ''}
         ${fit && fit.notes && fit.notes.length ? `<div class="verdict warn small" style="margin-top:10px">Замечания: ${fit.notes.map(esc).join('; ')}.</div>` : ''}
       </div>` : ''}
+    ${osDownloadButtons(os)}
     <div class="row">
       <button class="btn small ghost" onclick="state.osOpen = state.osOpen === '${os.id}' ? '' : '${os.id}';render()">${open ? 'Свернуть' : 'Подробнее'}</button>
       <button class="btn small" onclick="applyOsToServer('${os.id}')">Выбрать для сервера</button>
@@ -1177,6 +1190,9 @@ function renderServerOs() {
 
   $('#osGrid').innerHTML = list.map(o => osCard(o, contextBuild)).join('') || '<div class="empty">Ничего не найдено. Попробуйте «NAS», «гипервизор», «сертифицированная», «Windows».</div>';
   renderOsSelected();
+  const dlBox = $('#osServerDownloadList');
+  if (dlBox) dlBox.innerHTML = OS_DOWNLOAD_LINKS.filter(l => /Server|Debian|Ubuntu|Alma|Rocky|Proxmox|TrueNAS|Unraid|openSUSE|Astra|ALT|OPNsense|pfSense|ESXi|Ventoy|Rufus|balena/i.test(l.name))
+    .map(l => `<a class="dl-item" href="${l.url}" target="_blank" rel="noopener"><b>${esc(l.name)}</b><span>${esc(l.note)}</span></a>`).join('');
 
   // сравнение ОС
   const table = [
@@ -1189,9 +1205,83 @@ function renderServerOs() {
     ['Пакеты', o => esc(o.packageManager), null],
     ['Виртуализация', o => esc(o.virtualization), null],
     ['Для чего', o => o.bestFor.slice(0, 2).map(esc).join(', '), null],
+    ['Скачать', o => o.downloadUrl ? `<a href="${o.downloadUrl}" target="_blank" rel="noopener">ссылка ↗</a>` : '—', null],
   ];
   $('#osTable').innerHTML = `<div class="table-wrap"><table><tr><th>Параметр</th>${list.map(o => `<th>${esc(o.name)}</th>`).join('')}</tr>` +
     table.map(([label, fn]) => `<tr><td class="muted">${label}</td>${list.map(o => `<td>${fn(o)}</td>`).join('')}</tr>`).join('') + '</table></div>';
+}
+
+// ---------- ОС для обычных ПК ----------
+function osDownloadButtons(os) {
+  return `<div class="dl-row">
+    ${os.downloadUrl ? `<a class="btn small" href="${os.downloadUrl}" target="_blank" rel="noopener">⬇️ Скачать</a>` : ''}
+    ${os.docsUrl ? `<a class="btn small ghost" href="${os.docsUrl}" target="_blank" rel="noopener">📘 Документация</a>` : ''}
+  </div>`;
+}
+function pcOsCard(os) {
+  const open = state.pcOsOpen === os.id;
+  const ease = '★'.repeat(os.easy) + '☆'.repeat(5 - os.easy);
+  return `<article class="card os-card ${open ? 'open' : ''}">
+    <div class="tag">${os.familyIcon} ${os.family} · ${esc(os.vendor)}</div>
+    <h3>${esc(os.name)}</h3>
+    <div class="os-price">${os.price ? fmt(os.price) : 'Бесплатно'} <span class="muted small">· ${esc(os.license)}</span></div>
+    <div class="specs-mini">
+      <div>Мин. CPU: <b>${os.minCores} ядра</b></div>
+      <div>Мин. RAM: <b>${os.minRamGb} ГБ</b></div>
+      <div>Мин. диск: <b>${os.minDiskGb} ГБ</b></div>
+      <div>Рекомендуется: <b>${esc(os.recommends)}</b></div>
+      <div>Поддержка: <b>${esc(os.support)}</b></div>
+      <div>Простота: <b title="5 — проще всего">${ease}</b></div>
+    </div>
+    <p class="os-desc ${open ? '' : 'clamped'}">${esc(os.desc)}</p>
+    ${open ? `<div class="os-block">
+      <h4>✅ Плюсы</h4><ul>${os.pros.map(p => `<li>${esc(p)}</li>`).join('')}</ul>
+      <h4>⚠️ Минусы</h4><ul>${os.cons.map(p => `<li>${esc(p)}</li>`).join('')}</ul>
+      <h4>🎯 Кому подходит</h4><div class="chips">${os.bestFor.map(b => `<span class="chip">${esc(b)}</span>`).join('')}</div>
+      <h4>💿 Установка</h4><div class="small">${esc(os.install)}</div>
+    </div>` : ''}
+    ${osDownloadButtons(os)}
+    <div class="row" style="justify-content:flex-end">
+      <button class="btn small ghost" onclick="state.pcOsOpen = state.pcOsOpen === '${os.id}' ? '' : '${os.id}';render()">${open ? 'Свернуть' : 'Подробнее'}</button>
+    </div>
+  </article>`;
+}
+function renderPcOs() {
+  const families = ['all', ...new Set(DESKTOP_OS.map(o => o.family))];
+  $('#pcOsFamilyChips').innerHTML = families.map(f =>
+    `<button class="chip ${state.pcOsFamily === f ? 'active' : ''}" onclick="state.pcOsFamily='${f}';render()">${f === 'all' ? '🗂️ Все' : f}</button>`).join('');
+  let list = DESKTOP_OS.filter(o => state.pcOsFamily === 'all' || o.family === state.pcOsFamily);
+  if (state.pcOsQuery) {
+    const tokens = normalize(state.pcOsQuery).split(/\s+/).filter(t => t.length > 1)
+      .map(t => t.length > 5 ? t.slice(0, -2) : t); // простой учёт окончаний: «старый» → «стары»
+    list = list.filter(o => {
+      const text = normalize([o.name, o.vendor, o.family, o.desc, o.bestFor.join(' '), o.pros.join(' '), o.cons.join(' '), o.install].join(' '));
+      return tokens.every(t => text.includes(t));
+    });
+  }
+  if (state.pcOsSort === 'easy') list = list.sort((a, b) => b.easy - a.easy);
+  else if (state.pcOsSort === 'price') list = list.sort((a, b) => a.price - b.price);
+  else if (state.pcOsSort === 'ram') list = list.sort((a, b) => a.minRamGb - b.minRamGb);
+  else list = list.sort((a, b) => a.name.localeCompare(b.name, 'ru'));
+  $('#pcOsGrid').innerHTML = list.map(pcOsCard).join('') || '<div class="empty">Ничего не найдено. Попробуйте «игры», «старый ноутбук», «офис», «Linux».</div>';
+
+  // таблица сравнения
+  const rows = [
+    ['Семейство', o => o.family],
+    ['Цена', o => o.price ? fmt(o.price) : 'Бесплатно'],
+    ['Простота освоения', o => '★'.repeat(o.easy) + '☆'.repeat(5 - o.easy)],
+    ['Игры', o => o.gaming ? '✅ да' : '⚠️ ограниченно'],
+    ['Мин. RAM', o => o.minRamGb + ' ГБ'],
+    ['Мин. диск', o => o.minDiskGb + ' ГБ'],
+    ['Поддержка', o => esc(o.support)],
+    ['Скачать', o => o.downloadUrl ? `<a href="${o.downloadUrl}" target="_blank" rel="noopener">ссылка ↗</a>` : '—'],
+  ];
+  $('#pcOsTable').innerHTML = `<div class="table-wrap"><table><tr><th>Параметр</th>${list.map(o => `<th>${esc(o.name)}</th>`).join('')}</tr>` +
+    rows.map(([label, fn]) => `<tr><td class="muted">${label}</td>${list.map(o => `<td>${fn(o)}</td>`).join('')}</tr>`).join('') + '</table></div>';
+
+  // список ссылок на скачивание
+  $('#osDownloadList').innerHTML = OS_DOWNLOAD_LINKS.map(l =>
+    `<a class="dl-item" href="${l.url}" target="_blank" rel="noopener"><b>${esc(l.name)}</b><span>${esc(l.note)}</span></a>`).join('');
 }
 
 // ---------- Проверка совместимости серверов ----------
@@ -1237,6 +1327,7 @@ function render() {
   else if (state.page === 'saved') renderSavedPage();
   else if (state.page === 'servers') renderServers();
   else if (state.page === 'server-os') renderServerOs();
+  else if (state.page === 'pc-os') renderPcOs();
   else if (state.page === 'server-compat') renderServerCompat();
 }
 
