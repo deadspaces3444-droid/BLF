@@ -316,7 +316,7 @@
 <!-- СОВМЕСТИМОСТЬ -->
 <section class="page" id="page-compat"><div class="wrap">
   <h2>✅ Проверка совместимости</h2>
-  <p class="sub">Выберите комплектующие — проверим сокет, тип памяти, мощность блока питания, длину видеокарты, высоту кулера, форм-фактор платы, слоты M.2/SATA, версию BIOS и PCIe. Старые платформы (DDR3, LGA1150) тоже поддерживаются.</p>
+  <p class="sub">Выберите процессор — в остальных списках останутся только совместимые варианты (сокет, память, M.2/SATA, форм-фактор, мощность БП, высота кулера). Проверяются также версия BIOS и PCIe. Старые платформы (DDR3, LGA1150, LGA775) тоже поддерживаются.</p>
   <div class="toolbar"><select id="compatQuick" onchange="applyBuildToCompat(this.value)"></select></div>
   <div class="builder-grid">
     <div id="compatForm"></div>
@@ -327,7 +327,8 @@
 <!-- КОНСТРУКТОР -->
 <section class="page" id="page-builder"><div class="wrap">
   <h2>🧩 Конструктор ПК</h2>
-  <p class="sub">Соберите свою конфигурацию: цена пересчитывается по городам, совместимость проверяется на лету, а FPS считается по 20 играм.</p>
+  <p class="sub">Соберите свою конфигурацию: цена пересчитывается по городам, совместимость проверяется на лету, а FPS считается по 20 играм. Выберите процессор — списки плат, памяти, охлаждения, корпуса и БП сразу сузятся до совместимых.</p>
+  <div class="toolbar compat-bar" id="builderCompatBar"></div>
   <div class="builder-grid">
     <div id="builderSlots"></div>
     <div class="summary" id="builderSummary"></div>
@@ -342,6 +343,7 @@
 
 <script src="data.js"></script>
 <script src="compat.js"></script>
+<script src="compat-ui.js"></script>
 <script src="servers.js"></script>
 <script src="desktop-os.js"></script>
 <script src="catalog.js"></script>

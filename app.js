@@ -29,6 +29,7 @@ const state = {
   priceQuery: '', priceCat: 'all', priceCond: 'all', priceSort: 'cheap', priceMin: '', priceMax: '',
   builder: { cpu:'cpu-i5-12400f', gpu:'gpu-rtx4070', motherboard:'mb-b660m', ram:'ram-kingston32', ssd:'ssd-nv2-1tb', psu:'psu-rm750', case:'case-matrexx', cooling:'cool-peerless' },
   buildsFilter: 'all',
+  onlyCompatible: true,
   builderFpsRes: '1080p',
   builderOs: '',
   fps: { cpu: 'cpu-i5-12400f', gpu: 'gpu-rtx4070', ram: 'ram-kingston32', game: 'cyberpunk', res: '1080p', settings: 'ultra' },
@@ -409,6 +410,42 @@ function loadBuilder(id) {
   state.builder = { ...b.parts };
   navigate('builder');
 }
+// Выбор компонента в конструкторе: сразу приводим остальные слоты
+// к совместимым значениям (иначе список показывает только совместимые).
+function setBuilderPart(cat, id) {
+  const prev = state.builder[cat];
+  if (!id || !byId(id)) {
+    // Пустое/неизвестное значение (например, выбор вне списка) — оставляем как было
+    if (!state.builder[cat]) state.builder[cat] = compatibleOptions(cat, state.builder)[0]?.id || prev;
+    render();
+    return;
+  }
+  state.builder[cat] = id;
+  if (state.onlyCompatible) {
+    const res = autoFixBuild(state.builder, cat);
+    state.builder = res.build;
+    if (res.changed.length) toast(`Подобраны совместимые: ${res.changed.join(', ')}`);
+  }
+  // Страховка: если в слоте оказался неизвестный id — подставить первый подходящий
+  let broke = Object.values(state.builder).some(v => v && !byId(v));
+  if (broke && state.onlyCompatible) {
+    state.builder = autoFixBuild(state.builder, null).build;
+    broke = Object.values(state.builder).some(v => v && !byId(v));
+  }
+  if (broke) {
+    CATEGORIES.forEach(c => { if (state.builder[c.id] && !byId(state.builder[c.id])) state.builder[c.id] = compatibleOptions(c.id, state.builder)[0]?.id; });
+  }
+  render();
+}
+// Переключить режим «только совместимые / все комплектующие»
+function toggleOnlyCompatible() {
+  state.onlyCompatible = !state.onlyCompatible;
+  if (state.onlyCompatible) {
+    const res = autoFixBuild(state.builder);
+    state.builder = res.build;
+  }
+  render();
+}
 function goPrice(q) {
   state.priceQuery = q;
   state.priceCat = 'all';
@@ -421,15 +458,18 @@ function goPriceId(id) {
   goPrice(c.name);
 }
 function syncCompatFromBuilder() {
-  CATEGORIES.forEach(c => { const el = $('#compat-' + c.id); if (el) el.value = state.builder[c.id]; });
+  if (typeof renderCompatForm === 'function') renderCompatForm(state.builder);
   navigate('compat');
+  if (typeof renderCompatForm === 'function') renderCompatForm(state.builder);
+  renderCompat(state.builder);
 }
 function applyBuildToCompat(id) {
   const b = BUILDS.find(x => x.id === id);
   if (!b) return;
   state.builder = { ...b.parts };
+  if (typeof renderCompatForm === 'function') renderCompatForm(b.parts);
   CATEGORIES.forEach(c => { const el = $('#compat-' + c.id); if (el) el.value = b.parts[c.id]; });
-  renderCompat();
+  renderCompat(b.parts);
 }
 
 // ---------- FPS-таблица ----------
@@ -719,9 +759,53 @@ function renderPrices() {
   }).join('') + (offers.length > 80 ? `<p class="muted small">Показаны первые 80 из ${offers.length}. Уточните запрос или фильтры.</p>` : '');
 }
 
-function renderCompat() {
+function renderCompatForm(parts) {
+  parts = parts || readCompatParts();
+  const totalFor = id => COMPONENTS.filter(x => x.cat === id).length;
+  $('#compatForm').innerHTML = `<div class="compat-hint small muted" style="margin-bottom:8px">
+    ${state.onlyCompatible
+      ? '✅ В списках — только совместимые варианты: сокет процессора, тип памяти, слоты M.2/SATA, форм-фактор корпуса, мощность БП и высота кулера.'
+      : '📋 Показаны все комплектующие.'}
+    <button class="btn small ghost" style="margin-left:8px" onclick="toggleOnlyCompatible();renderCompatForm()">
+      ${state.onlyCompatible ? 'Показать все' : 'Только совместимые'}
+    </button></div>` + CATEGORIES.map(c => {
+    const sel = parts[c.id];
+    const { pool, compatible } = optionsFor(c.id, parts, sel);
+    const hidden = totalFor(c.id) - compatible.length;
+    return `<div class="slot"><div class="icon">${c.icon}</div>
+      <div style="flex:1"><label class="small muted">${c.name}${state.onlyCompatible && hidden > 0 ? ` <span class="compat-note">· скрыто несовместимых: ${hidden}</span>` : ''}</label>
+      <select id="compat-${c.id}" onchange="onCompatChange('${c.id}', this.value)">
+        ${pool.map(x => `<option value="${x.id}" ${x.id === sel ? 'selected' : ''}>${esc(x.name)}${x.year < 2020 ? ' · старая' : ''}</option>`).join('')}
+      </select></div></div>`;
+  }).join('');
+}
+
+function readCompatParts() {
   const parts = {};
-  CATEGORIES.forEach(c => { parts[c.id] = $('#compat-' + c.id)?.value || ''; });
+  CATEGORIES.forEach(c => { const el = $('#compat-' + c.id); if (el) parts[c.id] = el.value; });
+  if (!parts.cpu && state.builder) return { ...state.builder };
+  return parts;
+}
+
+// Выбор на странице совместимости: в режиме «только совместимые» остальные
+// списки сразу пересобираются под новый компонент.
+function onCompatChange(cat, id) {
+  const parts = readCompatParts();
+  parts[cat] = id;
+  if (state.onlyCompatible) {
+    const res = autoFixBuild(parts, cat);
+    if (res.changed.length) {
+      toast(`Подобраны совместимые: ${res.changed.join(', ')}`);
+    }
+    renderCompatForm(res.build);
+    renderCompat(res.build);
+    return;
+  }
+  renderCompat(parts);
+}
+
+function renderCompat(partsOverride) {
+  const parts = partsOverride || readCompatParts();
   const res = checkCompatibility(parts);
   const icon = res.status === 'ok' ? '✅' : res.status === 'warn' ? '⚠️' : '❌';
   const title = res.status === 'ok' ? 'Всё совместимо!' : res.status === 'warn' ? 'Совместимо, но есть замечания' : 'Есть несовместимости — исправьте перед покупкой';
@@ -735,14 +819,38 @@ function renderCompat() {
   </div>`;
 }
 
+// Набор опций select: в режиме «только совместимые» — с пометкой количества
+function optionsFor(cat, build, selected) {
+  const compatible = compatibleOptions(cat, build);
+  const allCat = COMPONENTS.filter(x => x.cat === cat);
+  let pool = state.onlyCompatible ? compatible : allCat;
+  if (selected && !pool.some(x => x.id === selected)) {
+    const cur = byId(selected);
+    if (cur) pool = [cur, ...pool];
+  }
+  return { pool, compatible, allCat };
+}
+
 function renderBuilder() {
+  const cur0 = byId(state.builder.cpu);
+  const bar = $('#builderCompatBar');
+  if (bar) bar.innerHTML = `
+    <span class="small muted">${state.onlyCompatible
+      ? `Показаны только комплектующие, совместимые с процессором <b>${esc(cur0 ? cur0.name : '—')}</b> и выбранной платой.`
+      : 'Показаны все комплектующие — несовместимые можно выбрать, проверка покажет ❌.'}</span>
+    <button class="btn small ${state.onlyCompatible ? 'lime' : 'ghost'}" onclick="toggleOnlyCompatible()">
+      ${state.onlyCompatible ? '✅ Только совместимые' : '📋 Все комплектующие'}
+    </button>`;
+
   $('#builderSlots').innerHTML = CATEGORIES.map(c => {
     const cur = state.builder[c.id];
-    const pool = COMPONENTS.filter(x => x.cat === c.id);
+    const { pool, compatible, allCat } = optionsFor(c.id, state.builder, cur);
     const curObj = byId(cur);
+    const hidden = allCat.length - compatible.length;
     return `<div class="slot"><div class="icon">${c.icon}</div>
-      <div style="flex:1"><label class="small muted">${c.name}</label>
-      <select onchange="state.builder['${c.id}']=this.value;render()">
+      <div style="flex:1"><label class="small muted">${c.name}
+        ${state.onlyCompatible && hidden > 0 ? `<span class="compat-note">· ${compatible.length} из ${allCat.length}, ${hidden} несовместимых скрыто</span>` : ''}</label>
+      <select onchange="setBuilderPart('${c.id}', this.value)">
         ${pool.map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)} — от ${fmt(minPrice(x.id, state.region, 'new') ?? x.basePrice)}${x.year < 2020 ? ' · старая' : ''}</option>`).join('')}
       </select></div>
       <div class="p"><span class="price">${fmt(minPrice(cur, state.region, 'new') ?? curObj?.basePrice ?? 0)}</span><br>
@@ -1373,12 +1481,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#priceQueryInput')?.addEventListener('input', e => { state.priceQuery = e.target.value; render(); });
 
   // Форма совместимости
-  $('#compatForm').innerHTML = CATEGORIES.map(c => `
-    <div class="slot"><div class="icon">${c.icon}</div>
-      <div style="flex:1"><label class="small muted">${c.name}</label>
-      <select id="compat-${c.id}" onchange="renderCompat()">
-        ${COMPONENTS.filter(x => x.cat === c.id).map(x => `<option value="${x.id}">${esc(x.name)}${x.year < 2020 ? ' · старая' : ''}</option>`).join('')}
-      </select></div></div>`).join('');
+  renderCompatForm();
   $('#compatQuick').innerHTML = `<option value="">— подставить готовую сборку —</option>` +
     BUILDS.map(b => `<option value="${b.id}">${esc(b.name)}</option>`).join('');
   const first = BUILDS[0].parts;

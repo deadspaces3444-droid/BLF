@@ -1091,25 +1091,25 @@ const COMPONENTS = [
 
   // ---------- Cooling ----------
   { id:'cool-box', cat:'cooling', name:'Intel Box Cooler (LGA1150/1151)', brand:'Intel', basePrice:1500, perf:25, work:25, power:0, year:2014, aliases:['box_cooler','боксовый кулер','стоковый'],
-    specs:{ type:'Воздух', tdpSupport:95, heightMm:70, radiatorSize:'—', fans:'1×92 мм', noise:'35 дБ' } },
+    specs:{ type:'Воздух', tdpSupport:95, heightMm:70, radiatorSize:'—', sockets:'LGA1150/1151', fans:'1×92 мм', noise:'35 дБ' } },
   { id:'cool-hyper212', cat:'cooling', name:'Cooler Master Hyper 212 EVO', brand:'Cooler Master', basePrice:3000, perf:42, work:42, power:0, year:2011, aliases:['hyper_212','hyper212','212 evo'],
-    specs:{ type:'Воздух', tdpSupport:150, heightMm:160, radiatorSize:'—', fans:'1×120 мм', noise:'30 дБ' } },
+    specs:{ type:'Воздух', tdpSupport:150, heightMm:160, radiatorSize:'—', sockets:'LGA775/115x/1366/2011, AM2+/AM3/AM3+', fans:'1×120 мм', noise:'30 дБ' } },
   { id:'cool-nhu12s', cat:'cooling', name:'Noctua NH-U12S', brand:'Noctua', basePrice:7000, perf:60, work:60, power:0, year:2013, aliases:['nh-u12s','u12s'],
-    specs:{ type:'Воздух', tdpSupport:140, heightMm:158, radiatorSize:'—', fans:'1×120 мм', noise:'22 дБ' } },
+    specs:{ type:'Воздух', tdpSupport:140, heightMm:158, radiatorSize:'—', sockets:'LGA115x/1200/1700/2011, AM3+/AM4', fans:'1×120 мм', noise:'22 дБ' } },
   { id:'cool-zalman', cat:'cooling', name:'Zalman CNPS10X Optima', brand:'Zalman', basePrice:3500, perf:44, work:44, power:0, year:2014, aliases:['cnps10x','zalman optima'],
-    specs:{ type:'Воздух', tdpSupport:150, heightMm:160, radiatorSize:'—', fans:'1×120 мм', noise:'28 дБ' } },
+    specs:{ type:'Воздух', tdpSupport:150, heightMm:160, radiatorSize:'—', sockets:'LGA775/115x/1366/2011, AM2+/AM3/AM3+', fans:'1×120 мм', noise:'28 дБ' } },
   { id:'cool-se214', cat:'cooling', name:'ID-Cooling SE-214-XT', brand:'ID-Cooling', basePrice:3500, perf:45, work:45, power:0, year:2021, aliases:['se-214','se214'],
-    specs:{ type:'Воздух', tdpSupport:150, heightMm:155, radiatorSize:'—', fans:'1×120 мм', noise:'28 дБ' } },
+    specs:{ type:'Воздух', tdpSupport:150, heightMm:155, radiatorSize:'—', sockets:'LGA115x/1200/1700, AM4', fans:'1×120 мм', noise:'28 дБ' } },
   { id:'cool-ak400', cat:'cooling', name:'DeepCool AK400', brand:'DeepCool', basePrice:4500, perf:58, work:58, power:0, year:2022, aliases:['ak400'],
-    specs:{ type:'Воздух', tdpSupport:220, heightMm:155, radiatorSize:'—', fans:'1×120 мм', noise:'29 дБ' } },
+    specs:{ type:'Воздух', tdpSupport:220, heightMm:155, radiatorSize:'—', sockets:'LGA115x/1200/1700, AM4/AM5', fans:'1×120 мм', noise:'29 дБ' } },
   { id:'cool-peerless', cat:'cooling', name:'Thermalright Peerless Assassin 120', brand:'Thermalright', basePrice:6500, perf:72, work:72, power:0, year:2023, aliases:['peerless_assassin','peerless'],
-    specs:{ type:'Воздух', tdpSupport:270, heightMm:155, radiatorSize:'—', fans:'2×120 мм', noise:'25 дБ' } },
+    specs:{ type:'Воздух', tdpSupport:270, heightMm:155, radiatorSize:'—', sockets:'LGA115x/1200/1700, AM4/AM5', fans:'2×120 мм', noise:'25 дБ' } },
   { id:'cool-nhd15', cat:'cooling', name:'Noctua NH-D15', brand:'Noctua', basePrice:12500, perf:80, work:80, power:0, year:2024, aliases:['nh-d15','nhd15'],
-    specs:{ type:'Воздух', tdpSupport:250, heightMm:165, radiatorSize:'—', fans:'2×140 мм', noise:'24 дБ' } },
+    specs:{ type:'Воздух', tdpSupport:250, heightMm:165, radiatorSize:'—', sockets:'LGA115x/1200/1700/2011, AM4/AM5', fans:'2×140 мм', noise:'24 дБ' } },
   { id:'cool-ls520', cat:'cooling', name:'DeepCool LS520 240 мм', brand:'DeepCool', basePrice:9500, perf:70, work:70, power:0, year:2022, aliases:['ls520','240 мм'],
-    specs:{ type:'СЖО (AIO)', tdpSupport:250, heightMm:0, radiatorSize:'240 мм', fans:'2×120 мм', noise:'30 дБ' } },
+    specs:{ type:'СЖО (AIO)', tdpSupport:250, heightMm:0, radiatorSize:'240 мм', sockets:'LGA115x/1200/1700, AM4/AM5', fans:'2×120 мм', noise:'30 дБ' } },
   { id:'cool-freezer360', cat:'cooling', name:'Arctic Liquid Freezer III 360', brand:'Arctic', basePrice:13500, perf:85, work:85, power:0, year:2024, aliases:['freezer_360','liquid freezer'],
-    specs:{ type:'СЖО (AIO)', tdpSupport:350, heightMm:0, radiatorSize:'360 мм', fans:'3×120 мм', noise:'28 дБ' } },
+    specs:{ type:'СЖО (AIO)', tdpSupport:350, heightMm:0, radiatorSize:'360 мм', sockets:'LGA115x/1200/1700/1851, AM4/AM5', fans:'3×120 мм', noise:'28 дБ' } },
 ];
 
 const BUILDS = [
@@ -1281,8 +1281,10 @@ function minPrice(componentId, regionId, condition = 'new') {
 function buildPrice(build, regionId, condition = 'new') {
   let total = 0, missing = 0;
   Object.values(build.parts).forEach(cid => {
+    const comp = byId(cid);
+    if (!comp) return;                       // неизвестный id — не ломаем расчёт
     const p = minPrice(cid, regionId, condition);
-    if (p === null) { missing++; total += byId(cid).basePrice; }
+    if (p === null) { missing++; total += comp.basePrice; }
     else total += p;
   });
   return { total, missing };
