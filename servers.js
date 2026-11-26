@@ -35,6 +35,59 @@ const SERVER_COMPONENTS = [
   { id:'sc-cpu-lite', cat:'servercpu', name:'Intel Core i3-12100 (серверный минимум)', brand:'Intel', basePrice:13500, year:2022, perf:30, power:60, budget:true,
     specs:{ socket:'LGA1700', cores:4, threads:8, baseFreq:'3.3 ГГц', boostFreq:'4.3 ГГц', tdp:60, memType:'DDR4/DDR5 ECC (W680)', channels:2, maxMem:'128 ГБ', pcie:'PCIe 4.0', priceNote:'домашний сервер / один сайт' },
     aliases:['i3 12100','i3-12100 сервер','бюджетный сервер'] },
+  // --- Xeon E5 v1/v2: LGA2011 (X79), DDR3 ECC REG ---
+  { id:'sc-e5-2620v2', cat:'servercpu', name:'Intel Xeon E5-2620 v2 (Б/У, X79)', brand:'Intel', basePrice:1200, year:2013, perf:10, power:80, budget:true, xeon:true,
+    specs:{ socket:'LGA2011', cores:6, threads:12, baseFreq:'2.1 ГГц', boostFreq:'2.6 ГГц', tdp:80, memType:'DDR3 ECC REG', channels:4, maxMem:'384 ГБ', pcie:'PCIe 3.0', priceNote:'самый дешёвый вход в серверы' },
+    aliases:['2620 v2','e5 2620','x79 cpu'] },
+  { id:'sc-e5-2650v2', cat:'servercpu', name:'Intel Xeon E5-2650 v2 (Б/У, X79)', brand:'Intel', basePrice:1900, year:2013, perf:16, power:95, budget:true, xeon:true,
+    specs:{ socket:'LGA2011', cores:8, threads:16, baseFreq:'2.6 ГГц', boostFreq:'3.4 ГГц', tdp:95, memType:'DDR3 ECC REG', channels:4, maxMem:'384 ГБ', pcie:'PCIe 3.0', priceNote:'8 ядер за 2 тыс.' },
+    aliases:['2650 v2','e5 2650'] },
+  { id:'sc-e5-2690v2', cat:'servercpu', name:'Intel Xeon E5-2690 v2 (Б/У, X79)', brand:'Intel', basePrice:4200, year:2013, perf:24, power:130, xeon:true,
+    specs:{ socket:'LGA2011', cores:10, threads:20, baseFreq:'3.0 ГГц', boostFreq:'3.6 ГГц', tdp:130, memType:'DDR3 ECC REG', channels:4, maxMem:'384 ГБ', pcie:'PCIe 3.0', priceNote:'топ для X79' },
+    aliases:['2690 v2'] },
+  // --- Xeon E5 v3/v4: LGA2011-3 (X99), DDR4 ECC REG ---
+  { id:'sc-e5-2620v3', cat:'servercpu', name:'Intel Xeon E5-2620 v3 (Б/У, X99)', brand:'Intel', basePrice:1200, year:2014, perf:12, power:85, budget:true, xeon:true,
+    specs:{ socket:'LGA2011-3', cores:6, threads:12, baseFreq:'2.4 ГГц', boostFreq:'3.2 ГГц', tdp:85, memType:'DDR4 ECC REG', channels:4, maxMem:'768 ГБ', pcie:'PCIe 3.0', priceNote:'минимум для X99' },
+    aliases:['2620 v3','e5 2620 v3'] },
+  { id:'sc-e5-2640v3', cat:'servercpu', name:'Intel Xeon E5-2640 v3 (Б/У, X99)', brand:'Intel', basePrice:2200, year:2014, perf:15, power:90, budget:true, xeon:true,
+    specs:{ socket:'LGA2011-3', cores:8, threads:16, baseFreq:'2.6 ГГц', boostFreq:'3.4 ГГц', tdp:90, memType:'DDR4 ECC REG', channels:4, maxMem:'768 ГБ', pcie:'PCIe 3.0', priceNote:'8 ядер, холодный' },
+    aliases:['2640 v3','e5 2640 v3'] },
+  { id:'sc-e5-2660v3', cat:'servercpu', name:'Intel Xeon E5-2660 v3 (Б/У, X99)', brand:'Intel', basePrice:2900, year:2014, perf:19, power:105, budget:true, xeon:true,
+    specs:{ socket:'LGA2011-3', cores:10, threads:20, baseFreq:'2.6 ГГц', boostFreq:'3.3 ГГц', tdp:105, memType:'DDR4 ECC REG', channels:4, maxMem:'768 ГБ', pcie:'PCIe 3.0', priceNote:'10 ядер до 3 тыс.' },
+    aliases:['2660 v3'] },
+  { id:'sc-e5-2670v3', cat:'servercpu', name:'Intel Xeon E5-2670 v3 (Б/У, X99)', brand:'Intel', basePrice:4300, year:2014, perf:23, power:120, xeon:true,
+    specs:{ socket:'LGA2011-3', cores:12, threads:24, baseFreq:'2.3 ГГц', boostFreq:'3.1 ГГц', tdp:120, memType:'DDR4 ECC REG', channels:4, maxMem:'768 ГБ', pcie:'PCIe 3.0', priceNote:'12 ядер' },
+    aliases:['2670 v3'] },
+  { id:'sc-e5-2660v4', cat:'servercpu', name:'Intel Xeon E5-2660 v4 (Б/У, X99)', brand:'Intel', basePrice:5200, year:2016, perf:24, power:105, xeon:true,
+    specs:{ socket:'LGA2011-3', cores:14, threads:28, baseFreq:'2.0 ГГц', boostFreq:'3.2 ГГц', tdp:105, memType:'DDR4 ECC REG', channels:4, maxMem:'1.5 ТБ', pcie:'PCIe 3.0', priceNote:'14 ядер' },
+    aliases:['2660 v4'] },
+  { id:'sc-e5-2696v4', cat:'servercpu', name:'Intel Xeon E5-2696 v4 (Б/У, X99)', brand:'Intel', basePrice:19000, year:2016, perf:40, power:150, xeon:true,
+    specs:{ socket:'LGA2011-3', cores:22, threads:44, baseFreq:'2.2 ГГц', boostFreq:'3.6 ГГц', tdp:150, memType:'DDR4 ECC REG', channels:4, maxMem:'1.5 ТБ', pcie:'PCIe 3.0', priceNote:'22 ядра — топ X99' },
+    aliases:['2696 v4'] },
+  { id:'sc-e5-2699v4', cat:'servercpu', name:'Intel Xeon E5-2699 v4 (Б/У, X99)', brand:'Intel', basePrice:24000, year:2016, perf:42, power:145, xeon:true,
+    specs:{ socket:'LGA2011-3', cores:22, threads:44, baseFreq:'2.2 ГГц', boostFreq:'3.6 ГГц', tdp:145, memType:'DDR4 ECC REG', channels:4, maxMem:'1.5 ТБ', pcie:'PCIe 3.0', priceNote:'флагман X99' },
+    aliases:['2699 v4'] },
+  // --- Xeon E3: LGA1150/1151, обычная DDR3/DDR4 ---
+  { id:'sc-e3-1230v3', cat:'servercpu', name:'Intel Xeon E3-1230 v3 (Б/У, LGA1150)', brand:'Intel', basePrice:2400, year:2013, perf:13, power:80, budget:true, xeon:true,
+    specs:{ socket:'LGA1150', cores:4, threads:8, baseFreq:'3.3 ГГц', boostFreq:'3.7 ГГц', tdp:80, memType:'DDR3 ECC UDIMM', channels:2, maxMem:'32 ГБ', pcie:'PCIe 3.0', priceNote:'i7 за 2,5 тыс.' },
+    aliases:['e3 1230 v3','1230v3'] },
+  { id:'sc-e3-1240v5', cat:'servercpu', name:'Intel Xeon E3-1240 v5 (Б/У, LGA1151)', brand:'Intel', basePrice:4200, year:2015, perf:17, power:80, xeon:true,
+    specs:{ socket:'LGA1151', cores:4, threads:8, baseFreq:'3.5 ГГц', boostFreq:'3.9 ГГц', tdp:80, memType:'DDR4 ECC UDIMM', channels:2, maxMem:'64 ГБ', pcie:'PCIe 3.0', priceNote:'E3 на DDR4' },
+    aliases:['e3 1240 v5'] },
+  // --- Xeon Scalable / W / D ---
+  { id:'sc-silver4210', cat:'servercpu', name:'Intel Xeon Silver 4210', brand:'Intel', basePrice:38000, year:2019, perf:34, power:85, xeon:true,
+    specs:{ socket:'LGA3647', cores:10, threads:20, baseFreq:'2.2 ГГц', boostFreq:'3.2 ГГц', tdp:85, memType:'DDR4 ECC RDIMM', channels:6, maxMem:'1 ТБ', pcie:'PCIe 3.0', priceNote:'Scalable 2-го поколения' },
+    aliases:['silver 4210','4210'] },
+  { id:'sc-platinum8272cl', cat:'servercpu', name:'Intel Xeon Platinum 8272CL (Б/У)', brand:'Intel', basePrice:52000, year:2019, perf:52, power:205, xeon:true,
+    specs:{ socket:'LGA3647', cores:26, threads:52, baseFreq:'2.6 ГГц', boostFreq:'3.7 ГГц', tdp:205, memType:'DDR4 ECC RDIMM', channels:6, maxMem:'1 ТБ', pcie:'PCIe 3.0', priceNote:'26 ядер из облака' },
+    aliases:['8272cl','platinum 8272'] },
+  { id:'sc-w2295', cat:'servercpu', name:'Intel Xeon W-2295', brand:'Intel', basePrice:96000, year:2019, perf:48, power:165, xeon:true,
+    specs:{ socket:'LGA2066', cores:18, threads:36, baseFreq:'3.0 ГГц', boostFreq:'4.6 ГГц', tdp:165, memType:'DDR4 ECC RDIMM', channels:4, maxMem:'1 ТБ', pcie:'PCIe 3.0', priceNote:'высокая частота для 3D' },
+    aliases:['w-2295','xeon w'] },
+  // --- EPYC первого поколения: тоже дешёвый вход ---
+  { id:'sc-epyc-7282', cat:'servercpu', name:'AMD EPYC 7282', brand:'AMD', basePrice:21000, year:2019, perf:34, power:120,
+    specs:{ socket:'SP3', cores:16, threads:32, baseFreq:'2.8 ГГц', boostFreq:'3.2 ГГц', tdp:120, memType:'DDR4 ECC RDIMM', channels:8, maxMem:'4 ТБ', pcie:'PCIe 4.0 (128 линий)', priceNote:'16 ядер Rome' },
+    aliases:['7282','epyc 7282'] },
   { id:'sc-cpu-am4', cat:'servercpu', name:'AMD Ryzen 5 5600G (серверный минимум)', brand:'AMD', basePrice:9500, year:2021, perf:26, power:65, budget:true,
     specs:{ socket:'AM4', cores:6, threads:12, baseFreq:'3.9 ГГц', boostFreq:'4.4 ГГц', tdp:65, memType:'DDR4', channels:2, maxMem:'128 ГБ', pcie:'PCIe 3.0', priceNote:'дешёвый домашний сервер' },
     aliases:['5600g','ryzen 5600','am4 минимум'] },
@@ -43,6 +96,25 @@ const SERVER_COMPONENTS = [
     aliases:['2680v4','e5 2680 v4','2680 v4'] },
 
   // ---------- Платы ----------
+  // --- Китайские платы под Xeon (X79/X99) и серверные платы б/у ---
+  { id:'smb-x79-cn', cat:'servermb', name:'Китайская плата X79 (LGA2011, DDR3 REG)', brand:'Machinist / Kllisre', basePrice:4200, year:2019, perf:8, power:30, budget:true, chinese:true,
+    specs:{ socket:'LGA2011', formFactor:'ATX', ramType:'DDR3 ECC REG', ramSlots:4, maxRam:'128 ГБ', maxCpuTdp:135, sata:6, m2:1, nvmeU2:0, nic:'1× 1GbE', raid:'SATA RAID 0/1/10', ipmi:'нет (Wake-on-LAN)' },
+    aliases:['x79','китайская x79','lga2011 плата','machinist x79','kllisre'] },
+  { id:'smb-x99-cn', cat:'servermb', name:'Китайская плата X99 (LGA2011-3, DDR4 REG)', brand:'Machinist / Jingsha', basePrice:6800, year:2020, perf:10, power:35, budget:true, chinese:true,
+    specs:{ socket:'LGA2011-3', formFactor:'ATX', ramType:'DDR4 ECC REG', ramSlots:4, maxRam:'256 ГБ', maxCpuTdp:145, sata:6, m2:1, nvmeU2:0, nic:'1× 1GbE', raid:'SATA RAID 0/1/10', ipmi:'нет (Wake-on-LAN)' },
+    aliases:['x99','китайская x99','jingsha','machinist x99','lga2011-3 плата'] },
+  { id:'smb-x99-dual', cat:'servermb', name:'Китайская двухпроцессорная X99 (2× Xeon)', brand:'Jingsha / Huananzhi', basePrice:14500, year:2020, perf:14, power:50, budget:true, chinese:true,
+    specs:{ socket:'LGA2011-3 ×2', formFactor:'E-ATX', ramType:'DDR4 ECC REG', ramSlots:8, maxRam:'512 ГБ', maxCpuTdp:145, sata:10, m2:1, nvmeU2:0, nic:'2× 1GbE', raid:'SATA RAID 0/1/10', ipmi:'нет (Wake-on-LAN)' },
+    aliases:['двухпроцессорная x99','dual x99','huananzhi'] },
+  { id:'smb-huananzhi-f8', cat:'servermb', name:'Huananzhi F8 (X99, 8 слотов RAM)', brand:'Huananzhi', basePrice:9500, year:2020, perf:12, power:40, budget:true, chinese:true,
+    specs:{ socket:'LGA2011-3', formFactor:'ATX', ramType:'DDR4 ECC REG', ramSlots:8, maxRam:'512 ГБ', maxCpuTdp:145, sata:10, m2:1, nvmeU2:0, nic:'1× 1GbE', raid:'SATA RAID 0/1/10', ipmi:'нет (Wake-on-LAN)' },
+    aliases:['f8','huananzhi f8'] },
+  { id:'smb-e3-cn', cat:'servermb', name:'Китайская плата H81/B85 под Xeon E3', brand:'Machinist', basePrice:2800, year:2019, perf:6, power:20, budget:true, chinese:true,
+    specs:{ socket:'LGA1150', formFactor:'microATX', ramType:'DDR3', ramSlots:2, maxRam:'16 ГБ', maxCpuTdp:84, sata:4, m2:0, nvmeU2:0, nic:'1× 1GbE', raid:'SATA RAID 0/1', ipmi:'нет (Wake-on-LAN)' },
+    aliases:['h81 китайская','b85','lga1150 плата'] },
+  { id:'smb-x10srl2', cat:'servermb', name:'Supermicro X10SRL-F (Б/У, X99)', brand:'Supermicro', basePrice:14500, year:2015, perf:12, power:30, xeon:true,
+    specs:{ socket:'LGA2011-3', formFactor:'ATX', ramType:'DDR4 ECC REG', ramSlots:8, maxRam:'512 ГБ', maxCpuTdp:145, sata:10, m2:0, nvmeU2:0, nic:'2× 1GbE', raid:'SATA RAID 0/1/5/10', ipmi:'есть (IPMI 2.0)' },
+    aliases:['x10srl-f бу','supermicro x10'] },
   { id:'smb-b760-atx', cat:'servermb', name:'ASUS PRIME B760M-A (потребительская, mATX)', brand:'ASUS', basePrice:16000, year:2023, perf:10, power:25, budget:true,
     specs:{ socket:'LGA1700', formFactor:'microATX', ramType:'DDR5', ramSlots:4, maxRam:'192 ГБ', maxCpuTdp:150, sata:4, m2:3, nvmeU2:0, nic:'1× 2.5GbE', raid:'SATA RAID 0/1/5/10', ipmi:'нет (Wake-on-LAN)' },
     aliases:['b760','потребительская плата','бюджетная серверная плата'] },
@@ -69,6 +141,14 @@ const SERVER_COMPONENTS = [
     aliases:['x10srl','x10srl-f'] },
 
   // ---------- Память ----------
+  { id:'sram-ddr3reg8', cat:'serverram', name:'DDR3 ECC REG 8 ГБ 1600 (Б/У, X79)', brand:'Samsung', basePrice:650, year:2013, perf:8, budget:true,
+    specs:{ type:'DDR3 ECC REG', capacityGb:8, modules:1, speed:'1600 МТ/с', ecc:'ECC REG', rank:'2Rx4', voltage:'1.5 В' }, aliases:['ddr3 reg','ddr3 ecc','x79 память'] },
+  { id:'sram-ddr3reg16', cat:'serverram', name:'DDR3 ECC REG 16 ГБ 1600 (Б/У, X79)', brand:'Hynix', basePrice:1200, year:2013, perf:10, budget:true,
+    specs:{ type:'DDR3 ECC REG', capacityGb:16, modules:1, speed:'1600 МТ/с', ecc:'ECC REG', rank:'2Rx4', voltage:'1.5 В' }, aliases:['ddr3 reg 16','16gb ddr3 ecc'] },
+  { id:'sram-ddr4reg16', cat:'serverram', name:'DDR4 ECC REG 16 ГБ 2400 (Б/У, X99)', brand:'Samsung', basePrice:1800, year:2016, perf:14, budget:true,
+    specs:{ type:'DDR4 ECC REG', capacityGb:16, modules:1, speed:'2400 МТ/с', ecc:'ECC REG', rank:'1Rx4', voltage:'1.2 В' }, aliases:['ddr4 reg','ddr4 ecc reg','x99 память','16gb ddr4 reg'] },
+  { id:'sram-ddr4reg32', cat:'serverram', name:'DDR4 ECC REG 32 ГБ 2666 (Б/У, X99)', brand:'Micron', basePrice:3400, year:2017, perf:18, budget:true,
+    specs:{ type:'DDR4 ECC REG', capacityGb:32, modules:1, speed:'2666 МТ/с', ecc:'ECC REG', rank:'2Rx4', voltage:'1.2 В' }, aliases:['ddr4 reg 32','32gb ddr4 reg'] },
   { id:'sram-ddr4-8-non', cat:'serverram', name:'DDR4 8 ГБ 2666 (потребительская)', brand:'Kingston', basePrice:1900, year:2019, perf:10, budget:true,
     specs:{ type:'DDR4 (без ECC)', capacityGb:8, modules:1, speed:'2666 МТ/с', ecc:'нет', rank:'1Rx8', voltage:'1.2 В' }, aliases:['ddr4 8gb','8gb ddr4'] },
   { id:'sram-ddr4-16-non', cat:'serverram', name:'DDR4 16 ГБ 3200 (потребительская)', brand:'Crucial', basePrice:3400, year:2021, perf:12, budget:true,
@@ -85,6 +165,10 @@ const SERVER_COMPONENTS = [
     specs:{ type:'DDR4 ECC RDIMM', capacityGb:16, modules:1, speed:'2666 МТ/с', ecc:'ECC (RDIMM)', rank:'1Rx4', voltage:'1.2 В' }, aliases:['ddr4 ecc 16','rdimm 16'] },
 
   // ---------- Накопители ----------
+  { id:'sst-hdd500', cat:'serverstorage', name:'HDD 500 ГБ SATA (Б/У, система)', brand:'Seagate', basePrice:600, year:2014, perf:8, power:5, budget:true,
+    specs:{ type:'HDD SATA', interface:'SATA 6 Гбит/с', capacityGb:500, tbw:'—', read:'120 МБ/с', write:'120 МБ/с', formFactor:'3.5"', workload:'система и файлы, бюджет' }, aliases:['hdd 500','500gb hdd','hdd бу'] },
+  { id:'sst-hdd2tb-used', cat:'serverstorage', name:'HDD 2 ТБ SATA (Б/У, архив)', brand:'HGST', basePrice:2200, year:2015, perf:14, power:6, budget:true,
+    specs:{ type:'HDD SATA', interface:'SATA 6 Гбит/с', capacityGb:2000, tbw:'—', read:'170 МБ/с', write:'170 МБ/с', formFactor:'3.5"', workload:'архив, бэкапы, медиа' }, aliases:['hdd 2tb бу','2tb hdd'] },
   { id:'sst-sata240', cat:'serverstorage', name:'Kingston A400 240 ГБ SATA SSD', brand:'Kingston', basePrice:1900, year:2019, perf:14, power:2, budget:true,
     specs:{ type:'SATA SSD', interface:'SATA 6 Гбит/с', capacityGb:240, tbw:'80 TBW', read:'500 МБ/с', write:'350 МБ/с', formFactor:'2.5" 7 мм', workload:'система для дома/офиса' }, aliases:['a400','ssd 240'] },
   { id:'sst-nv2-1tb', cat:'serverstorage', name:'Kingston NV2 1 ТБ NVMe', brand:'Kingston', basePrice:6200, year:2022, perf:46, power:5, budget:true,
@@ -119,6 +203,8 @@ const SERVER_COMPONENTS = [
     specs:{ type:'1GbE', ports:'4× RJ-45', interface:'PCIe 2.1 ×4', speed:'1 Гбит/с', offload:'SR-IOV, VLAN', drivers:'Linux / Windows / FreeBSD' }, aliases:['i350','4x 1gbe'] },
 
   // ---------- БП ----------
+  { id:'spsu-500w-budget', cat:'serverpsu', name:'AeroCool VX-500 500 Вт', brand:'AeroCool', basePrice:2400, year:2018, perf:16, power:500, budget:true,
+    specs:{ wattage:500, formFactor:'ATX', efficiency:'80+ (без сертификата)', redundancy:'нет', connectors:'24-pin, 1× EPS, 3× SATA', cooling:'120 мм' }, aliases:['500w дешево','vx-500'] },
   { id:'spsu-450w', cat:'serverpsu', name:'Chieftec 450 Вт 80+ Bronze (ATX)', brand:'Chieftec', basePrice:3600, year:2019, perf:20, power:450, budget:true,
     specs:{ wattage:450, formFactor:'ATX', efficiency:'80+ Bronze', redundancy:'нет', connectors:'24-pin, 1× EPS, 3× SATA', cooling:'120 мм' }, aliases:['450w','дешевый бп'] },
   { id:'spsu-650w', cat:'serverpsu', name:'DeepCool PF650 650 Вт 80+', brand:'DeepCool', basePrice:5500, year:2021, perf:26, power:650, budget:true,
@@ -137,6 +223,8 @@ const SERVER_COMPONENTS = [
     specs:{ formFactor:'1U', boardSupport:'ATX, microATX, mini-ITX', driveBays:'4× 3.5" горячая замена', maxPsu:'1U / RPS', heightU:1, depth:'647 мм', fans:'4× 40 мм' }, aliases:['cse-815','1u atx'] },
   { id:'sch-2u', cat:'serverchassis', name:'Supermicro CSE-825 2U (8× 3.5")', brand:'Supermicro', basePrice:62000, year:2019, perf:36, power:0,
     specs:{ formFactor:'2U', boardSupport:'ATX, microATX, E-ATX', driveBays:'8× 3.5" + 2× 2.5"', maxPsu:'2U RPS', heightU:2, depth:'647 мм', fans:'3× 80 мм' }, aliases:['2u chassis','cse-825'] },
+  { id:'sch-atx-used', cat:'serverchassis', name:'Б/У корпус ATX с 4× 3.5"', brand:'Generic', basePrice:1200, year:2015, perf:6, power:0, budget:true,
+    specs:{ formFactor:'Tower', boardSupport:'ATX, microATX, mini-ITX', driveBays:'4× 3.5" + 2× 2.5"', maxPsu:'ATX', heightU:0, depth:'450 мм', fans:'2× 120 мм' }, aliases:['бу корпус','корпус атх'] },
   { id:'sch-matx-lite', cat:'serverchassis', name:'Zalman I3 Neo (microATX, 4× 3.5")', brand:'Zalman', basePrice:4200, year:2022, perf:10, power:0, budget:true,
     specs:{ formFactor:'Tower', boardSupport:'microATX, mini-ITX', driveBays:'4× 3.5" + 2× 2.5"', maxPsu:'ATX', heightU:0, depth:'430 мм', fans:'4× 120 мм' }, aliases:['zalman','бюджетный корпус'] },
   { id:'sch-itx-nas', cat:'serverchassis', name:'Fractal Node 304 (ITX, 6× 3.5")', brand:'Fractal Design', basePrice:10500, year:2019, perf:14, power:0, budget:true,
@@ -173,6 +261,37 @@ const SERVER_BUILDS = [
     parts:{ servercpu:'sc-epyc-9754', servermb:'smb-h13ssl', serverram:'sram-ddr5ecc64', serverstorage:'sst-cd6', servernic:'snic-e810', serverpsu:'spsu-1200w', serverchassis:'sch-tower' },
     drives:4, ramModules:4, os:'ubuntu-server', note:'Ubuntu Server LTS — стандарт для CUDA и контейнеров ML.' },
   // ---------- Бюджетные и частные серверы (для начинающих) ----------
+  // ---------- Ультрабюджетные Xeon-серверы (до 20 000 ₽) ----------
+  { id:'srv-xeon-15k', name:'Xeon-сервер за 15 тысяч', tag:'X99 · Б/У · До 20 000 ₽', level:'beginner', budget:18000,
+    desc:'Китайская плата X99 + Xeon E5-2640 v3 (8 ядер / 16 потоков) + 16 ГБ серверной REG-памяти. Полноценный сервер дешевле нового мини-ПК — для дома, сайта, Docker и тестов.',
+    purpose:'Домашние сервисы, один сайт, Docker, обучение', uses:['one-site','self-hosted'],
+    parts:{ servercpu:'sc-e5-2640v3', servermb:'smb-x99-cn', serverram:'sram-ddr4reg16', serverstorage:'sst-sata240', servernic:'snic-2port', serverpsu:'spsu-500w-budget', serverchassis:'sch-atx-used' },
+    drives:1, ramModules:2, os:'ubuntu-server', note:'Ubuntu Server или Debian. Замените термопасту и проверьте BIOS — плата б/у китайская.' },
+  { id:'srv-x79-12k', name:'X79-сервер за 12 тысяч', tag:'X79 · DDR3 · До 15 000 ₽', level:'beginner', budget:13000,
+    desc:'Самая дешёвая полноценная серверная платформа: X79 + Xeon E5-2650 v2 (8 ядер) + DDR3 REG. Хватит на сайт, файлы и камеры, но платформа старая и горячая.',
+    purpose:'Один сайт, файлы, видеонаблюдение, тесты', uses:['one-site','cctv'],
+    parts:{ servercpu:'sc-e5-2650v2', servermb:'smb-x79-cn', serverram:'sram-ddr3reg16', serverstorage:'sst-hdd500', servernic:'snic-2port', serverpsu:'spsu-500w-budget', serverchassis:'sch-atx-used' },
+    drives:1, ramModules:2, os:'debian', note:'Debian 12 отлично живёт на X79; SSD под систему заметно ускорит работу.' },
+  { id:'srv-cctv-budget', name:'Видеонаблюдение до 20 тысяч', tag:'CCTV · Бюджет', level:'beginner', budget:20000,
+    desc:'4 камеры, круглосуточная запись: X99 + Xeon E5-2620 v3, 32 ГБ REG, диск WD Purple 2 ТБ и корпус NVR. Frigate/Shinobi в Docker, просмотр с телефона.',
+    purpose:'4 IP-камеры, архив 1–2 недели', uses:['cctv'],
+    parts:{ servercpu:'sc-e5-2620v3', servermb:'smb-x99-cn', serverram:'sram-ddr4reg16', serverstorage:'sst-hdd2tb-used', servernic:'snic-2port', serverpsu:'spsu-500w-budget', serverchassis:'sch-atx-used' },
+    drives:1, ramModules:1, os:'ubuntu-server', note:'Для круглосуточной записи замените диск на WD Purple; для 8 камер и детекции объектов берите сборку «Видеонаблюдение (4–8 камер)».' },
+  { id:'srv-one-site-15k', name:'Сайт за 15 тысяч', tag:'1 сайт · Бюджет', level:'beginner', budget:18000,
+    desc:'Личный сайт или блог на X79 + Xeon E5-2620 v2, 24 ГБ REG-памяти и SSD на 240 ГБ. nginx + PHP/Node, TLS, бэкапы в облако или на второй диск.',
+    purpose:'Один сайт/блог до 5 тыс. посетителей в день', uses:['one-site'],
+    parts:{ servercpu:'sc-e5-2620v2', servermb:'smb-x79-cn', serverram:'sram-ddr3reg8', serverstorage:'sst-sata240', servernic:'snic-2port', serverpsu:'spsu-500w-budget', serverchassis:'sch-atx-used' },
+    drives:1, ramModules:3, os:'ubuntu-server', note:'Три модуля по 8 ГБ — типичная схема для X79 (трёхканальный контроллер памяти).' },
+  { id:'srv-x99-32k', name:'X99: 14 ядер / 64 ГБ', tag:'X99 · 14 ядер', level:'intermediate', budget:35000,
+    desc:'Народный сервер среднего уровня: Xeon E5-2660 v4 на 14 ядер и 64 ГБ REG. Виртуалки, базы, несколько сайтов и Docker — всё на одной машине.',
+    purpose:'Несколько сайтов, БД, ВМ, домашняя лаборатория', uses:['one-site','self-hosted','home-nas'],
+    parts:{ servercpu:'sc-e5-2660v4', servermb:'smb-x99-cn', serverram:'sram-ddr4reg16', serverstorage:'sst-nv2-1tb', servernic:'snic-2port', serverpsu:'spsu-650w', serverchassis:'sch-atx-used' },
+    drives:1, ramModules:4, os:'proxmox', note:'Proxmox VE или Ubuntu: 14 ядер и 64 ГБ хватает на десяток ВМ.' },
+  { id:'srv-dual-x99', name:'Два Xeon: 40 ядер', tag:'2× CPU · X99', level:'advanced', budget:55000,
+    desc:'Двухпроцессорная китайская X99: 2× Xeon E5-2660 v3 = 20 ядер / 40 потоков и 128 ГБ REG-памяти. Дешёвая альтернатива современным 32-ядерным серверам.',
+    purpose:'Виртуализация, рендер, много контейнеров', uses:['self-hosted'],
+    parts:{ servercpu:'sc-e5-2660v3', servermb:'smb-x99-dual', serverram:'sram-ddr4reg32', serverstorage:'sst-nv2-1tb', servernic:'snic-2port', serverpsu:'spsu-650w', serverchassis:'sch-tower' },
+    drives:1, ramModules:4, cpus:2, os:'proxmox', note:'Шумно и горячо: 2× 105 Вт. Для дома лучше одну X99 на 14 ядер.' },
   { id:'srv-beginner', name:'Сервер для начинающих', tag:'Старт · Минимум', level:'beginner', budget:45000,
     desc:'Самый дешёвый путь в серверы: мини-ПК или старый ПК с i3 и 16 ГБ памяти. Хватит на один сайт, домашнее облако, Docker и первые эксперименты.',
     purpose:'Один сайт, домашние сервисы, обучение Linux', uses:['one-site','self-hosted'],
@@ -334,7 +453,7 @@ function serverPrice(partId, cityId = 'msk', condition = 'new') {
   return Math.round(base / 100) * 100;
 }
 function serverBuildParts(build) {
-  return { ...build.parts, drives: Math.max(1, build.drives || 1), ramModules: Math.max(1, build.ramModules || 1) };
+  return { ...build.parts, drives: Math.max(1, build.drives || 1), ramModules: Math.max(1, build.ramModules || 1), cpus: Math.max(1, build.cpus || 1) };
 }
 function serverBuildPrice(build, cityId = 'msk', condition = 'new') {
   const drives = Math.max(1, build.drives || 1);
@@ -344,6 +463,7 @@ function serverBuildPrice(build, cityId = 'msk', condition = 'new') {
     if (!p) return;
     let price = serverPrice(p, cityId, condition) || 0;
     if (cat === 'serverstorage') price *= drives;
+    if (cat === 'servercpu') price *= Math.max(1, build.cpus || 1);
     total += price;
   });
   return total;
@@ -356,7 +476,7 @@ function serverBuildRamGb(build) {
 }
 function serverBuildCores(build) {
   const cpu = serverPartById(build.parts.servercpu);
-  return cpu ? cpu.specs.cores : 0;
+  return cpu ? cpu.specs.cores * Math.max(1, build.cpus || 1) : 0;
 }
 function serverBuildDiskGb(build) {
   const st = serverPartById(build.parts.serverstorage);
@@ -366,7 +486,7 @@ function serverBuildDiskGb(build) {
 function serverBuildConsumption(build) {
   const cpu = serverPartById(build.parts.servercpu);
   const drives = Math.max(1, build.drives || 1);
-  return (cpu?.specs?.tdp || 65) + 60 + drives * 10 + 30;
+  return (cpu?.specs?.tdp || 65) * Math.max(1, build.cpus || 1) + 60 + drives * 10 + 30;
 }
 
 // Нагрузка: сколько ВМ / сайтов / TPS выдержит конфигурация
@@ -396,10 +516,15 @@ function checkServerCompatibility(parts) {
 
   // 1. Сокет
   if (cpu && mb) {
-    if (cpu.specs.socket !== mb.specs.socket) {
+    const mbSockets = String(mb.specs.socket).split('×')[0].trim();
+    const socketOk = cpu.specs.socket === mb.specs.socket || cpu.specs.socket === mbSockets;
+    if (!socketOk) {
       add('error', 'Сокет не совпадает', `Процессор ${cpu.name} (${cpu.specs.socket}) не встанет в плату ${mb.name} (${mb.specs.socket}).`, `Возьмите плату с сокетом ${cpu.specs.socket}.`);
     } else {
       add('ok', 'Сокет совпадает', `${cpu.specs.socket} — процессор и плата совместимы.`);
+    }
+    if (/×2/.test(String(mb.specs.socket)) && (parts.cpus || 1) < 2) {
+      add('info', 'Плата на два процессора', 'В плату можно поставить второй такой же Xeon: ядра и каналы памяти удвоятся.', 'Для двухпроцессорной конфигурации укажите 2 процессора.');
     }
     if (cpu.specs.tdp > mb.specs.maxCpuTdp) {
       add('error', 'Плата не рассчитана на TDP процессора', `${cpu.name} — ${cpu.specs.tdp} Вт, плата держит до ${mb.specs.maxCpuTdp} Вт.`, 'Нужна плата с большим лимитом TDP.');
@@ -410,6 +535,14 @@ function checkServerCompatibility(parts) {
   if (ram && mb) {
     const ramGen = (String(ram.specs.type).match(/DDR\d/) || [''])[0];
     const mbGens = String(mb.specs.ramType).match(/DDR\d/g) || [];
+    const ramReg = /REG/.test(String(ram.specs.type));
+    const mbReg = /REG/.test(String(mb.specs.ramType));
+    if (ramReg !== mbReg) {
+      add('error', 'Память REG/обычная не совпадает',
+        ramReg ? `Память ${ram.specs.type} (серверная регистровая) не заработает на плате с ${mb.specs.ramType}.`
+               : `Обычная память ${ram.specs.type} не подходит к плате с ${mb.specs.ramType} — нужны регистровые модули (REG).`,
+        ramReg ? 'Возьмите обычную DDR4/DDR5 или серверную плату с поддержкой REG.' : 'Возьмите память с маркировкой REG (RDIMM).');
+    }
     if (!mbGens.includes(ramGen)) {
       add('error', 'Тип памяти не совпадает', `Память ${ram.specs.type}, плата поддерживает ${mb.specs.ramType}.`, `Возьмите ${mb.specs.ramType}.`);
     } else {
@@ -487,6 +620,18 @@ function checkServerCompatibility(parts) {
     }
   }
 
+  if (mb && mb.chinese) {
+    add('info', 'Китайская плата под Xeon',
+      'Платы X79/X99 (Machinist, Jingsha, Huananzhi) — самый дешёвый вход в серверы, но без официальной поддержки и с «сюрпризами» в BIOS.',
+      'Перед покупкой проверьте список поддерживаемых CPU, берите у продавца с гарантией и сразу обновите BIOS.');
+    if (ram && !/REG/.test(String(ram.specs.type))) {
+      add('warn', 'Китайские X79/X99 обычно требуют REG-память', 'Большинство таких плат работают только с серверной регистровой памятью (ECC REG).', 'Возьмите DDR3/DDR4 ECC REG (б/у она дешёвая).');
+    }
+    if (/×2/.test(String(mb.specs.socket)) && (parts.cpus || 1) < 2) {
+      add('info', 'Двухпроцессорная плата с одним CPU', 'Будет работать и с одним процессором, но половина слотов памяти может быть недоступна.', 'Для полной отдачи добавьте второй Xeon.');
+    }
+  }
+
   // 6. Сеть и IPMI
   if (mb) {
     if (!/IPMI/.test(mb.specs.ipmi)) {
@@ -508,7 +653,11 @@ function checkServerCompatibility(parts) {
 
   // 7. Диск и нагрузка
   if (st && st.specs.type === 'HDD SATA' && (parts.drives || 1) < 2) {
-    add('warn', 'Один диск — нет защиты данных', 'Один HDD без зеркала: потеря диска = потеря данных.', 'Добавьте второй диск и RAID 1 или бэкап.');
+    if (ch && ch.specs.heightU > 0) {
+      add('warn', 'Один диск — нет защиты данных', 'Один HDD без зеркала: потеря диска = потеря данных.', 'Добавьте второй диск и RAID 1 или бэкап.');
+    } else {
+      add('info', 'Один диск — сделайте бэкап', 'Для домашнего сервера один диск допустим, но важные данные нужно бэкапить в облако или на второй диск.', 'Добавьте второй диск (RAID 1) при росте данных.');
+    }
   }
   if (st && st.specs.type === 'HDD SAS' && !mb?.specs?.raid?.includes('SAS')) {
     add('info', 'SAS без контроллера', 'SAS-диски нельзя подключить напрямую к SATA-портам.', 'Добавьте HBA/RAID-контроллер.');

@@ -1313,7 +1313,8 @@ const SEARCH_ALIASES = [
 function normalize(s) { return String(s || '').toLowerCase().replace(/ё/g, 'е').trim(); }
 function compSearchText(c) {
   const specs = Object.values(c.specs).join(' ');
-  return normalize(c.name + ' ' + c.brand + ' ' + catById(c.cat).name + ' ' + specs + ' ' + (c.aliases || []).join(' '));
+  const cat = catById(c.cat);
+  return normalize(c.name + ' ' + c.brand + ' ' + (cat ? cat.name : c.cat) + ' ' + specs + ' ' + (c.aliases || []).join(' '));
 }
 function matchesQuery(c, query) {
   const q = normalize(query);

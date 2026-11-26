@@ -35,6 +35,7 @@ const state = {
   serverBuild: { servercpu:'sc-xeon-silver4310', servermb:'smb-x12spl', serverram:'sram-ddr4ecc64', serverstorage:'sst-pm9a3m2', servernic:'snic-x710', serverpsu:'spsu-800wredundant', serverchassis:'sch-2u' },
   serverDrives: 4,
   serverRamModules: 2,
+  serverCpus: 1,
   serverCompare: ['srv-beginner', 'srv-web'],
   serverLevel: 'all',
   serverBudget: false,
@@ -164,7 +165,7 @@ function pcBuildSnapshot() {
   return { parts: { ...state.builder } };
 }
 function serverSnapshot() {
-  return { parts: { ...state.serverBuild }, drives: state.serverDrives, ramModules: state.serverRamModules, os: state.serverOs || '' };
+  return { parts: { ...state.serverBuild }, drives: state.serverDrives, ramModules: state.serverRamModules, cpus: state.serverCpus || 1, os: state.serverOs || '' };
 }
 function estimateSnapshotPrice(item, cityId = state.region) {
   if (item.kind === 'server') return serverBuildPrice(item, cityId, 'new');
@@ -249,6 +250,7 @@ function openSavedBuild(id) {
     state.serverBuild = { ...item.parts };
     state.serverDrives = item.drives || 2;
     state.serverRamModules = item.ramModules || 1;
+    state.serverCpus = item.cpus || 1;
     state.serverOs = item.os || '';
     navigate('servers');
     toast(`Загружена серверная сборка «${item.name}»`);
@@ -851,7 +853,7 @@ function serverCompCard(part) {
   const cat = serverCatById(part.cat);
   const wl = serverWorkload({ servercpu: part.cat === 'servercpu' ? part.id : 'sc-xeon-silver4310', serverram: part.cat === 'serverram' ? part.id : 'sram-ddr4ecc64', serverstorage: part.cat === 'serverstorage' ? part.id : 'sst-cd6', ramModules: 2 });
   return `<article class="card">
-    <div class="tag">${cat.icon} ${cat.name} · ${esc(part.brand)} · ${part.year}${part.budget ? ' · 💸 бюджет' : ''}</div>
+    <div class="tag">${cat.icon} ${cat.name} · ${esc(part.brand)} · ${part.year}${part.budget ? ' · 💸 бюджет' : ''}${part.xeon ? ' · Xeon' : ''}${part.chinese ? ' · 🇨🇳 китайская' : ''}</div>
     <h3>${esc(part.name)}</h3>
     <div class="specs-mini">${Object.entries(part.specs).map(([k, v]) => `<div>${k}: <b>${esc(v)}</b></div>`).join('')}</div>
     <div class="row">
@@ -892,28 +894,36 @@ function renderServers() {
       <div style="flex:1"><label class="small muted">Количество дисков (RAID)</label>
         <input type="number" min="1" max="24" value="${state.serverDrives}" oninput="state.serverDrives=Math.max(1,Math.min(24,+this.value||1));render()">
       </div><div class="p small muted">в цене учтено</div></div>
+    ${/×2/.test(String(serverPartById(state.serverBuild.servermb)?.specs.socket || '')) ? `
+    <div class="slot"><div class="icon">🧠</div>
+      <div style="flex:1"><label class="small muted">Количество процессоров (плата двухпроцессорная)</label>
+        <select onchange="state.serverCpus=+this.value;render()">
+          <option value="1" ${state.serverCpus === 1 ? 'selected' : ''}>1 процессор</option>
+          <option value="2" ${state.serverCpus === 2 ? 'selected' : ''}>2 процессора (удвоить ядра)</option>
+        </select>
+      </div><div class="p small muted">×2 к цене CPU</div></div>` : ''}
     <div class="slot"><div class="icon">💾</div>
       <div style="flex:1"><label class="small muted">Количество модулей памяти</label>
         <input type="number" min="1" max="16" value="${state.serverRamModules}" oninput="state.serverRamModules=Math.max(1,Math.min(16,+this.value||1));render()">
       </div><div class="p small muted">шт.</div></div>`;
 
-  const parts = serverBuildParts({ parts: state.serverBuild, drives: state.serverDrives, ramModules: state.serverRamModules });
+  const parts = serverBuildParts({ parts: state.serverBuild, drives: state.serverDrives, ramModules: state.serverRamModules, cpus: state.serverCpus });
   const topBuilds = [...SERVER_BUILDS].sort((a, b) => serverBuildPrice(a, state.region) - serverBuildPrice(b, state.region)).slice(0, 3);
-  const total = serverBuildPrice({ parts: state.serverBuild, drives: state.serverDrives, ramModules: state.serverRamModules }, state.region);
-  const used = serverBuildPrice({ parts: state.serverBuild, drives: state.serverDrives, ramModules: state.serverRamModules }, state.region, 'used');
+  const total = serverBuildPrice({ parts: state.serverBuild, drives: state.serverDrives, ramModules: state.serverRamModules, cpus: state.serverCpus }, state.region);
+  const used = serverBuildPrice({ parts: state.serverBuild, drives: state.serverDrives, ramModules: state.serverRamModules, cpus: state.serverCpus }, state.region, 'used');
   const compat = checkServerCompatibility(parts);
   const wl = serverWorkload(parts);
   const cores = serverPartById(state.serverBuild.servercpu)?.specs.cores || 0;
   const ramGb = (serverPartById(state.serverBuild.serverram)?.specs.capacityGb || 0) * state.serverRamModules;
   const diskGb = (serverPartById(state.serverBuild.serverstorage)?.specs.capacityGb || 0) * state.serverDrives;
-  const consumption = serverBuildConsumption({ parts: state.serverBuild, drives: state.serverDrives });
+  const consumption = serverBuildConsumption({ parts: state.serverBuild, drives: state.serverDrives, cpus: state.serverCpus });
 
   $('#serverSummary').innerHTML = `
     <h3 style="margin-top:0">🗄️ Ваш сервер</h3>
     <div class="total">${fmt(total)}</div>
     <div class="small muted">новое · ${esc(regionById(state.region).name)} · Б/У ≈ ${fmt(used)}</div>
     <div class="srv-grid">
-      <div><b>${cores}</b><span>ядер / ${serverPartById(state.serverBuild.servercpu)?.specs.threads || 0} потоков</span></div>
+      <div><b>${cores}</b><span>ядер / ${serverPartById(state.serverBuild.servercpu)?.specs.threads * (state.serverCpus || 1) || 0} потоков${state.serverCpus > 1 ? ' · 2 CPU' : ''}</span></div>
       <div><b>${ramGb} ГБ</b><span>ECC-память</span></div>
       <div><b>${(diskGb / 1000).toFixed(1)} ТБ</b><span>${state.serverDrives}× ${esc(serverPartById(state.serverBuild.serverstorage)?.specs.type || '')}</span></div>
       <div><b>${consumption} Вт</b><span>потребление</span></div>
@@ -961,6 +971,7 @@ function renderServers() {
     <button class="chip ${state.serverUse === 'all' ? 'active' : ''}" onclick="state.serverUse='all';render()">Любая задача</button>
     ${Object.entries(SERVER_USES).map(([id, u]) => `<button class="chip ${state.serverUse === id ? 'active' : ''}" onclick="state.serverUse='${id}';render()">${u.icon} ${u.name}</button>`).join('')}
     <span class="chip-sep"></span>
+    <button class="chip ${state.serverMaxPrice === '20000' ? 'active' : ''}" onclick="state.serverMaxPrice = state.serverMaxPrice === '20000' ? '' : '20000';render()">💸 До 20 000 ₽</button>
     <input class="price-input" inputmode="numeric" placeholder="до ₽" value="${esc(state.serverMaxPrice)}" oninput="state.serverMaxPrice=this.value;render()">`;
   const cheapest = filteredServerBuilds()[0];
   $('#serverStarter').innerHTML = `<div class="starter-row">
@@ -975,7 +986,7 @@ function renderServers() {
     const price = serverBuildPrice(b, state.region);
     const wlb = serverWorkload(bp);
     return `<article class="card">
-      <div class="tag">${esc(b.tag)} · ${b.parts ? serverPartById(b.parts.servercpu)?.specs.socket : ''}</div>
+      <div class="tag">${esc(b.tag)} · ${b.parts ? serverPartById(b.parts.servercpu)?.specs.socket : ''}${b.cpus > 1 ? ' · 2 CPU' : ''}</div>
       <h3>${esc(b.name)} ${cheapest && cheapest.id === b.id ? '<span class="cheapest">самая дешёвая</span>' : ''}</h3>
       <div style="margin:4px 0 8px">${serverLevelBadge(b.level || 'intermediate')} ${(b.uses || []).map(u => `<span class="chip mini">${SERVER_USES[u]?.icon || ''} ${SERVER_USES[u]?.name || u}</span>`).join(' ')}</div>
       <p>${esc(b.desc)}</p>
@@ -1001,7 +1012,11 @@ function renderServers() {
   // ----- каталог серверных комплектующих -----
   let list = SERVER_COMPONENTS.filter(p => state.serverCat === 'all' || p.cat === state.serverCat);
   if (state.serverBudget) list = list.filter(p => p.budget);
-  if (state.serverQuery) list = list.filter(p => matchesQuery(p, state.serverQuery) || Object.values(p.specs).join(' ').toLowerCase().includes(state.serverQuery.toLowerCase()));
+  if (state.serverQuery) {
+    const q = normalize(state.serverQuery);
+    list = list.filter(p => normalize([p.name, p.brand, (p.aliases || []).join(' '), Object.values(p.specs).join(' '),
+      p.chinese ? 'китайская x79 x99 machinist jingsha huananzhi' : '', p.xeon ? 'xeon ксеон' : ''].join(' ')).includes(q));
+  }
   if (state.serverSort === 'price') list = list.sort((a, b) => serverPrice(a, state.region) - serverPrice(b, state.region));
   else if (state.serverSort === 'priceDesc') list = list.sort((a, b) => serverPrice(b, state.region) - serverPrice(a, state.region));
   else if (state.serverSort === 'year') list = list.sort((a, b) => b.year - a.year);
@@ -1049,6 +1064,7 @@ function loadServerBuild(id) {
   state.serverBuild = { ...b.parts };
   state.serverDrives = b.drives || 2;
   state.serverRamModules = b.ramModules || 1;
+  state.serverCpus = b.cpus || 1;
   render();
   toast(`Загружена сборка «${b.name}»`);
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -1059,6 +1075,7 @@ function savePresetServerBuild(id) {
   state.serverBuild = { ...b.parts };
   state.serverDrives = b.drives || 2;
   state.serverRamModules = b.ramModules || 1;
+  state.serverCpus = b.cpus || 1;
   state.serverOs = b.os || '';
   state.saveName = b.name;
   saveCurrentBuild('server');
@@ -1193,7 +1210,7 @@ function renderServerCompat() {
     <div class="slot"><div class="icon">💾</div><div style="flex:1"><label class="small muted">Модулей памяти</label>
       <input type="number" min="1" max="16" value="${state.serverRamModules}" oninput="state.serverRamModules=Math.max(1,Math.min(16,+this.value||1));render()"></div></div>`;
 
-  const parts = serverBuildParts({ parts: state.serverBuild, drives: state.serverDrives, ramModules: state.serverRamModules });
+  const parts = serverBuildParts({ parts: state.serverBuild, drives: state.serverDrives, ramModules: state.serverRamModules, cpus: state.serverCpus });
   const topBuilds = [...SERVER_BUILDS].sort((a, b) => serverBuildPrice(a, state.region) - serverBuildPrice(b, state.region)).slice(0, 3);
   const res = checkServerCompatibility(parts);
   const icon = res.status === 'ok' ? '✅' : res.status === 'warn' ? '⚠️' : '❌';
