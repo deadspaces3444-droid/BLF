@@ -1,0 +1,219 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLF — Сравнение сборок и комплектующих ПК · Цены по городам · FPS в играх · Совместимость</title>
+<meta name="description" content="BLF сравнивает сборки ПК и отдельные комплектующие: цены по всем городам России и магазинам (новые и БУ), поиск на Avito, Юле, DNS, Ozon и других сайтах, расчёт FPS в популярных играх и проверка совместимости.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="#" onclick="navigate('home');return false"><span class="mark">BLF</span><span>Build<span style="color:var(--accent)">Lab</span><small>сравнение · цены · FPS · совместимость</small></span></a>
+    <nav class="tabs">
+      <button class="tab active" data-page="home" onclick="navigate('home')">Главная</button>
+      <button class="tab" data-page="builds" onclick="navigate('builds')">Сборки</button>
+      <button class="tab" data-page="compare-builds" onclick="navigate('compare-builds')">Сравнение сборок</button>
+      <button class="tab" data-page="components" onclick="navigate('components')">Комплектующие</button>
+      <button class="tab" data-page="compare-components" onclick="navigate('compare-components')">Сравнение</button>
+      <button class="tab" data-page="fps" onclick="navigate('fps')">FPS в играх</button>
+      <button class="tab" data-page="prices" onclick="navigate('prices')">Поиск цен</button>
+      <button class="tab" data-page="compat" onclick="navigate('compat')">Совместимость</button>
+      <button class="tab" data-page="builder" onclick="navigate('builder')">Конструктор</button>
+    </nav>
+    <button class="region-btn" id="regionBtn" onclick="openRegionModal()" title="Выбрать город — цены пересчитаются">
+      <span style="opacity:.7">📍</span> <span id="regionBtnLabel">Новосибирск</span> <span style="opacity:.5">▾</span>
+    </button>
+  </div>
+</header>
+
+<!-- Модальное окно выбора города -->
+<div class="modal" id="regionModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <h3 style="margin:0">Выбор города</h3>
+        <div class="small muted" id="regionCount"></div>
+      </div>
+      <button class="btn small ghost" onclick="closeRegionModal()">✕</button>
+    </div>
+    <input id="regionModalInput" class="modal-input" placeholder="Начните вводить город или регион: Новосибирск, Татарстан, ХМАО…" autocomplete="off">
+    <div class="region-list" id="regionList"></div>
+  </div>
+</div>
+
+<!-- ГЛАВНАЯ -->
+<section class="page active" id="page-home">
+  <div class="hero"><div class="wrap">
+    <h1>Соберите ПК <span>без переплат</span><br>и ошибок совместимости</h1>
+    <p>BLF сравнивает готовые сборки и отдельные комплектующие по ценам в вашем городе — в DNS, Citilink, Ozon, Wildberries, Яндекс Маркете и на Avito и Юле (включая БУ). Показывает FPS в 20 популярных играх и проверяет, встанет ли процессор в плату, хватит ли блока питания и поместится ли видеокарта в корпус.</p>
+    <div class="hero-search">
+      <input id="heroSearch" placeholder="🔍 Что искать: RTX 4070, i5-10400F, 32 ГБ DDR5, бп 750…" onkeydown="if(event.key==='Enter'){goPrice(this.value)}">
+      <button class="btn" onclick="goPrice(document.getElementById('heroSearch').value)">Найти цены</button>
+      <button class="btn ghost" onclick="navigate('fps')">🎮 Рассчитать FPS</button>
+    </div>
+    <div class="stats" id="homeStats"></div>
+    <div class="note"><b>Как это работает:</b> нажмите на город в шапке и выберите любой из 1 080 городов и регионов России — все цены, сравнение и конструктор пересчитаются под него. Поиск понимает и сленг: «видяха», «проц», «оперативка ddr3», «бп 750».</div>
+  </div></div>
+  <div class="wrap">
+    <div class="fps-highlight" id="homeFps"></div>
+    <h2>🔥 Готовые сборки</h2>
+    <p class="sub">Проверенные конфигурации под разные бюджеты и задачи — от современных до сборок на старых комплектующих с Avito. Нажмите «Сравнить», чтобы положить до трёх сборок рядом.</p>
+    <div class="grid" id="homeBuilds"></div>
+    <h2 style="margin-top:36px">📍 Сколько стоит сборка в разных городах</h2>
+    <p class="sub">Цена популярной сборки «Игровой 1080p / 1440p» (новые комплектующие, минимальные цены магазинов).</p>
+    <div class="region-prices" id="regionIndex" style="max-width:620px"></div>
+  </div>
+</section>
+
+<!-- СБОРКИ -->
+<section class="page" id="page-builds"><div class="wrap">
+  <h2>🖥️ Готовые сборки ПК</h2>
+  <p class="sub">Цены — минимальные по магазинам вашего города (новые). Рядом — ориентировочная цена на БУ-комплектующих с Avito.</p>
+  <div class="grid" id="buildsGrid"></div>
+</div></section>
+
+<!-- СРАВНЕНИЕ СБОРОК -->
+<section class="page" id="page-compare-builds"><div class="wrap">
+  <h2>⚖️ Сравнение сборок</h2>
+  <p class="sub">Выберите до трёх сборок — сравним цены, производительность, потребление, FPS, совместимость и стоимость в разных городах.</p>
+  <div class="compare-cols" id="compareBuildPicks"></div>
+  <div id="compareBuildsBody"></div>
+</div></section>
+
+<!-- КОМПЛЕКТУЮЩИЕ -->
+<section class="page" id="page-components"><div class="wrap">
+  <h2>🔧 Каталог комплектующих</h2>
+  <p class="sub">Все типы комплектующих — процессоры, видеокарты, платы, память, накопители, блоки питания, корпуса и охлаждение. Включая старые модели: DDR3, LGA1151/LGA1150, GTX 10-й серии, B450/H81, HDD.</p>
+  <div class="toolbar"><div class="chips" id="compChips"></div></div>
+  <div class="toolbar">
+    <input id="compSearch" placeholder="🔍 Гибкий поиск: «видяха 4060», «проц i5», «ddr3», «бп 750», «ssd 1tb», «hdd»…">
+    <select id="compBrand" onchange="state.compBrand=this.value;render()"></select>
+    <select onchange="state.compYear=this.value;render()">
+      <option value="all">Все годы</option>
+      <option value="new">Только новые (2020+)</option>
+      <option value="old">Только старые (до 2020)</option>
+    </select>
+    <select onchange="state.compSort=this.value;render()">
+      <option value="perf">Сначала мощные</option>
+      <option value="fps">По FPS в игре</option>
+      <option value="cheap">Сначала дешёвые</option>
+      <option value="expensive">Сначала дорогие</option>
+      <option value="year">Сначала новые модели</option>
+    </select>
+  </div>
+  <div class="toolbar">
+    <select id="compFpsGame" onchange="state.compFpsGame=this.value;render()"></select>
+    <select onchange="state.compFpsRes=this.value;render()">
+      <option value="1080p">FPS в 1080p</option>
+      <option value="1440p">FPS в 1440p</option>
+      <option value="4K">FPS в 4K</option>
+    </select>
+    <span class="muted small" id="compCount"></span>
+  </div>
+  <div class="grid" id="compGrid"></div>
+</div></section>
+
+<!-- СРАВНЕНИЕ КОМПОНЕНТОВ -->
+<section class="page" id="page-compare-components"><div class="wrap">
+  <h2>⚖️ Сравнение комплектующих</h2>
+  <p class="sub">Выберите категорию и до четырёх моделей (в том числе старых) — сравним характеристики, FPS и цены (новые и БУ) по городам. Поиск ниже фильтрует список моделей: «4070», «ddr4», «b550».</p>
+  <div class="toolbar"><div class="chips" id="compareCatChips"></div></div>
+  <div class="toolbar"><input id="compareSearch" placeholder="🔍 Отфильтровать список: «4070», «ddr4», «b550», «750 вт»…"></div>
+  <div class="compare-cols" id="compareCompPicks"></div>
+  <div id="compareCompsBody"></div>
+</div></section>
+
+<!-- FPS В ИГРАХ -->
+<section class="page" id="page-fps"><div class="wrap">
+  <h2>🎮 Расчёт FPS в популярных играх</h2>
+  <p class="sub">Выберите процессор, видеокарту, память и игру — получите ориентировочный FPS и оценку «играбельно / комфортно / отлично». Ниже — таблица по 20 популярным играм и сравнение готовых сборок.</p>
+  <div class="builder-grid">
+    <div class="fps-form">
+      <div class="slot"><div class="icon">🧠</div><div style="flex:1"><label class="small muted">Процессор</label><select id="fpsCpu" onchange="state.fps.cpu=this.value;render()"></select></div></div>
+      <div class="slot"><div class="icon">🎮</div><div style="flex:1"><label class="small muted">Видеокарта</label><select id="fpsGpu" onchange="state.fps.gpu=this.value;render()"></select></div></div>
+      <div class="slot"><div class="icon">💾</div><div style="flex:1"><label class="small muted">Оперативная память</label><select id="fpsRam" onchange="state.fps.ram=this.value;render()"></select></div></div>
+      <div class="slot"><div class="icon">🕹️</div><div style="flex:1"><label class="small muted">Игра</label><select id="fpsGame" onchange="state.fps.game=this.value;render()"></select></div></div>
+      <div class="slot"><div class="icon">🖥️</div><div style="flex:1"><label class="small muted">Разрешение</label>
+        <select id="fpsRes" onchange="state.fps.res=this.value;render()">
+          <option value="1080p">1920×1080 (Full HD)</option>
+          <option value="1440p">2560×1440 (2K)</option>
+          <option value="4K">3840×2160 (4K)</option>
+        </select></div></div>
+      <div class="slot"><div class="icon">⚙️</div><div style="flex:1"><label class="small muted">Настройки графики</label>
+        <select id="fpsSettings" onchange="state.fps.settings=this.value;render()">
+          <option value="ultra">Ультра / высокие</option>
+          <option value="medium">Средние (больше FPS)</option>
+        </select></div></div>
+      <div class="note small">Расчёт ориентировочный: модель учитывает игровой индекс CPU и GPU, разрешение, настройки и объём памяти. Реальный FPS зависит от драйверов, версии игры и сцены.</div>
+    </div>
+    <div class="summary" id="fpsResult"></div>
+  </div>
+  <h3 id="fpsAvg" style="margin-top:28px"></h3>
+  <div id="fpsTable"></div>
+  <h3 style="margin-top:26px">🏆 Готовые сборки в этой игре</h3>
+  <div class="region-prices" id="fpsBuilds"></div>
+</div></section>
+
+<!-- ПОИСК ЦЕН -->
+<section class="page" id="page-prices"><div class="wrap">
+  <h2>💸 Поиск цен по магазинам и объявлениям</h2>
+  <p class="sub">Ищем по открытым сайтам: DNS, Citilink, Ozon, Wildberries, Яндекс Маркет, М.Видео, Эльдорадо, Позитроника — новые; Avito (в вашем городе), Юла, уценка Ozon и б/у на Яндекс Маркете — с рук. Цены в каталоге учитывают город; кнопки ниже ведут на живой поиск по сайтам.</p>
+  <div class="toolbar">
+    <input id="priceQueryInput" placeholder="Название или сленг: RTX 4060, видяха 3070, проц i5-10400, ddr3 16, бп 750…">
+    <select onchange="state.priceCat=this.value;render()">
+      <option value="all">Все категории</option>
+      <option value="cpu">Процессоры</option><option value="gpu">Видеокарты</option>
+      <option value="motherboard">Материнские платы</option><option value="ram">Память</option>
+      <option value="ssd">Накопители</option><option value="psu">Блоки питания</option>
+      <option value="case">Корпуса</option><option value="cooling">Охлаждение</option>
+    </select>
+    <select onchange="state.priceCond=this.value;render()">
+      <option value="all">Новые и БУ</option><option value="new">Только новые</option><option value="used">Только БУ</option>
+    </select>
+    <select onchange="state.priceSort=this.value;render()">
+      <option value="cheap">Сначала дешёвые</option><option value="expensive">Сначала дорогие</option>
+      <option value="discount">По размеру скидки</option><option value="name">По названию</option>
+    </select>
+    <input class="price-input" placeholder="Цена от, ₽" inputmode="numeric" oninput="state.priceMin=this.value;render()">
+    <input class="price-input" placeholder="до, ₽" inputmode="numeric" oninput="state.priceMax=this.value;render()">
+  </div>
+  <p class="muted" id="priceCount"></p>
+  <div class="store-links" id="storeLinks"></div>
+  <div style="height:16px"></div>
+  <div id="priceResults"></div>
+</div></section>
+
+<!-- СОВМЕСТИМОСТЬ -->
+<section class="page" id="page-compat"><div class="wrap">
+  <h2>✅ Проверка совместимости</h2>
+  <p class="sub">Выберите комплектующие — проверим сокет, тип памяти, мощность блока питания, длину видеокарты, высоту кулера, форм-фактор платы, слоты M.2/SATA, версию BIOS и PCIe. Старые платформы (DDR3, LGA1150) тоже поддерживаются.</p>
+  <div class="toolbar"><select id="compatQuick" onchange="applyBuildToCompat(this.value)"></select></div>
+  <div class="builder-grid">
+    <div id="compatForm"></div>
+    <div class="summary" id="compatResult"></div>
+  </div>
+</div></section>
+
+<!-- КОНСТРУКТОР -->
+<section class="page" id="page-builder"><div class="wrap">
+  <h2>🧩 Конструктор ПК</h2>
+  <p class="sub">Соберите свою конфигурацию: цена пересчитывается по городам, совместимость проверяется на лету, а FPS считается по 20 играм.</p>
+  <div class="builder-grid">
+    <div id="builderSlots"></div>
+    <div class="summary" id="builderSummary"></div>
+  </div>
+  <div class="summary" id="builderFps" style="margin-top:24px"></div>
+</div></section>
+
+<footer><div class="wrap">
+  <b style="color:var(--text)">BLF — BuildLab</b> · Сравнение сборок и комплектующих ПК · Цены по городам · FPS в играх · Проверка совместимости<br>
+  <span class="small">Цены в каталоге — ориентировочные (минимальные по магазинам города на дату обновления). Актуальные цены и наличие смотрите по ссылкам на сайтах DNS, Citilink, Ozon, Wildberries, Яндекс Маркета, М.Видео, Юлы и Avito. Б/У-комплектующие покупайте с проверкой и гарантией продавца. Расчёт FPS — оценочный.</span>
+</div></footer>
+
+<script src="data.js"></script>
+<script src="compat.js"></script>
+<script src="app.js"></script>
+</body>
+</html>
