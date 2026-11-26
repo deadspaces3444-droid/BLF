@@ -364,9 +364,21 @@ function compCard(c) {
     <div class="row">
       <div><span class="price">${fmt(base)}</span> <span class="muted small">мин. в регионе</span><br>
       ${mpUsed ? `<span class="small" style="color:#fda4af">БУ от ${fmt(mpUsed)}</span>` : '<span class="small muted">БУ нет в регионе</span>'}</div>
-      <button class="btn small ghost" onclick="goPriceId('${c.id}')">Цены →</button>
+      <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+        <button class="btn small ghost" onclick="goPriceId('${c.id}')">Цены →</button>
+        <button class="btn small lime" onclick="compareFromCard('${c.id}')">⚖️ Сравнить</button>
+      </div>
     </div>
   </article>`;
+}
+// Быстрое сравнение из карточки: открываем страницу сравнения
+// с этим компонентом и лучшим «соперником» той же категории.
+function compareFromCard(id) {
+  const c = byId(id);
+  if (!c) return;
+  const pool = COMPONENTS.filter(x => x.cat === c.cat && x.id !== c.id);
+  const rival = [...pool].sort((a, b) => Math.abs(a.perf - c.perf) - Math.abs(b.perf - c.perf))[0];
+  compareWith(c.cat, c.id, rival ? rival.id : '');
 }
 
 function buildCard(b) {
@@ -646,51 +658,6 @@ function renderComponents() {
   $('#compGrid').innerHTML = list.length ? list.map(compCard).join('') : '<div class="empty">Ничего не найдено. Попробуйте проще: «4060», «ddr3», «бп 750», «видяха», «ssd 1tb».</div>';
 }
 
-function renderCompareComps() {
-  $('#compareCatChips').innerHTML = CATEGORIES.map(c =>
-    `<button class="chip ${state.compareCat === c.id ? 'active' : ''}" onclick="state.compareCat='${c.id}';state.compareQuery='';render()">${c.icon} ${c.name}</button>`).join('');
-  const cat = state.compareCat;
-  const selected = state.compareComps[cat] || [];
-  let pool = COMPONENTS.filter(c => c.cat === cat);
-  if (state.compareQuery) pool = pool.filter(c => matchesQuery(c, state.compareQuery));
-  $('#compareCompPicks').innerHTML = [0, 1, 2, 3].map(i => `
-    <div class="pick"><label class="small muted">Компонент ${i + 1}</label>
-      <select onchange="setCompareComp(${i}, this.value)">
-        <option value="">— не выбран —</option>
-        ${pool.map(c => `<option value="${c.id}" ${selected[i] === c.id ? 'selected' : ''}>${esc(c.name)}</option>`).join('')}
-      </select>
-    </div>`).join('');
-
-  const comps = selected.filter(Boolean).map(byId).filter(Boolean);
-  if (comps.length < 2) { $('#compareCompsBody').innerHTML = '<div class="empty">Выберите минимум 2 компонента. Удобно искать по подсказке: «4070», «ddr4», «b550», «750 вт».</div>'; return; }
-
-  const keys = [...new Set(comps.flatMap(c => Object.keys(c.specs)))];
-  let html = `<div class="table-wrap"><table><tr><th>Параметр</th>${comps.map(c => `<th>${esc(c.name)}</th>`).join('')}</tr>`;
-  html += `<tr><td class="muted">Бренд</td>${comps.map(c => `<td>${esc(c.brand)}</td>`).join('')}</tr>`;
-  html += `<tr><td class="muted">Год выпуска</td>${comps.map(c => `<td class="${c.year < 2020 ? 'muted' : ''}">${c.year}${c.year < 2020 ? ' · старее' : ''}</td>`).join('')}</tr>`;
-  html += `<tr><td class="muted">Игровая производительность</td>${comps.map(c => `<td>${c.perf}/100</td>`).join('')}</tr>`;
-  html += `<tr><td class="muted">Рабочая производительность</td>${comps.map(c => `<td>${c.work}/100</td>`).join('')}</tr>`;
-  if (comps.some(c => c.cat === 'gpu' || c.cat === 'cpu')) {
-    html += `<tr><td class="muted">FPS · Cyberpunk 2077 1080p</td>${comps.map(c => { const f = compFps(c, 'cyberpunk', '1080p'); return `<td>${f ? f + ' FPS' : '—'}</td>`; }).join('')}</tr>`;
-    html += `<tr><td class="muted">FPS · CS2 1080p</td>${comps.map(c => { const f = compFps(c, 'cs2', '1080p'); return `<td>${f ? f + ' FPS' : '—'}</td>`; }).join('')}</tr>`;
-  }
-  if (comps.some(c => c.power > 0)) html += `<tr><td class="muted">Потребление</td>${comps.map(c => `<td>${c.power ? c.power + ' Вт' : '—'}</td>`).join('')}</tr>`;
-  keys.forEach(k => { html += `<tr><td class="muted">${k}</td>${comps.map(c => `<td>${c.specs[k] ?? '—'}</td>`).join('')}</tr>`; });
-  html += `<tr><td class="muted">Мин. цена, ${esc(regionById(state.region).name)} (новые)</td>${comps.map(c => `<td class="price">${fmt(minPrice(c.id, state.region, 'new') ?? c.basePrice)}</td>`).join('')}</tr>`;
-  html += `<tr><td class="muted">Мин. цена БУ, ${esc(regionById(state.region).name)}</td>${comps.map(c => { const p = minPrice(c.id, state.region, 'used'); return `<td>${p ? fmt(p) : 'нет предложений'}</td>`; }).join('')}</tr>`;
-  html += '</table></div>';
-
-  const cities = topCities(10);
-  html += `<h3 style="margin-top:24px">💰 Цены по городам (новые / БУ)</h3><div class="table-wrap"><table><tr><th>Город</th>${comps.map(c => `<th>${esc(c.name)}</th>`).join('')}</tr>`;
-  cities.forEach(r => {
-    html += `<tr><td>${r.icon} ${esc(r.name)}</td>${comps.map(c => {
-      const n = minPrice(c.id, r.id, 'new'); const u = minPrice(c.id, r.id, 'used');
-      return `<td>${n ? fmt(n) : '—'}${u ? ` <span class="small" style="color:#fda4af">/ БУ ${fmt(u)}</span>` : ''}</td>`;
-    }).join('')}</tr>`;
-  });
-  html += '</table></div><p class="sub">Нужен другой город? Смените регион в шапке — таблица пересчитается.</p>';
-  $('#compareCompsBody').innerHTML = html;
-}
 function setCompareComp(i, id) {
   const cat = state.compareCat;
   if (!state.compareComps[cat]) state.compareComps[cat] = [];
