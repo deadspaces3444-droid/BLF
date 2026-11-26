@@ -615,6 +615,60 @@ function aiCompareDevices(budget, profile) {
 }
 
 // Блок «ПК или ноутбук» в результате
+// В ИИ-результате: кнопки «сделать дешевле / быстрее» прямо на месте
+function aiSwapSuggestHtml() {
+  const res = state.aiResult;
+  if (!res || !res.parts) return '';
+  const build = { parts: res.parts };
+  const total = buildPrice(build, state.region, 'new').total;
+  const fps = res.fpsAvg || 0;
+  const sameCheaper = typeof aiBuildBuild === 'function' ? null : null;
+  const rows = [];
+  // дешевле: пробуем срезать 15% бюджета и пересобрать
+  const cheapBudget = Math.round(res.budget * 0.85);
+  const cheap = aiBuildBuildFor(cheapBudget, res.profile);
+  if (cheap && cheap.total < total - 1500) rows.push({ kind: 'cheaper', budget: cheapBudget, r: cheap, delta: cheap.total - total, fps: cheap.fpsAvg });
+  // быстрее: +20% бюджета
+  const fastBudget = Math.round(res.budget * 1.2);
+  const fast = aiBuildBuildFor(fastBudget, res.profile);
+  if (fast && fast.fpsAvg > fps + 2) rows.push({ kind: 'faster', budget: fastBudget, r: fast, delta: fast.total - total, fps: fast.fpsAvg });
+  if (!rows.length) return '';
+  return `<div class="swap-box mini">
+    <div class="swap-head"><b>🔁 Одним кликом: дешевле или быстрее</b>
+      <div class="small muted">Пересобираем под другой бюджет, сохраняя профиль (игры, разрешение, город).</div></div>
+    <div class="swap-cols">
+      ${rows.map(x => `<div class="swap-col ${x.kind === 'cheaper' ? 'cheap' : 'fast'}">
+        <div class="swap-col-head">${x.kind === 'cheaper' ? '💸 Удешевить' : '🚀 Ускорить'} <span class="small muted">· бюджет ${fmt(x.budget)}</span></div>
+        <div class="swap-card">
+          <div class="swap-deltas">
+            <span class="swap-badge ${x.delta < 0 ? 'pos' : 'neutral'}">${x.delta < 0 ? '−' : '+'}${fmt(Math.abs(x.delta))}</span>
+            <span class="swap-badge ${x.fps > fps ? 'pos' : 'neg'}">${x.fps > fps ? '+' : ''}${x.fps - fps} FPS</span>
+            <span class="swap-badge neutral">итого ${fmt(x.r.total)}</span>
+          </div>
+          <div class="small muted">${esc(byId(x.r.parts.cpu)?.name || '')} + ${esc(byId(x.r.parts.gpu)?.name || '')}</div>
+          <button class="btn small ${x.kind === 'cheaper' ? 'ghost' : 'lime'}" style="margin-top:8px" onclick="aiApplyBudget(${x.budget})">Пересобрать за ${fmt(x.budget)}</button>
+        </div>
+      </div>`).join('')}
+    </div>
+  </div>`;
+}
+// Пересборка под другой бюджет без изменения профиля
+function aiBuildBuildFor(budget, profile) {
+  const saveBudget = state.aiBudget;
+  state.aiBudget = budget;
+  try {
+    const r = aiBuildBuild();
+    return r && r.ok ? r : null;
+  } catch (e) { return null; }
+  finally { state.aiBudget = saveBudget; }
+}
+function aiApplyBudget(budget) {
+  state.aiBudget = budget;
+  saveAiConfig();
+  aiGenerate();
+  toast(`Пересобрано под ${fmt(budget)}`);
+}
+
 function aiDeviceDuelHtml(cmp) {
   if (!cmp) return '';
   const p = priorityInfoSafe();
@@ -1070,6 +1124,7 @@ function aiResultHtml() {
         }).join('')}
       </div>
     </div>
+    ${aiSwapSuggestHtml()}
     ${aiDeviceDuelHtml(state.aiCompare)}
     ${aiLaptopResultHtml(state.aiLaptop)}
     ${(() => {

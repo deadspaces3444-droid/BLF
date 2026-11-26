@@ -432,6 +432,7 @@ function renderLaptopsDetail() {
         : `Ноутбук дешевле на ${fmt(twin.total - (pNew ?? l.basePrice))} — собирать ПК под эту мощность смысла нет.`}
         <button class="btn small ghost" onclick="loadBuilderTwin('${l.id}')">Показать этот ПК в конструкторе</button></div>
     </div>` : ''}
+    ${typeof laptopSwapsHtml === 'function' ? laptopSwapsHtml(l) : ''}
     <div class="laptop-links">
       ${laptopStoreLinks(l).map(s => `<a class="btn small ghost" href="${s.url}" target="_blank" rel="noopener">${esc(s.name)} ↗</a>`).join('')}
     </div>

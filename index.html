@@ -23,6 +23,7 @@
       <button class="tab" data-page="prices" onclick="navigate('prices')">Поиск цен</button>
       <button class="tab" data-page="servers" onclick="navigate('servers')">Серверы</button>
       <button class="tab" data-page="server-os" onclick="navigate('server-os')">ОС для серверов</button>
+      <button class="tab" data-page="server-guide" onclick="navigate('server-guide')">📘 Гайд по серверам</button>
       <button class="tab" data-page="pc-os" onclick="navigate('pc-os')">ОС для ПК</button>
       <button class="tab" data-page="compat" onclick="navigate('compat')">Совместимость</button>
       <button class="tab" data-page="builder" onclick="navigate('builder')">Конструктор</button>
@@ -270,6 +271,7 @@
     <div id="serverSlots"></div>
     <div class="summary" id="serverSummary"></div>
   </div>
+  <div id="serverSwaps"></div>
 
   <h2 style="margin-top:36px">🏁 Готовые серверные сборки</h2>
   <p class="sub">От дешёвых вариантов для начинающих до ЦОД-конфигураций. Фильтруйте по уровню, задаче (видеонаблюдение, один сайт, домашний NAS, свои сервисы) и максимальной цене. Нажмите «Открыть в конструкторе», чтобы доработать сборку, или «Сохранить», чтобы оставить её в «Моих сборках».</p>
@@ -294,6 +296,17 @@
     <div id="serverBudgetLabel"></div>
   </div>
   <div class="grid" id="serverGrid"></div>
+</div></section>
+
+<!-- ГАЙД ПО НАСТРОЙКЕ СЕРВЕРОВ -->
+<section class="page" id="page-server-guide"><div class="wrap">
+  <h2>📘 Гайд по настройке серверов</h2>
+  <p class="sub">Пошагово и по-русски: планирование ресурсов, сборка железа, установка ОС, SSH и безопасность, сеть, диски и RAID, бэкапы 3-2-1, Docker и база, виртуализация, видеонаблюдение, мониторинг и разбор поломок. С готовыми командами — их можно скопировать одной кнопкой.</p>
+  <div class="toolbar">
+    <input id="guideSearch" placeholder="🔍 Поиск по гайду: RAID, бэкап, SSH, Proxmox, камеры…" oninput="state.guideQuery=this.value;render()">
+    <div class="chips" id="guideChips"></div>
+  </div>
+  <div id="guideRoot"></div>
 </div></section>
 
 <!-- ОС ДЛЯ СЕРВЕРОВ -->
@@ -381,6 +394,7 @@
     <div id="builderSlots"></div>
     <div class="summary" id="builderSummary"></div>
   </div>
+  <div id="builderSwaps"></div>
   <div class="summary" id="builderFps" style="margin-top:24px"></div>
 </div></section>
 
@@ -396,6 +410,8 @@
 <script src="build-priority.js"></script>
 <script src="ai-build.js"></script>
 <script src="laptops.js"></script>
+<script src="upgrade-ui.js"></script>
+<script src="server-guide.js"></script>
 <script src="servers.js"></script>
 <script src="desktop-os.js"></script>
 <script src="catalog.js"></script>

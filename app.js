@@ -52,6 +52,10 @@ const state = {
   laptopOpen: null,
   aiDevice: 'auto',      // auto | pc | laptop
   aiLaptopPick: null,
+  // гайд по серверам
+  guideOpen: 'plan',
+  guideLevel: 'Все',
+  guideQuery: '',
   // приоритетная игра для подбора и оценки сборок
   priorityGame: 'all',
   priorityRes: '1080p',
@@ -922,6 +926,7 @@ function renderBuilder() {
     </div>
     ${typeof priorityBuilderPanel === 'function' ? priorityBuilderPanel() : ''}
     ${fpsTable(state.builder, state.builderFpsRes)}`;
+  if (typeof renderSwaps === 'function') renderSwaps();
   if (typeof renderPriorityBars === 'function') renderPriorityBars();
 }
 
@@ -1121,7 +1126,9 @@ function renderServers() {
     </div>
     <div class="fps-inline" style="margin-top:12px">🖥️ ОС: <b>${esc(SERVER_OS.find(o => o.id === state.serverOs)?.name || 'не выбрана')}</b></div>
     <button class="btn lime" style="width:100%;margin-top:10px" onclick="state.osPickFor='custom';navigate('server-os')">Подобрать ОС под сервер →</button>
-    <button class="btn ghost" style="width:100%;margin-top:8px" onclick="navigate('server-compat')">Детальная проверка совместимости →</button>`;
+    <button class="btn ghost" style="width:100%;margin-top:8px" onclick="navigate('server-compat')">Детальная проверка совместимости →</button>
+    <button class="btn ghost" style="width:100%;margin-top:8px" onclick="navigate('server-guide')">📘 Гайд по настройке сервера</button>`;
+  if (typeof renderServerSwaps === 'function') renderServerSwaps();
 
   // ----- готовые серверные сборки -----
   const visibleBuilds = filteredServerBuilds();
@@ -1478,6 +1485,7 @@ function render() {
   else if (state.page === 'fps') renderFps();
   else if (state.page === 'saved') renderSavedPage();
   else if (state.page === 'ai') { if (typeof renderAi === 'function') renderAi(); }
+  else if (state.page === 'server-guide') { if (typeof renderServerGuide === 'function') renderServerGuide(); }
   else if (state.page === 'laptops') { if (typeof renderLaptops === 'function') { renderLaptops(); renderLaptopsDetail(); } }
   else if (state.page === 'servers') renderServers();
   else if (state.page === 'server-os') renderServerOs();
@@ -1496,6 +1504,7 @@ document.addEventListener('DOMContentLoaded', () => {
   $('#compSearch')?.addEventListener('input', e => { state.compQuery = e.target.value; render(); });
   $('#compareSearch')?.addEventListener('input', e => { state.compareQuery = e.target.value; render(); });
   $('#laptopSearch')?.addEventListener('input', e => { state.laptopQuery = e.target.value; render(); });
+  $('#guideSearch')?.addEventListener('input', e => { state.guideQuery = e.target.value; render(); });
   $('#priceQueryInput')?.addEventListener('input', e => { state.priceQuery = e.target.value; render(); });
 
   // Форма совместимости
