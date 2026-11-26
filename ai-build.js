@@ -36,10 +36,13 @@ function initAiState() {
     if (AI_TASKS[cfg.task]) state.aiTask = cfg.task;
     if (AI_RES[cfg.res]) state.aiRes = cfg.res;
     if (['new', 'used', 'any'].includes(cfg.condition)) state.aiCondition = cfg.condition;
+    if (['auto', 'pc', 'laptop'].includes(cfg.device)) state.aiDevice = cfg.device;
     if (cfg.result && typeof cfg.result === 'object' && cfg.result.parts) state.aiResult = cfg.result;
     if (typeof cfg.key === 'string') state.aiKey = cfg.key.slice(0, 200);
     if (['deepseek-chat', 'deepseek-reasoner'].includes(cfg.model)) state.aiModel = cfg.model;
     if (typeof cfg.answer === 'string') state.aiAnswer = cfg.answer.slice(0, 12000);
+    if (cfg.compare && typeof cfg.compare === 'object') state.aiCompare = cfg.compare;
+    if (cfg.laptop && cfg.laptop.l && typeof cfg.laptop.l === 'object') state.aiLaptop = cfg.laptop;
   } catch (e) { /* приватный режим */ }
 }
 function saveAiConfig() {
@@ -47,6 +50,9 @@ function saveAiConfig() {
     localStorage.setItem(AI_KEY, JSON.stringify({
       budget: state.aiBudget, gameQuery: state.aiGameQuery, task: state.aiTask,
       res: state.aiRes, condition: state.aiCondition, result: state.aiResult || null,
+      device: state.aiDevice || 'auto',
+      compare: state.aiCompare || null,
+      laptop: state.aiLaptop || null,
       key: state.aiKey || '', model: state.aiModel || 'deepseek-chat', answer: state.aiAnswer || '',
     }));
   } catch (e) {}
@@ -565,6 +571,125 @@ function aiBuildBuild() {
     title: aiBuildTitle(profile, total),
   };
 }
+function laptopsReady() { return typeof LAPTOPS !== 'undefined' && Array.isArray(LAPTOPS) && LAPTOPS.length > 0; }
+
+// ---------- Сравнение: ПК или ноутбук ----------
+// Считаем и сборку ПК, и ноутбук под те же условия, и показываем, что выгоднее.
+function aiCompareDevices(budget, profile) {
+  const pc = aiBuildBuild();
+  const laptop = (typeof aiPickLaptop === 'function') ? aiPickLaptop(budget, profile) : null;
+  if (!pc.ok && !laptop) return null;
+  const pcFps = pc.ok ? pc.fpsAvg : 0;
+  const lapFps = laptop ? laptop.fps : 0;
+  const pcPrice = pc.ok ? pc.total : Infinity;
+  const lapPrice = laptop ? laptop.price : Infinity;
+  const pcValue = pcFps ? pcPrice / pcFps : Infinity;      // ₽ за 1 FPS
+  const lapValue = lapFps ? lapPrice / lapFps : Infinity;
+  let winner = 'none';
+  if (pc.ok && laptop) {
+    const pcBetter = (pcFps >= profile.target && lapFps < profile.target) ? true
+      : (lapFps >= profile.target && pcFps < profile.target) ? false
+      : pcValue <= lapValue * 0.95 ? true : lapValue <= pcValue * 0.95 ? false : pcPrice <= lapPrice;
+    winner = pcBetter ? 'pc' : 'laptop';
+  } else if (pc.ok) winner = 'pc';
+  else if (laptop) winner = 'laptop';
+
+  // Честное сравнение: самый дешёвый ПК, который добивает тот же FPS (и наоборот)
+  const target = Math.max(Math.round(Math.min(pcFps || Infinity, lapFps || Infinity)), 1) || profile.target;
+  const cheapPc = (pc.ok && laptop && typeof aiCheapestPc === 'function') ? aiCheapestPc(profile, Math.max(lapFps, 1), budget * 2) : null;
+  const cheapLap = (typeof aiCheapestLaptop === 'function' && pcFps) ? aiCheapestLaptop(profile, Math.max(pcFps, 1), budget * 2) : null;
+  const lapNew = laptop ? laptop.priceNew : null;
+  const sameFps = (() => {
+    if (cheapPc && cheapLap) {
+      return cheapPc.total <= cheapLap.price ? 'pc' : 'laptop';
+    }
+    if (cheapPc) return 'pc';
+    if (cheapLap) return 'laptop';
+    return null;
+  })();
+  const saving = (() => {
+    if (cheapPc && cheapLap) return Math.abs(cheapPc.total - cheapLap.price);
+    return 0;
+  })();
+  return { pc, laptop, pcFps, lapFps, pcPrice, lapPrice, pcValue, lapValue, winner, cheapPc, cheapLap, sameFps, saving, lapNew };
+}
+
+// Блок «ПК или ноутбук» в результате
+function aiDeviceDuelHtml(cmp) {
+  if (!cmp) return '';
+  const p = priorityInfoSafe();
+  const row = (title, icon, price, fps, value, extra, isWin) => `<div class="duel-card ${isWin ? 'win' : ''}">
+    <div class="duel-card-head">${icon} <b>${esc(title)}</b>${isWin ? ' <span class="win-badge">🏆 выгоднее</span>' : ''}</div>
+    <div class="duel-card-price">${isFinite(price) ? fmt(price) : '—'}</div>
+    <div class="small muted">${fps ? `${fps} FPS · ${Math.round(value)} ₽ за 1 FPS` : 'нет варианта'}</div>
+    ${extra ? `<div class="duel-card-extra">${extra}</div>` : ''}
+  </div>`;
+  const pcExtra = cmp.pc.ok ? `Сборка на ${byId(cmp.pc.parts.cpu)?.name || ''} + ${byId(cmp.pc.parts.gpu)?.name || ''}` : '';
+  const lapExtra = cmp.laptop ? `${esc(cmp.laptop.l.name)} · ${esc(cmp.laptop.l.cpu)} + ${esc(cmp.laptop.l.gpu)}` : '';
+  const diffText = (cmp.pc.ok && cmp.laptop)
+    ? (cmp.winner === 'pc'
+      ? `ПК дешевле на ${fmt(Math.max(0, cmp.lapPrice - cmp.pcPrice))} при ${cmp.pcFps} FPS против ${cmp.lapFps} FPS — и его можно апгрейдить по частям.`
+      : `Ноутбук выгоднее: ${fmt(cmp.lapPrice)} против ${fmt(cmp.pcPrice)} за тот же уровень (${cmp.lapFps} против ${cmp.pcFps} FPS) — и его можно носить с собой.`)
+    : '';
+  return `<div class="duel-block">
+    <div class="duel-block-head">🖥️ ПК или 💻 ноутбук — что дешевле под ваши задачи</div>
+    <div class="duel-cards">
+      ${row('Собрать ПК', '🧩', cmp.pcPrice, cmp.pcFps, cmp.pcValue, pcExtra, cmp.winner === 'pc')}
+      ${row('Купить ноутбук', '💻', cmp.lapPrice, cmp.lapFps, cmp.lapValue, lapExtra, cmp.winner === 'laptop')}
+    </div>
+    ${diffText ? `<div class="duel-note small">${diffText}</div>` : ''}
+    ${(cmp.cheapPc || cmp.cheapLap) ? `<div class="duel-note small">
+      ${(cmp.cheapPc && cmp.cheapLap) ? `<b>Честно, за тот же FPS:</b> чтобы получить столько же кадров, ПК обойдётся в ${fmt(cmp.cheapPc.total)} (${cmp.cheapPc.fps} FPS), а ноутбук — в ${fmt(cmp.cheapLap.price)} (${cmp.cheapLap.fps} FPS).
+        ${cmp.sameFps === 'pc'
+          ? `ПК дешевле на ${fmt(cmp.saving)} — но ноутбук можно носить с собой.`
+          : `Ноутбук дешевле на ${fmt(cmp.saving)} — сборка ПК под этот FPS выходит дороже.`}`
+      : cmp.cheapPc
+        ? `<b>Честно, за тот же FPS:</b> столько же кадров на ПК даёт сборка за ${fmt(cmp.cheapPc.total)} (${cmp.cheapPc.fps} FPS). Ноутбука такой производительности в продаже нет — это верхняя граница для мобильных чипов.`
+        : `<b>Честно, за тот же FPS:</b> ${fmt(cmp.cheapLap.price)} — самый дешёвый ноутбук, который вытягивает ${cmp.cheapLap.fps} FPS.`}
+    </div>` : ''}
+    ${cmp.laptop && cmp.laptop.altCheaper ? `<div class="small muted">Дешевле под цель: ${esc(cmp.laptop.altCheaper.l.name)} за ${fmt(cmp.laptop.altCheaper.price)} (${cmp.laptop.altCheaper.fps} FPS).</div>` : ''}
+    ${cmp.cheapPc ? `<div class="cheap-pc">
+      <div class="cheap-pc-head">💸 Самый дешёвый ПК под ваш FPS: <b>${fmt(cmp.cheapPc.total)}</b> <span class="small muted">· ${cmp.cheapPc.fps} FPS</span></div>
+      <div class="small muted">${byId(cmp.cheapPc.parts.cpu)?.name || ''} + ${byId(cmp.cheapPc.parts.gpu)?.name || ''} · плата ${byId(cmp.cheapPc.parts.motherboard)?.name || ''} · ${byId(cmp.cheapPc.parts.ram)?.specs?.capacityGb || ''} ГБ ${byId(cmp.cheapPc.parts.ram)?.specs?.type || ''}</div>
+      <button class="btn small lime" style="margin-top:8px" onclick="loadCheapPc()">🧩 Открыть этот ПК в конструкторе</button>
+    </div>` : ''}
+    ${cmp.laptop ? `<div class="ai-actions" style="margin-top:10px">
+      <button class="btn small" onclick="loadLaptopToBuilder('${cmp.laptop.l.id}')">💻 Открыть ноутбук</button>
+      <button class="btn small ghost" onclick="navigate('laptops');openLaptop('${cmp.laptop.l.id}')">Все характеристики</button>
+    </div>` : ''}
+  </div>`;
+}
+function priorityInfoSafe() { return typeof priorityInfo === 'function' ? priorityInfo() : null; }
+
+// Карточка рекомендованного ноутбука
+function aiLaptopResultHtml(lap, profile) {
+  if (!lap) return '';
+  const p = priorityInfoSafe();
+  return `<div class="ai-laptop">
+    <div class="ai-laptop-head">💻 Рекомендуемый ноутбук</div>
+    <div class="ai-laptop-main">
+      <div>
+        <b>${esc(lap.l.name)}</b> <span class="muted small">· ${esc(lap.l.brand)} · ${lap.l.year} · ${laptopBadge(lap.l)}</span>
+        <div class="small muted">${esc(lap.l.cpu)} · ${esc(lap.l.gpu)}${lap.l.vramGb ? ' ' + lap.l.vramGb + ' ГБ' : ''} · ${lap.l.ramGb} ГБ ${esc(lap.l.ramType)} · ${lap.l.storageGb >= 1000 ? (lap.l.storageGb / 1000) + ' ТБ' : lap.l.storageGb + ' ГБ'} ${esc(lap.l.storageType)} · ${lap.l.screen}" ${esc(lap.l.resolution)} ${lap.l.hz} Гц · ${lap.l.weight} кг</div>
+        <div class="small">${lap.fps} FPS в среднем ${p && p.kind !== 'all' ? 'в «' + esc(p.name) + '»' : 'по играм'} (${esc((p && p.res) || '1080p')}) · ${Math.round(lap.price / Math.max(lap.fps, 1))} ₽ за 1 FPS · ${lap.enough ? '<span class="pos">цель по FPS достигнута</span>' : '<span class="neg">цель по FPS не достигнута</span>'}</div>
+      </div>
+      <div class="ai-laptop-price">${fmt(lap.price)}<div class="small muted">${lap.priceNew && lap.price < lap.priceNew ? 'БУ, новый ' + fmt(lap.priceNew) : 'новый'}</div></div>
+    </div>
+    <div class="ai-actions" style="margin-top:10px">
+      <button class="btn small" onclick="navigate('laptops');openLaptop('${lap.l.id}')">Подробнее</button>
+      <button class="btn small ghost" onclick="compareLaptopWithPc('${lap.l.id}')">Сравнить с ПК за эти деньги</button>
+    </div>
+  </div>`;
+}
+function loadCheapPc() {
+  const cmp = state.aiCompare;
+  if (!cmp || !cmp.cheapPc || !cmp.cheapPc.parts) { toast('Сначала подберите сборку'); return; }
+  state.builder = { ...cmp.cheapPc.parts };
+  navigate('builder');
+  toast(`В конструкторе — ПК за ${fmt(cmp.cheapPc.total)}`);
+}
+function loadLaptopToBuilder(id) { if (typeof openLaptop === 'function') { navigate('laptops'); openLaptop(id); } }
+
 function aiBuildTitle(profile, total) {
   const task = AI_TASKS[aiCfg().aiTask] || AI_TASKS.gaming;
   if (profile.mode === 'games') return `${task.icon} ${profile.games[0].name}${profile.games.length > 1 ? ' и др.' : ''} · ${fmt(total)}`;
@@ -584,6 +709,13 @@ function aiExplain(res) {
   else if (p.mode === 'unknown') lines.push(`Запрос «${p.label}» — подобрал универсальную конфигурацию с запасом по производительности.`);
   else lines.push(`Задача: ${(AI_TASKS[cfg.aiTask] || AI_TASKS.gaming).name.toLowerCase()}, разрешение ${p.res}.`);
   lines.push(`Итог: ${fmt(res.total)} — ${res.over ? `на ${fmt(res.total - res.budget)} выше бюджета` : `осталось ${fmt(res.budget - res.total)} в запасе`}.`);
+  const cmp = state.aiCompare;
+  if (cmp && cmp.laptop) {
+    lines.push(cmp.winner === 'laptop'
+      ? `Ноутбук выгоднее: ${esc(cmp.laptop.l.name)} за ${fmt(cmp.lapPrice)} даёт ${cmp.lapFps} FPS против ${cmp.pcFps} у сборки.`
+      : `Сборка ПК выгоднее: ${cmp.pcFps} FPS за ${fmt(cmp.pcPrice)} против ${cmp.lapFps} FPS у ноутбука ${esc(cmp.laptop.l.name)} за ${fmt(cmp.lapPrice)}.`);
+    if (cmp.cheapPc) lines.push(`Если нужен только результат по кадрам — самый дешёвый ПК под эти задачи стоит ${fmt(cmp.cheapPc.total)}.`);
+  }
   return lines;
 }
 function aiPartWhy(cat, part, res) {
@@ -617,6 +749,7 @@ function aiSet(field, value) { state[field] = value; saveAiConfig(); }
 function aiSetBudget(v) { const n = Math.max(0, Math.min(3000000, Math.round(Number(v) || 0))); state.aiBudget = n; saveAiConfig(); }
 function aiSetTask(v) { state.aiTask = AI_TASKS[v] ? v : 'gaming'; saveAiConfig(); render(); }
 function aiSetRes(v) { state.aiRes = AI_RES[v] ? v : 'default'; saveAiConfig(); render(); }
+function aiSetDevice(v) { state.aiDevice = ['auto', 'pc', 'laptop'].includes(v) ? v : 'auto'; saveAiConfig(); render(); }
 function aiSetCondition(v) { state.aiCondition = ['new', 'used', 'any'].includes(v) ? v : 'new'; saveAiConfig(); render(); }
 function aiSetGameQuery(v) { state.aiGameQuery = String(v || '').slice(0, 120); saveAiConfig(); }
 function aiSetCity(id) { if (!cityById(id)) return; state.region = id; saveAiConfig(); render(); }
@@ -624,9 +757,32 @@ function aiSetCity(id) { if (!cityById(id)) return; state.region = id; saveAiCon
 function aiGenerate() {
   initAiState();
   if (!state.aiBudget || state.aiBudget < 8000) { toast('Укажите бюджет — хотя бы 8 000 ₽'); return; }
+  // режим «ноутбук»: ПК не собираем, только подбираем ноутбук
+  if (state.aiDevice === 'laptop') {
+    const profile = aiProfile();
+    const laptop = (typeof aiPickLaptop === 'function') ? aiPickLaptop(Math.max(8000, Number(state.aiBudget)), profile) : null;
+    state.aiResult = null;
+    state.aiCompare = null;
+    state.aiLaptop = laptop;
+    state.aiError = laptop ? '' : `Под бюджет ${fmt(state.aiBudget)} ноутбук не нашёлся — увеличьте бюджет или выберите «только БУ».`;
+    state.aiPrompt = '';
+    saveAiConfig();
+    render();
+    if (laptop) toast(`Ноутбук найден: ${fmt(laptop.price)}`);
+    return;
+  }
   const res = aiBuildBuild();
   state.aiResult = res.ok ? res : null;
   state.aiError = res.ok ? '' : res.error;
+  // сравнение ПК и ноутбука
+  if (res.ok) {
+    state.aiCompare = (state.aiDevice === 'auto' && typeof laptopsReady === 'function' && laptopsReady())
+      ? aiCompareDevices(res.budget, res.profile) : null;
+    state.aiLaptop = state.aiCompare && state.aiCompare.laptop ? state.aiCompare.laptop : null;
+  } else {
+    state.aiCompare = null;
+    state.aiLaptop = null;
+  }
   // приоритетная игра на сайте подстраивается под запрос (сборки/конструктор будут считать то же самое)
   if (res.ok && res.profile.mode === 'games' && res.profile.games.length === 1 && typeof savePriority === 'function') {
     state.priorityGame = res.profile.games[0].id;
@@ -684,7 +840,11 @@ function aiPromptText() {
     lines.push(`Итого: ${fmt(res.total)}.`);
     const issues = (res.compat.issues || []).filter(i => i.level !== 'ok').map(i => i.title);
     if (issues.length) lines.push(`Замечания по совместимости: ${issues.join('; ')}.`);
-    lines.push('Проверь совместимость и узкие места. Скажи, что улучшить в рамках этого бюджета и на чём можно сэкономить без потери FPS.');
+    if (state.aiCompare && state.aiCompare.laptop) {
+      const c = state.aiCompare;
+      lines.push(`Альтернатива: ноутбук ${c.laptop.l.name} за ${fmt(c.lapPrice)} — ${c.lapFps} FPS; ПК — ${c.pcFps} FPS за ${fmt(c.pcPrice)}.`);
+    }
+    lines.push('Проверь совместимость и узкие места. Скажи, что улучшить в рамках бюджета, на чём сэкономить без потери FPS и стоит ли брать ноутбук вместо этой сборки.');
   } else {
     lines.push('Предложи 2–3 варианта сборки под эти условия с ценами на комплектующие в России и объясни выбор.');
   }
@@ -819,6 +979,14 @@ function aiControlsHtml() {
       </select>
     </div>
     <div class="ai-field">
+      <label>🧰 Что собираем</label>
+      <select onchange="aiSetDevice(this.value)">
+        <option value="auto" ${cfg.aiDevice === 'auto' ? 'selected' : ''}>Сравнить ПК и ноутбук — что дешевле</option>
+        <option value="pc" ${cfg.aiDevice === 'pc' ? 'selected' : ''}>Только ПК (сборка)</option>
+        <option value="laptop" ${cfg.aiDevice === 'laptop' ? 'selected' : ''}>Только ноутбук</option>
+      </select>
+    </div>
+    <div class="ai-field">
       <label>🛒 Что покупать</label>
       <select onchange="aiSetCondition(this.value)">
         <option value="new" ${cfg.aiCondition === 'new' ? 'selected' : ''}>Только новое</option>
@@ -902,6 +1070,8 @@ function aiResultHtml() {
         }).join('')}
       </div>
     </div>
+    ${aiDeviceDuelHtml(state.aiCompare)}
+    ${aiLaptopResultHtml(state.aiLaptop)}
     ${(() => {
       const matches = aiMatchingBuilds(3);
       if (!matches.length) return '';
@@ -933,15 +1103,54 @@ function aiResultHtml() {
   </div>`;
 }
 
+function aiLaptopOnlyHtml() {
+  const lap = state.aiLaptop;
+  const profile = aiProfile();
+  if (state.aiError) return `<div class="empty">⚠️ ${esc(state.aiError)}</div>`;
+  if (!lap) return `<div class="empty">Укажите бюджет и во что играете — ИИ подберёт ноутбук под эти условия.</div>`;
+  const p = priorityInfoSafe();
+  const list = (lap.list || []).slice(1, 5);
+  return `<div class="ai-result">
+    <div class="ai-head">
+      <div>
+        <div class="ai-title">💻 ${esc(lap.l.name)}</div>
+        <div class="small muted">${esc(regionById(state.region).name)} · ${esc(profile.res)} · ${p && p.kind !== 'all' ? 'цель ' + profile.target + ' FPS в «' + esc(p.name) + '»' : 'универсальный профиль'}</div>
+      </div>
+      <div class="ai-score">
+        <div><b>${lap.fps}</b> <span class="small muted">FPS</span></div>
+        <div><b>${fmt(lap.price)}</b> <span class="small muted">цена</span></div>
+        <div><b>${Math.round(lap.price / Math.max(lap.fps, 1))}</b> <span class="small muted">₽ за 1 FPS</span></div>
+      </div>
+    </div>
+    <div class="ai-chat"><div class="ai-msg"><span class="ai-avatar">🤖</span><div>
+      <div>Подобрал ноутбук под бюджет ${fmt(state.aiBudget)} и задачи: ${esc(profile.label)}.</div>
+      <div>${esc(lap.l.cpu)} + ${esc(lap.l.gpu)}${lap.l.vramGb ? ' ' + lap.l.vramGb + ' ГБ' : ''}, ${lap.l.ramGb} ГБ ${esc(lap.l.ramType)}, ${lap.l.storageGb >= 1000 ? (lap.l.storageGb / 1000) + ' ТБ' : lap.l.storageGb + ' ГБ'} ${esc(lap.l.storageType)}, экран ${lap.l.screen}" ${esc(lap.l.resolution)} ${lap.l.hz} Гц.</div>
+      <div>${lap.enough ? 'Цель по FPS достигается с запасом — можно играть на высоких настройках.' : 'Цель по FPS не достигается: ноутбуки этой цены слабее ПК. Ниже — что дешевле.'}</div>
+    </div></div></div>
+    ${aiDeviceDuelHtml(state.aiCompare)}
+    ${list.length ? `<div class="ai-matches"><h4 style="margin:0 0 8px">Другие варианты под бюджет</h4><div class="ai-match-list">
+      ${list.map(x => `<div class="ai-match">
+        <span class="ai-match-name">${esc(x.l.name)}<span class="muted small"> · ${esc(x.l.cpu)}</span></span>
+        <span><b>${x.fps}</b> <span class="small muted">FPS</span></span>
+        <span class="small muted">${fmt(x.price)}</span>
+        <button class="btn small ghost" onclick="navigate('laptops');openLaptop('${x.l.id}')">Подробнее</button>
+      </div>`).join('')}
+    </div></div>` : ''}
+    ${aiDeepSeekBlock(false)}
+  </div>`;
+}
+
 function renderAi() {
   initAiState();
   const formEl = $('#aiForm'), resEl = $('#aiResult');
+  const laptopMode = state.aiDevice === 'laptop';
+  const resHtml = laptopMode ? aiLaptopOnlyHtml() : aiResultHtml();
   if (formEl) formEl.innerHTML = aiControlsHtml();
-  if (resEl) resEl.innerHTML = aiResultHtml();
+  if (resEl) resEl.innerHTML = resHtml;
   // зеркалим на главной
   const homeForm = $('#homeAiForm'), homeRes = $('#homeAiResult');
   if (homeForm) homeForm.innerHTML = aiControlsHtml();
-  if (homeRes) homeRes.innerHTML = aiResultHtml();
+  if (homeRes) homeRes.innerHTML = resHtml;
 }
 
 // ---------- Готовые сборки, подходящие под запрос ----------

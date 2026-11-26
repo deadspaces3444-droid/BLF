@@ -423,3 +423,34 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .ai-answer-head{font-weight:800;margin-bottom:6px}
 .ai-prompt{margin-top:10px}
 .ai-prompt pre{white-space:pre-wrap;font-size:.8rem;background:var(--card);border:1px solid var(--line);border-radius:10px;padding:10px;max-height:260px;overflow:auto}
+
+/* ===== Ноутбуки ===== */
+.laptop-card .laptop-actions{display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end}
+.laptop-twin{margin-top:8px;padding:6px 10px;border-radius:9px;background:var(--bg2);border:1px solid var(--line)}
+.laptop-twin.pos{color:#6ee7b7}
+.laptop-twin.neg{color:#fcd34d}
+.laptop-detail-slot{margin-bottom:18px}
+.laptop-detail{background:var(--card);border:1px solid var(--line);border-left:3px solid var(--accent);border-radius:var(--radius);padding:18px;box-shadow:var(--shadow)}
+.laptop-fps{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:6px;margin:14px 0}
+.laptop-fps-item{display:flex;justify-content:space-between;gap:8px;background:var(--bg2);border:1px solid var(--line);border-radius:9px;padding:6px 10px;font-size:.82rem}
+.laptop-fps-item b.ok{color:#6ee7b7}.laptop-fps-item b.warn{color:#fcd34d}.laptop-fps-item b.err{color:#fca5a5}
+.laptop-links{display:flex;gap:8px;flex-wrap:wrap;margin-top:12px}
+
+/* ===== ПК или ноутбук (дуэль в ИИ) ===== */
+.duel-block{margin-top:18px;padding:16px;border-radius:var(--radius);background:linear-gradient(160deg,rgba(34,211,238,.07),rgba(163,230,53,.05));border:1px solid var(--line)}
+.duel-block-head{font-weight:800;margin-bottom:12px}
+.duel-cards{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.duel-card{background:var(--bg2);border:1px solid var(--line);border-radius:12px;padding:14px}
+.duel-card.win{border-color:rgba(163,230,53,.55);box-shadow:0 0 0 1px rgba(163,230,53,.35) inset}
+.duel-card-head{font-size:.95rem;display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.win-badge{font-size:.7rem;font-weight:800;padding:2px 8px;border-radius:999px;background:rgba(163,230,53,.16);color:#bef264;border:1px solid rgba(163,230,53,.4)}
+.duel-card-price{font-size:1.5rem;font-weight:800;margin:6px 0 2px}
+.duel-card-extra{font-size:.82rem;color:var(--muted);margin-top:6px}
+.duel-note{margin-top:10px;padding:10px 12px;border-radius:10px;background:rgba(255,255,255,.03);border:1px solid var(--line)}
+.ai-laptop{margin-top:18px;padding:16px;border-radius:var(--radius);background:var(--card);border:1px solid var(--line)}
+.ai-laptop-head{font-weight:800;margin-bottom:10px}
+.ai-laptop-main{display:flex;gap:16px;justify-content:space-between;flex-wrap:wrap}
+.ai-laptop-price{font-size:1.30rem;font-weight:800;text-align:right}
+@media (max-width:720px){.duel-cards{grid-template-columns:1fr}}
+.cheap-pc{margin-top:12px;padding:12px 14px;border-radius:12px;background:rgba(163,230,53,.07);border:1px solid rgba(163,230,53,.3)}
+.cheap-pc-head{font-weight:700;margin-bottom:4px}

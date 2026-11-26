@@ -15,6 +15,7 @@
       <button class="tab active" data-page="home" onclick="navigate('home')">Главная</button>
       <button class="tab" data-page="ai" onclick="navigate('ai')">🤖 ИИ-подбор</button>
       <button class="tab" data-page="builds" onclick="navigate('builds')">Сборки</button>
+      <button class="tab" data-page="laptops" onclick="navigate('laptops')">💻 Ноутбуки</button>
       <button class="tab" data-page="compare-builds" onclick="navigate('compare-builds')">Сравнение сборок</button>
       <button class="tab" data-page="components" onclick="navigate('components')">Комплектующие</button>
       <button class="tab" data-page="compare-components" onclick="navigate('compare-components')">Сравнение</button>
@@ -83,6 +84,28 @@
     <div class="region-prices" id="regionIndex" style="max-width:620px"></div>
   </div>
 </section>
+
+<!-- НОУТБУКИ -->
+<section class="page" id="page-laptops"><div class="wrap">
+  <h2>💻 Ноутбуки</h2>
+  <p class="sub">Готовые ноутбуки — от бюджетных и офисных до игровых, рабочих станций и MacBook. Цены по городам (новые и БУ), FPS в играх и честное сравнение: сколько стоил бы ПК такой же мощности. ИИ подберёт ноутбук под ваш бюджет и игры — и покажет, что дешевле.</p>
+  <div class="ai-home" id="laptopAiHint"></div>
+  <div class="toolbar">
+    <div class="chips" id="laptopChips"></div>
+  </div>
+  <div class="toolbar">
+    <input id="laptopSearch" placeholder="🔍 Поиск: RTX 4060, MacBook, ультрабук, Ryzen…" oninput="state.laptopQuery=this.value;render()">
+    <select onchange="state.laptopSort=this.value;render()">
+      <option value="price">Сначала дешёвые</option>
+      <option value="perf">Сначала мощные</option>
+      <option value="value">Лучшая цена за FPS</option>
+    </select>
+    <input type="number" placeholder="До, ₽" style="max-width:150px" oninput="state.laptopMaxPrice=this.value;render()">
+    <span class="small muted" id="laptopCount"></span>
+  </div>
+  <div class="laptop-detail-slot" id="laptopDetail"></div>
+  <div class="grid" id="laptopGrid"></div>
+</div></section>
 
 <!-- ИИ-ПОДБОР -->
 <section class="page" id="page-ai"><div class="wrap">
@@ -372,6 +395,7 @@
 <script src="compare-ui.js"></script>
 <script src="build-priority.js"></script>
 <script src="ai-build.js"></script>
+<script src="laptops.js"></script>
 <script src="servers.js"></script>
 <script src="desktop-os.js"></script>
 <script src="catalog.js"></script>

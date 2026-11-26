@@ -44,6 +44,14 @@ const state = {
   aiAnswer: '',
   aiAnswerErr: '',
   aiBusy: false,
+  // ноутбуки и выбор «ПК или ноутбук»
+  laptopType: 'all',
+  laptopQuery: '',
+  laptopSort: 'price',
+  laptopMaxPrice: '',
+  laptopOpen: null,
+  aiDevice: 'auto',      // auto | pc | laptop
+  aiLaptopPick: null,
   // приоритетная игра для подбора и оценки сборок
   priorityGame: 'all',
   priorityRes: '1080p',
@@ -1470,6 +1478,7 @@ function render() {
   else if (state.page === 'fps') renderFps();
   else if (state.page === 'saved') renderSavedPage();
   else if (state.page === 'ai') { if (typeof renderAi === 'function') renderAi(); }
+  else if (state.page === 'laptops') { if (typeof renderLaptops === 'function') { renderLaptops(); renderLaptopsDetail(); } }
   else if (state.page === 'servers') renderServers();
   else if (state.page === 'server-os') renderServerOs();
   else if (state.page === 'pc-os') renderPcOs();
@@ -1486,6 +1495,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
   $('#compSearch')?.addEventListener('input', e => { state.compQuery = e.target.value; render(); });
   $('#compareSearch')?.addEventListener('input', e => { state.compareQuery = e.target.value; render(); });
+  $('#laptopSearch')?.addEventListener('input', e => { state.laptopQuery = e.target.value; render(); });
   $('#priceQueryInput')?.addEventListener('input', e => { state.priceQuery = e.target.value; render(); });
 
   // Форма совместимости
