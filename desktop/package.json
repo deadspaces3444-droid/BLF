@@ -1,0 +1,86 @@
+{
+  "name": "blf-desktop",
+  "productName": "BLF BuildLab",
+  "version": "1.0.0",
+  "description": "BLF — каталог, конструктор и сравнение ПК: локальная версия для Windows/macOS/Linux",
+  "main": "main.js",
+  "author": "BLF",
+  "license": "MIT",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "dist": "electron-builder",
+    "dist:win": "electron-builder --win nsis portable",
+    "dist:linux": "electron-builder --linux AppImage",
+    "dist:mac": "electron-builder --mac dmg"
+  },
+  "devDependencies": {
+    "electron": "^45.5.0",
+    "electron-builder": "^26.18.0"
+  },
+  "build": {
+    "appId": "ru.blf.buildlab",
+    "productName": "BLF BuildLab",
+    "directories": {
+      "output": "release",
+      "buildResources": "build"
+    },
+    "files": [
+      "main.js",
+      "package.json",
+      "!release/**",
+      "!node_modules/**"
+    ],
+    "extraResources": [
+      {
+        "from": "..",
+        "to": "app",
+        "filter": [
+          "index.html",
+          "style.css",
+          "data.js",
+          "catalog.js",
+          "catalog-images.js",
+          "compat.js",
+          "compat-ui.js",
+          "compare-ui.js",
+          "build-priority.js",
+          "ai-build.js",
+          "laptops.js",
+          "socket-ui.js",
+          "upgrade-ui.js",
+          "server-guide.js",
+          "servers.js",
+          "desktop-os.js",
+          "app.js",
+          "img/parts/*.jpg"
+        ]
+      }
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ],
+      "artifactName": "BLF-Setup-${version}.${ext}"
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "shortcutName": "BLF BuildLab"
+    },
+    "linux": {
+      "target": [
+        "AppImage"
+      ],
+      "category": "Utility"
+    },
+    "mac": {
+      "target": [
+        "dmg"
+      ],
+      "category": "public.app-category.utilities"
+    }
+  }
+}

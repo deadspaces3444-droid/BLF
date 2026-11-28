@@ -1,0 +1,86 @@
+# Сборка ПК-версии BLF (Electron): установщик .exe, portable .exe и AppImage.
+# Запускается вручную (Actions → Desktop build → Run workflow) или на тег v*.
+# Готовые файлы лежат в артефактах запуска — их можно скачать и запустить на ПК.
+name: Desktop build
+
+on:
+  workflow_dispatch:
+    inputs:
+      targets:
+        description: 'Что собрать'
+        required: false
+        default: 'win'
+        type: choice
+        options: [win, linux, win+linux]
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: read
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - os: windows-latest
+            args: --win nsis portable
+            artifact: BLF-windows
+          - os: ubuntu-latest
+            args: --linux AppImage
+            artifact: BLF-linux
+    runs-on: ${{ matrix.os }}
+    defaults:
+      run:
+        working-directory: desktop
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+          cache-dependency-path: desktop/package-lock.json
+
+      # при запуске вручную можно ограничиться одной платформой
+      - id: want
+        shell: bash
+        run: |
+          t="${{ github.event.inputs.targets || 'win+linux' }}"
+          case "${{ matrix.os }}" in
+            windows-*) want=$([[ "$t" == *win* ]] && echo yes || echo no) ;;
+            *)          want=$([[ "$t" == *linux* ]] && echo yes || echo no) ;;
+          esac
+          echo "run=$want" >> "$GITHUB_OUTPUT"
+
+      - name: Установка зависимостей
+        if: steps.want.outputs.run == 'yes'
+        run: npm ci || npm install
+
+      - name: Проверка, что файлы сайта и фото на месте
+        if: steps.want.outputs.run == 'yes'
+        shell: bash
+        run: |
+          set -e
+          test -f ../index.html
+          test -f ../catalog-images.js
+          n=$(ls ../img/parts/*.jpg | wc -l)
+          echo "фото: $n"
+          test "$n" -ge 200
+
+      - name: Сборка приложения
+        if: steps.want.outputs.run == 'yes'
+        run: npx electron-builder ${{ matrix.args }} --publish never
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+      - uses: actions/upload-artifact@v4
+        if: steps.want.outputs.run == 'yes'
+        with:
+          name: ${{ matrix.artifact }}
+          path: |
+            desktop/release/*.exe
+            desktop/release/*.AppImage
+          if-no-files-found: warn
+          retention-days: 14
