@@ -1,0 +1,427 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>BLF — Сравнение сборок и комплектующих ПК · Цены по городам · FPS в играх · Совместимость</title>
+<meta name="description" content="BLF сравнивает сборки ПК и отдельные комплектующие: цены по всем городам России и магазинам (новые и БУ), поиск на Avito, Юле, DNS, Ozon и других сайтах, расчёт FPS в популярных играх и проверка совместимости.">
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header>
+  <div class="wrap nav">
+    <a class="logo" href="#" onclick="navigate('home');return false"><span class="mark">BLF</span><span>Build<span style="color:var(--accent)">Lab</span><small>сравнение · цены · FPS · совместимость</small></span></a>
+    <nav class="tabs">
+      <button class="tab active" data-page="home" onclick="navigate('home')">Главная</button>
+      <button class="tab" data-page="ai" onclick="navigate('ai')">🤖 ИИ-подбор</button>
+      <button class="tab" data-page="builds" onclick="navigate('builds')">Сборки</button>
+      <button class="tab" data-page="laptops" onclick="navigate('laptops')">💻 Ноутбуки</button>
+      <button class="tab" data-page="compare-builds" onclick="navigate('compare-builds')">Сравнение сборок</button>
+      <button class="tab" data-page="components" onclick="navigate('components')">Комплектующие</button>
+      <button class="tab" data-page="compare-components" onclick="navigate('compare-components')">Сравнение</button>
+      <button class="tab" data-page="fps" onclick="navigate('fps')">FPS в играх</button>
+      <button class="tab" data-page="prices" onclick="navigate('prices')">Поиск цен</button>
+      <button class="tab" data-page="servers" onclick="navigate('servers')">Серверы</button>
+      <button class="tab" data-page="server-os" onclick="navigate('server-os')">ОС для серверов</button>
+      <button class="tab" data-page="server-guide" onclick="navigate('server-guide')">📘 Гайд по серверам</button>
+      <button class="tab" data-page="pc-os" onclick="navigate('pc-os')">ОС для ПК</button>
+      <button class="tab" data-page="compat" onclick="navigate('compat')">Совместимость</button>
+      <button class="tab" data-page="builder" onclick="navigate('builder')">Конструктор</button>
+      <button class="tab" data-page="saved" onclick="navigate('saved')">💾 Мои сборки</button>
+    </nav>
+    <button class="region-btn" id="regionBtn" onclick="openRegionModal()" title="Выбрать город — цены пересчитаются">
+      <span style="opacity:.7">📍</span> <span id="regionBtnLabel">Саратов</span> <span style="opacity:.5">▾</span>
+    </button>
+  </div>
+</header>
+
+<!-- Модальное окно выбора города -->
+<div class="modal" id="regionModal">
+  <div class="modal-box">
+    <div class="modal-head">
+      <div>
+        <h3 style="margin:0">Выбор города</h3>
+        <div class="small muted" id="regionCount"></div>
+      </div>
+      <button class="btn small ghost" onclick="closeRegionModal()">✕</button>
+    </div>
+    <input id="regionModalInput" class="modal-input" placeholder="Начните вводить город или регион: Новосибирск, Татарстан, ХМАО…" autocomplete="off">
+    <div class="region-list" id="regionList"></div>
+  </div>
+</div>
+
+<!-- ГЛАВНАЯ -->
+<section class="page active" id="page-home">
+  <div class="hero"><div class="wrap">
+    <h1>Соберите ПК <span>без переплат</span><br>и ошибок совместимости</h1>
+    <p>BLF сравнивает готовые сборки и отдельные комплектующие по ценам в вашем городе. Новые товары считаются по официальным магазинам — DNS, Citilink, Ozon, Wildberries, Яндекс Маркет, М.Видео, Эльдорадо, Позитроника, Regard, XCOM, у каждой позиции есть кнопка с живым поиском нужной модели. БУ — только примерный ориентир с пометкой «проверять самостоятельно»: вторичный рынок зависит от состояния и продавца. Плюс FPS в 20 играх и проверка совместимости: встанет ли процессор в плату, хватит ли блока питания, поместится ли видеокарта в корпус.</p>
+    <div class="hero-search">
+      <input id="heroSearch" placeholder="🔍 Что искать: RTX 4070, i5-10400F, 32 ГБ DDR5, бп 750…" onkeydown="if(event.key==='Enter'){goPrice(this.value)}">
+      <button class="btn" onclick="goPrice(document.getElementById('heroSearch').value)">Найти цены</button>
+      <button class="btn ghost" onclick="navigate('fps')">🎮 Рассчитать FPS</button>
+      <button class="btn ghost" onclick="navigate('servers')">🗄️ Серверы</button>
+    </div>
+    <div class="stats" id="homeStats"></div>
+    <div class="quick-grid" id="homeQuick"></div>
+    <div class="note"><b>Как это работает:</b> нажмите на город в шапке и выберите любой из 1 080 городов и регионов России — все цены, сравнение и конструктор пересчитаются под него. Поиск понимает и сленг: «видяха», «проц», «оперативка ddr3», «бп 750».</div>
+  </div></div>
+  <div class="wrap">
+    <div class="ai-home" id="homeAi">
+      <div class="ai-home-head">
+        <h2 style="margin:0">🤖 ИИ-подбор: цена + город + во что играть</h2>
+        <button class="btn ghost small" onclick="navigate('ai')">Открыть полностью →</button>
+      </div>
+      <p class="sub" style="margin:6px 0 14px">Укажите бюджет, город и игры или задачи — сайт сам соберёт совместимый ПК и объяснит выбор.</p>
+      <div id="homeAiForm"></div>
+      <div id="homeAiResult"></div>
+    </div>
+    <div class="fps-highlight" id="homeFps"></div>
+    <div id="homePriority"></div>
+    <h2>🔥 Готовые сборки</h2>
+    <p class="sub">Проверенные конфигурации под разные бюджеты и задачи — от современных до сборок на старых комплектующих с Avito. Нажмите «Сравнить», чтобы положить до трёх сборок рядом.</p>
+    <div class="grid" id="homeBuilds"></div>
+    <h2 style="margin-top:36px">📍 Сколько стоит сборка в разных городах</h2>
+    <p class="sub">Цена популярной сборки «Игровой 1080p / 1440p» (новые комплектующие, минимальные цены магазинов).</p>
+    <div class="region-prices" id="regionIndex" style="max-width:620px"></div>
+  </div>
+</section>
+
+<!-- НОУТБУКИ -->
+<section class="page" id="page-laptops"><div class="wrap">
+  <h2>💻 Ноутбуки</h2>
+  <p class="sub">Готовые ноутбуки — от бюджетных и офисных до игровых, рабочих станций и MacBook. Цены по городам (новые и БУ), FPS в играх и честное сравнение: сколько стоил бы ПК такой же мощности. ИИ подберёт ноутбук под ваш бюджет и игры — и покажет, что дешевле.</p>
+  <div class="ai-home" id="laptopAiHint"></div>
+  <div class="toolbar">
+    <div class="chips" id="laptopChips"></div>
+  </div>
+  <div class="toolbar">
+    <input id="laptopSearch" placeholder="🔍 Поиск: RTX 4060, MacBook, ультрабук, Ryzen…" oninput="state.laptopQuery=this.value;render()">
+    <select onchange="state.laptopSort=this.value;render()">
+      <option value="price">Сначала дешёвые</option>
+      <option value="perf">Сначала мощные</option>
+      <option value="value">Лучшая цена за FPS</option>
+    </select>
+    <input type="number" placeholder="До, ₽" style="max-width:150px" oninput="state.laptopMaxPrice=this.value;render()">
+    <span class="small muted" id="laptopCount"></span>
+  </div>
+  <div class="laptop-detail-slot" id="laptopDetail"></div>
+  <div class="grid" id="laptopGrid"></div>
+</div></section>
+
+<!-- ИИ-ПОДБОР -->
+<section class="page" id="page-ai"><div class="wrap">
+  <h2>🤖 ИИ-подбор сборки ПК</h2>
+  <p class="sub">Заполните три поля — <b>цена</b>, <b>город</b> и <b>во что хотите играть или для каких задач ПК</b>. ИИ-консультант BLF переберёт процессоры и видеокарты по всему каталогу, доберёт совместимые плату, память, диск, БП, корпус и охлаждение, посчитает FPS и объяснит каждый выбор. Кнопка «Спросить у DeepSeek» открывает <a href="https://chat.deepseek.com/" target="_blank" rel="noopener">chat.deepseek.com</a> с готовым запросом, чтобы продолжить диалог там.</p>
+  <div id="socketBarAi"></div>
+  <div class="ai-layout">
+    <div id="aiForm"></div>
+    <div id="aiResult"></div>
+  </div>
+</div></section>
+
+<!-- СБОРКИ -->
+<section class="page" id="page-builds"><div class="wrap">
+  <h2>🖥️ Готовые сборки ПК</h2>
+  <p class="sub">Цены — минимальные по магазинам вашего города (новые). Рядом — ориентировочная цена на БУ-комплектующих с Avito. В каталоге — классические сборки и 18 сборок на Xeon (в том числе двухпроцессорные и серверные платформы в роли ПК).</p>
+  <div id="buildsPriority"></div>
+  <div id="buildsPriorityTop"></div>
+  <div class="toolbar"><div class="chips" id="buildsChips"></div></div>
+  <div class="grid" id="buildsGrid"></div>
+</div></section>
+
+<!-- СРАВНЕНИЕ СБОРОК -->
+<section class="page" id="page-compare-builds"><div class="wrap">
+  <h2>⚖️ Сравнение сборок</h2>
+  <p class="sub">Выберите до трёх сборок — сравним цены, производительность, потребление, FPS, совместимость и стоимость в разных городах.</p>
+  <div id="compareBuildsPriority"></div>
+  <div class="compare-cols" id="compareBuildPicks"></div>
+  <div id="compareBuildsBody"></div>
+</div></section>
+
+<!-- КОМПЛЕКТУЮЩИЕ -->
+<section class="page" id="page-components"><div class="wrap">
+  <h2>🔧 Каталог комплектующих</h2>
+  <p class="sub">Все типы комплектующих: процессоры (Intel 2–14 поколений, Core Ultra, AMD Phenom II/FX/Ryzen/Threadripper, все Xeon — E3, E5 v1–v4, E7, W, E и Scalable), материнские платы под каждый сокет (включая китайские X58/X79/X99 и двухпроцессорные), видеокарты, память от DDR2 до DDR5 ECC, HDD/SSD/NVMe, блоки питания, корпуса и охлаждение.</p>
+  <div id="socketBarComponents"></div>
+  <div class="toolbar"><div class="chips" id="compChips"></div></div>
+  <div class="toolbar">
+    <input id="compSearch" placeholder="🔍 Гибкий поиск: «видяха 4060», «проц i5», «ddr3», «бп 750», «ssd 1tb», «hdd»…">
+    <select id="compBrand" onchange="state.compBrand=this.value;render()"></select>
+    <select onchange="state.compYear=this.value;render()">
+      <option value="all">Все годы</option>
+      <option value="new">Только новые (2020+)</option>
+      <option value="old">Только старые (до 2020)</option>
+    </select>
+    <select onchange="state.compSort=this.value;render()">
+      <option value="perf">Сначала мощные</option>
+      <option value="fps">По FPS в игре</option>
+      <option value="cheap">Сначала дешёвые</option>
+      <option value="expensive">Сначала дорогие</option>
+      <option value="year">Сначала новые модели</option>
+    </select>
+  </div>
+  <div class="toolbar">
+    <select id="compFpsGame" onchange="state.compFpsGame=this.value;render()"></select>
+    <select onchange="state.compFpsRes=this.value;render()">
+      <option value="1080p">FPS в 1080p</option>
+      <option value="1440p">FPS в 1440p</option>
+      <option value="4K">FPS в 4K</option>
+    </select>
+    <span class="muted small" id="compCount"></span>
+  </div>
+  <div class="grid" id="compGrid"></div>
+</div></section>
+
+<!-- СРАВНЕНИЕ КОМПОНЕНТОВ -->
+<section class="page" id="page-compare-components"><div class="wrap">
+  <h2>⚖️ Сравнение комплектующих</h2>
+  <p class="sub">Подробное сравнение в стиле technical.city: совокупный балл с разницей в процентах, характеристики с подсветкой лучшего значения, FPS в 20 играх, плюсы и минусы, цена-качество и цены (новые и БУ) по городам. Выберите категорию и две модели — можно и больше.</p>
+  <div class="toolbar"><div class="chips" id="compareCatChips"></div></div>
+  <div class="toolbar"><input id="compareSearch" placeholder="🔍 Отфильтровать список: «4070», «ddr4», «b550», «750 вт»…"></div>
+  <div class="compare-cols" id="compareCompPicks"></div>
+  <div id="compareCompsBody"></div>
+</div></section>
+
+<!-- FPS В ИГРАХ -->
+<section class="page" id="page-fps"><div class="wrap">
+  <h2>🎮 Расчёт FPS в популярных играх</h2>
+  <p class="sub">Выберите процессор, видеокарту, память и игру — получите ориентировочный FPS и оценку «играбельно / комфортно / отлично». Ниже — таблица по 20 популярным играм и сравнение готовых сборок.</p>
+  <div class="builder-grid">
+    <div class="fps-form">
+      <div class="slot"><div class="icon">🧠</div><div style="flex:1"><label class="small muted">Процессор</label><select id="fpsCpu" onchange="state.fps.cpu=this.value;render()"></select></div></div>
+      <div class="slot"><div class="icon">🎮</div><div style="flex:1"><label class="small muted">Видеокарта</label><select id="fpsGpu" onchange="state.fps.gpu=this.value;render()"></select></div></div>
+      <div class="slot"><div class="icon">💾</div><div style="flex:1"><label class="small muted">Оперативная память</label><select id="fpsRam" onchange="state.fps.ram=this.value;render()"></select></div></div>
+      <div class="slot"><div class="icon">🕹️</div><div style="flex:1"><label class="small muted">Игра</label><select id="fpsGame" onchange="state.fps.game=this.value;render()"></select></div></div>
+      <div class="slot"><div class="icon">🖥️</div><div style="flex:1"><label class="small muted">Разрешение</label>
+        <select id="fpsRes" onchange="state.fps.res=this.value;render()">
+          <option value="1080p">1920×1080 (Full HD)</option>
+          <option value="1440p">2560×1440 (2K)</option>
+          <option value="4K">3840×2160 (4K)</option>
+        </select></div></div>
+      <div class="slot"><div class="icon">⚙️</div><div style="flex:1"><label class="small muted">Настройки графики</label>
+        <select id="fpsSettings" onchange="state.fps.settings=this.value;render()">
+          <option value="ultra">Ультра / высокие</option>
+          <option value="medium">Средние (больше FPS)</option>
+        </select></div></div>
+      <div class="note small">Расчёт ориентировочный: модель учитывает игровой индекс CPU и GPU, разрешение, настройки и объём памяти. Реальный FPS зависит от драйверов, версии игры и сцены.</div>
+    </div>
+    <div class="summary" id="fpsResult"></div>
+  </div>
+  <h3 id="fpsAvg" style="margin-top:28px"></h3>
+  <div id="fpsTable"></div>
+  <h3 style="margin-top:26px">🏆 Готовые сборки в этой игре</h3>
+  <div class="region-prices" id="fpsBuilds"></div>
+</div></section>
+
+<!-- ПОИСК ЦЕН -->
+<section class="page" id="page-prices"><div class="wrap">
+  <h2>💸 Поиск цен по магазинам и объявлениям</h2>
+  <p class="sub">Цены в каталоге — по официальным магазинам (DNS, Citilink, Ozon, Wildberries, Яндекс Маркет, М.Видео, Эльдорадо, Позитроника, Regard, XCOM), только новые товары и с учётом города. БУ — отдельная примерная оценка с пометкой «проверять самостоятельно»: вторичный рынок зависит от состояния и продавца.</p>
+  <div id="priceHonestNote"></div>
+  <div class="toolbar">
+    <input id="priceQueryInput" placeholder="Название или сленг: RTX 4060, видяха 3070, проц i5-10400, ddr3 16, бп 750…">
+    <select onchange="state.priceCat=this.value;render()">
+      <option value="all">Все категории</option>
+      <option value="cpu">Процессоры</option><option value="gpu">Видеокарты</option>
+      <option value="motherboard">Материнские платы</option><option value="ram">Память</option>
+      <option value="ssd">Накопители</option><option value="psu">Блоки питания</option>
+      <option value="case">Корпуса</option><option value="cooling">Охлаждение</option>
+    </select>
+    <select onchange="state.priceCond=this.value;render()">
+      <option value="all">Новые и БУ</option><option value="new">Только новые</option><option value="used">Только БУ</option>
+    </select>
+    <select onchange="state.priceSort=this.value;render()">
+      <option value="cheap">Сначала дешёвые</option><option value="expensive">Сначала дорогие</option>
+      <option value="discount">По размеру скидки</option><option value="name">По названию</option>
+    </select>
+    <input class="price-input" placeholder="Цена от, ₽" inputmode="numeric" oninput="state.priceMin=this.value;render()">
+    <input class="price-input" placeholder="до, ₽" inputmode="numeric" oninput="state.priceMax=this.value;render()">
+  </div>
+  <p class="muted" id="priceCount"></p>
+  <div class="store-links" id="storeLinks"></div>
+  <div style="height:16px"></div>
+  <div id="priceResults"></div>
+</div></section>
+
+
+<!-- МОИ СБОРКИ -->
+<section class="page" id="page-saved"><div class="wrap">
+  <h2>💾 Мои сохранённые сборки</h2>
+  <p class="sub">Сборки сохраняются прямо в браузере (localStorage) — регистрация не нужна, данные никуда не отправляются. Можно переименовать, сделать копию, удалить, а также выгрузить все сборки в JSON-файл и перенести на другое устройство.</p>
+  <div class="toolbar">
+    <div class="chips" id="savedFilter"></div>
+  </div>
+  <div class="toolbar">
+    <select id="saveKind" onchange="state.saveKind=this.value;render()"></select>
+    <button class="btn" onclick="saveCurrentBuild()">💾 Сохранить текущую сборку</button>
+    <button class="btn ghost" onclick="navigate(state.saveKind==='server'?'servers':'builder')">Открыть конструктор</button>
+    <button class="btn ghost" onclick="exportSavedBuilds()">⬇️ Выгрузить JSON</button>
+    <label class="btn ghost" style="display:inline-flex;align-items:center">⬆️ Загрузить JSON
+      <input type="file" accept="application/json,.json" style="display:none" onchange="importSavedBuilds(event)">
+    </label>
+  </div>
+  <p class="muted" id="savedCount"></p>
+  <div class="grid" id="savedGrid"></div>
+</div></section>
+
+<!-- СЕРВЕРЫ -->
+<section class="page" id="page-servers"><div class="wrap">
+  <h2>🗄️ Серверы: сборки и комплектующие</h2>
+  <p class="sub">17 серверных сборок — от Xeon-сервера на китайской плате X79/X99 <b>за 12–17 тысяч рублей</b> до ИИ-фермы. Частные сценарии: видеонаблюдение, один сайт, домашний NAS, тестовый стенд. В каталоге 82 комплектующих: все поколения Xeon (E3, E5 v1–v4, Scalable, W), китайские платы X79/X99 и двухпроцессорные, дешёвая серверная REG-память и диски для NVR. Цена считается по вашему городу, совместимость и нагрузка проверяются на лету.</p>
+
+  <div id="serverStarter"></div>
+  <div class="builder-grid">
+    <div id="serverSlots"></div>
+    <div class="summary" id="serverSummary"></div>
+  </div>
+  <div id="serverSwaps"></div>
+
+  <h2 style="margin-top:36px">🏁 Готовые серверные сборки</h2>
+  <p class="sub">От дешёвых вариантов для начинающих до ЦОД-конфигураций. Фильтруйте по уровню, задаче (видеонаблюдение, один сайт, домашний NAS, свои сервисы) и максимальной цене. Нажмите «Открыть в конструкторе», чтобы доработать сборку, или «Сохранить», чтобы оставить её в «Моих сборках».</p>
+  <div class="toolbar"><div class="chips" id="serverFilters"></div></div>
+  <div class="grid" id="serverBuilds"></div>
+
+  <h2 style="margin-top:36px">⚖️ Сравнение серверов</h2>
+  <div class="compare-cols" id="serverComparePicks"></div>
+  <div id="serverCompareBody"></div>
+
+  <h2 style="margin-top:36px">🔧 Серверные комплектующие</h2>
+  <p class="sub">Процессоры Xeon/EPYC, платы Supermicro, память ECC RDIMM, NVMe U.2, SAS/HDD, RAID-контроллеры, сетевые карты 1/10/25GbE, БП с резервированием и шасси 1U/2U.</p>
+  <div class="toolbar"><div class="chips" id="serverChips"></div></div>
+  <div class="toolbar">
+    <input placeholder="🔍 Поиск: EPYC, DDR5 ECC, U.2, 25GbE, 2U…" oninput="state.serverQuery=this.value;render()">
+    <select onchange="state.serverSort=this.value;render()">
+      <option value="price">Сначала дешёвые</option>
+      <option value="priceDesc">Сначала дорогие</option>
+      <option value="perf">По производительности</option>
+      <option value="year">Сначала новые</option>
+    </select>
+    <div id="serverBudgetLabel"></div>
+  </div>
+  <div class="grid" id="serverGrid"></div>
+</div></section>
+
+<!-- ГАЙД ПО НАСТРОЙКЕ СЕРВЕРОВ -->
+<section class="page" id="page-server-guide"><div class="wrap">
+  <h2>📘 Гайд по настройке серверов</h2>
+  <p class="sub">Пошагово и по-русски: планирование ресурсов, сборка железа, установка ОС, SSH и безопасность, сеть, диски и RAID, бэкапы 3-2-1, Docker и база, виртуализация, видеонаблюдение, мониторинг и разбор поломок. С готовыми командами — их можно скопировать одной кнопкой.</p>
+  <div class="toolbar">
+    <input id="guideSearch" placeholder="🔍 Поиск по гайду: RAID, бэкап, SSH, Proxmox, камеры…" oninput="state.guideQuery=this.value;render()">
+    <div class="chips" id="guideChips"></div>
+  </div>
+  <div id="guideRoot"></div>
+</div></section>
+
+<!-- ОС ДЛЯ СЕРВЕРОВ -->
+<section class="page" id="page-server-os"><div class="wrap">
+  <h2>🖥️ Операционные системы для серверов</h2>
+  <p class="sub">14 серверных ОС с подробным описанием: что это, кому подходит, плюсы и минусы, минимальные требования, пакетный менеджер, виртуализация и лицензия. Выберите свою серверную сборку — сайт проверит, хватает ли ей ресурсов для выбранной ОС.</p>
+  <div class="toolbar">
+    <div class="chips" id="osFamilyChips"></div>
+  </div>
+  <div class="toolbar">
+    <input placeholder="🔍 Поиск по ОС: NAS, гипервизор, сертифицированная, Windows, Debian…" oninput="state.osQuery=this.value;render()">
+    <select id="osBuildPick" onchange="state.osPickFor=this.value;render()"></select>
+    <select onchange="state.osSort=this.value;render()">
+      <option value="name">По названию</option>
+      <option value="fit">Сначала подходящие</option>
+      <option value="price">Сначала бесплатные</option>
+      <option value="ram">По требованиям к RAM</option>
+    </select>
+  </div>
+  <div class="fps-inline" id="osSelected"></div>
+  <div class="grid" id="osGrid"></div>
+  <h2 style="margin-top:36px">📊 Сравнение ОС</h2>
+  <p class="sub">Сводная таблица по текущему фильтру. Подробности — в карточках выше (кнопка «Подробнее»).</p>
+  <div id="osTable"></div>
+  <h2 style="margin-top:36px">⬇️ Скачать серверные ОС</h2>
+  <p class="sub">Официальные страницы загрузки. У Windows Server и ESXi нужна учётная запись, у Astra и ALT — лицензия.</p>
+  <div class="dl-grid" id="osServerDownloadList"></div>
+</div></section>
+
+<!-- СОВМЕСТИМОСТЬ СЕРВЕРОВ -->
+<section class="page" id="page-server-compat"><div class="wrap">
+  <h2>🧩 Совместимость серверной сборки</h2>
+  <p class="sub">Проверяем сокет и TDP, тип памяти ECC и число слотов, U.2/SAS/SATA, мощность и резервирование БП, форм-фактор шасси, число дисковых корзин, наличие IPMI и сетевые порты.</p>
+  <div class="builder-grid">
+    <div id="serverCompatForm"></div>
+    <div class="summary" id="serverCompatResult"></div>
+  </div>
+</div></section>
+
+
+<!-- ОС ДЛЯ ПК -->
+<section class="page" id="page-pc-os"><div class="wrap">
+  <h2>💻 Операционные системы для обычных ПК</h2>
+  <p class="sub">Windows, Linux-дистрибутивы и особые варианты — с подробным описанием, требованиями, плюсами и минусами и <b>прямыми ссылками на официальное скачивание</b>. Сортировка по простоте освоения поможет новичку выбрать систему, которая просто работает.</p>
+  <div class="toolbar"><div class="chips" id="pcOsFamilyChips"></div></div>
+  <div class="toolbar">
+    <input placeholder="🔍 Поиск: игры, старый ноутбук, офис, Linux, NVIDIA…" oninput="state.pcOsQuery=this.value;render()">
+    <select onchange="state.pcOsSort=this.value;render()">
+      <option value="easy">Сначала простые</option>
+      <option value="name">По названию</option>
+      <option value="price">Сначала бесплатные</option>
+      <option value="ram">По требованиям к RAM</option>
+    </select>
+    <a class="btn small ghost" href="https://rufus.ie/ru/" target="_blank" rel="noopener">🔧 Rufus (флешка)</a>
+    <a class="btn small ghost" href="https://www.ventoy.net/en/download.html" target="_blank" rel="noopener">🔧 Ventoy</a>
+  </div>
+  <div class="grid" id="pcOsGrid"></div>
+  <h2 style="margin-top:36px">📊 Сравнение ОС для ПК</h2>
+  <p class="sub">Сводная таблица по текущему фильтру — с колонкой «Скачать».</p>
+  <div id="pcOsTable"></div>
+  <h2 style="margin-top:36px">⬇️ Все ссылки на скачивание</h2>
+  <p class="sub">Официальные сайты и утилиты для записи загрузочной флешки. Открываются в новой вкладке.</p>
+  <div class="dl-grid" id="osDownloadList"></div>
+  <div class="note"><b>Как поставить ОС:</b> скачайте ISO → запишите на флешку 8 ГБ+ через Rufus (Windows) или balenaEtcher (macOS/Linux) → загрузитесь с флешки (F12/F8/Del при старте) → установите. Перед установкой второй системы сделайте резервную копию данных. Ventoy позволяет держать несколько ISO на одной флешке.</div>
+</div></section>
+
+<!-- СОВМЕСТИМОСТЬ -->
+<section class="page" id="page-compat"><div class="wrap">
+  <h2>✅ Проверка совместимости</h2>
+  <p class="sub">Выберите процессор — в остальных списках останутся только совместимые варианты (сокет, память, M.2/SATA, форм-фактор, мощность БП, высота кулера). Проверяются также версия BIOS и PCIe. Старые платформы (DDR3, LGA1150, LGA775) тоже поддерживаются.</p>
+  <div class="toolbar"><select id="compatQuick" onchange="applyBuildToCompat(this.value)"></select></div>
+  <div class="builder-grid">
+    <div id="compatForm"></div>
+    <div class="summary" id="compatResult"></div>
+  </div>
+</div></section>
+
+<!-- КОНСТРУКТОР -->
+<section class="page" id="page-builder"><div class="wrap">
+  <h2>🧩 Конструктор ПК</h2>
+  <p class="sub">Соберите свою конфигурацию: цена пересчитывается по городам, совместимость проверяется на лету, а FPS считается по 20 играм. Выберите процессор — списки плат, памяти, охлаждения, корпуса и БП сразу сузятся до совместимых.</p>
+  <div id="socketBarBuilder"></div>
+  <div id="builderPriority"></div>
+  <div class="toolbar compat-bar" id="builderCompatBar"></div>
+  <div class="builder-grid">
+    <div id="builderSlots"></div>
+    <div class="summary" id="builderSummary"></div>
+  </div>
+  <div id="builderSwaps"></div>
+  <div class="summary" id="builderFps" style="margin-top:24px"></div>
+</div></section>
+
+<footer><div class="wrap">
+  <b style="color:var(--text)">BLF — BuildLab</b> · Сравнение сборок и комплектующих ПК · Цены по городам · FPS в играх · Проверка совместимости<br>
+  <span class="small">Цены в каталоге — ориентировочные (минимальные по магазинам города на дату обновления). Актуальные цены и наличие смотрите по ссылкам на сайтах DNS, Citilink, Ozon, Wildberries, Яндекс Маркета, М.Видео, Юлы и Avito. Б/У-комплектующие покупайте с проверкой и гарантией продавца. Расчёт FPS — оценочный.</span>
+</div></footer>
+
+<script src="data.js"></script>
+<script src="catalog-images.js"></script>
+<script src="compat.js"></script>
+<script src="compat-ui.js"></script>
+<script src="compare-ui.js"></script>
+<script src="build-priority.js"></script>
+<script src="ai-build.js"></script>
+<script src="laptops.js"></script>
+<script src="socket-ui.js"></script>
+<script src="upgrade-ui.js"></script>
+<script src="server-guide.js"></script>
+<script src="servers.js"></script>
+<script src="desktop-os.js"></script>
+<script src="catalog.js"></script>
+<script src="app.js"></script>
+<div class="toast" id="toast"></div>
+</body>
+</html>

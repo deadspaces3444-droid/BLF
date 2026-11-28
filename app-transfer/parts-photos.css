@@ -1,0 +1,74 @@
+/* ===== BLF: фото комплектующих (стили) =====
+   Подключается в приложении вместе с parts-photos.js.
+   Использует те же переменные темы, что и сайт; значения ниже — запасные. */
+:root{
+  --line:#e4e8f0; --muted:#697386; --radius:18px; --radius-sm:12px;
+  --pill:999px; --shadow-soft:0 8px 24px rgba(16,26,48,.08);
+}
+
+/* ===== Реальные фото комплектующих ===== */
+/* Все картинки — локальные JPEG из img/parts, белый фон, объект по центру.
+   Плитка белая с мягкой тенью — как карточка товара в PS Store. */
+.part-img{display:block;background:#fff;object-fit:contain;border-radius:14px;
+  border:1px solid var(--line);box-shadow:var(--shadow-soft)}
+.part-img-sm{width:64px;height:64px;padding:5px;border-radius:12px}
+.part-img-md{width:112px;height:112px;padding:8px;border-radius:16px}
+.part-img-lg{width:100%;height:210px;padding:14px;border-radius:var(--radius)}
+
+/* плашка «изображения нет»: рисунок рамки на CSS, без эмодзи и внешних файлов */
+.part-img-missing{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  background:repeating-linear-gradient(135deg,#f7f9fd 0 10px,#eef2f9 10px 20px);
+  border:1px dashed #c8d3e4;border-radius:14px;color:var(--muted);text-align:center;padding:8px}
+.part-img-missing .pim-icon{position:relative;display:block;width:34%;max-width:52px;aspect-ratio:1/1;
+  border:2px solid #b9c6da;border-radius:6px;background:#fff}
+.part-img-missing .pim-icon::before{content:"";position:absolute;left:14%;bottom:16%;width:72%;height:2px;
+  background:#b9c6da;transform:rotate(-38deg);transform-origin:center}
+.part-img-missing .pim-icon::after{content:"";position:absolute;right:16%;top:16%;width:22%;aspect-ratio:1/1;
+  border-radius:50%;background:#dbe4f2}
+.part-img-missing .pim-text{font-size:.72rem;font-weight:750;letter-spacing:.04em;text-transform:uppercase}
+.part-img-missing .pim-sub{font-size:.68rem;font-weight:600;color:var(--muted);max-width:96%;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;opacity:.85}
+.part-img-missing-sm{width:64px;height:64px;padding:5px;border-radius:12px}
+.part-img-missing-sm .pim-icon{width:38%;max-width:24px}
+.part-img-missing-sm .pim-text,.part-img-missing-sm .pim-sub{display:none}
+.part-img-missing-md{width:112px;height:112px;border-radius:16px}
+.part-img-missing-md .pim-text{font-size:.6rem;letter-spacing:.01em}
+.part-img-missing-md .pim-sub{display:none}
+.part-img-missing-lg{width:100%;height:210px;border-radius:var(--radius)}
+.part-img-missing .pim-text{line-height:1.15}
+/* в карточках плашка занимает ровно то же место, что и фото */
+.card-photo .part-img-missing-lg,.srv-photo .part-img-missing-lg,
+.laptop-photo .part-img-missing-lg{height:196px}
+.srv-card .srv-photo .part-img-missing-lg,.laptop-card .laptop-photo .part-img-missing-lg{height:170px}
+.slot .slot-photo .part-img-missing-md{width:74px;height:74px;border-radius:14px}
+.slot .slot-photo .part-img-missing-md .pim-text{font-size:.52rem}
+.build-img-strip .part-img-missing-sm{width:62px;height:62px;border-radius:12px}
+
+/* карточка каталога: фото сверху, крупно */
+.card-photo{position:relative;margin:-22px -22px 14px;border-radius:var(--radius) var(--radius) 0 0;
+  overflow:hidden;background:linear-gradient(180deg,#f8fbff,#eef4fc)}
+.card-photo img{display:block;width:100%;height:196px;object-fit:contain;padding:14px 16px;margin:0}
+.card-photo .card-photo-cat{position:absolute;left:12px;top:12px;background:rgba(255,255,255,.92);
+  border:1px solid var(--line);border-radius:var(--pill);padding:4px 11px;font-size:.7rem;
+  font-weight:750;letter-spacing:.06em;text-transform:uppercase;color:var(--accent-deep)}
+
+/* честная пометка: фото не самой модели, а типовое фото серии */
+.photo-badge{position:absolute;right:10px;bottom:10px;font-size:.66rem;font-weight:750;
+  letter-spacing:.04em;padding:3px 9px;border-radius:var(--pill);background:rgba(255,255,255,.94);
+  border:1px solid var(--line);color:var(--muted)}
+.photo-badge.is-exact{color:var(--accent-deep);border-color:#cfe3fb;background:#eef6ff}
+
+.ai-part .ai-part-photo img{width:56px;height:56px;object-fit:contain;padding:5px;background:#fff;
+  border:1px solid var(--line);border-radius:12px}
+.duel-side .duel-photo img{width:100%;height:150px;object-fit:contain;padding:10px;background:#fff;
+  border:1px solid var(--line);border-radius:var(--radius-sm);margin-bottom:10px}
+.saved-card .build-img-strip img{width:54px;height:54px}
+.swap-card{display:grid;grid-template-columns:52px 1fr;gap:10px;align-items:start}
+.swap-card>img{width:52px;height:52px;object-fit:contain;padding:4px;background:#fff;
+  border:1px solid var(--line);border-radius:10px;grid-row:1/span 4}
+.swap-card>.swap-card-body{display:flex;flex-direction:column;gap:2px;min-width:0}
+
+/* фото в карточке ноутбука и сервера */
+.laptop-card .laptop-photo img,.srv-card .srv-photo img{width:100%;height:170px;object-fit:contain;
+  padding:12px;background:linear-gradient(180deg,#f8fbff,#eef4fc);border:1px solid var(--line);
+  border-radius:var(--radius-sm)}

@@ -1,0 +1,8 @@
+node_modules/
+
+# исходники-кандидаты для отбора фото (не нужны на сайте)
+image-search/
+
+# зависимости и сборки ПК-версии
+desktop/node_modules/
+desktop/release/
