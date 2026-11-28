@@ -1305,17 +1305,19 @@ function buildPrice(build, regionId, condition = 'new') {
   });
   return { total, missing };
 }
+// Сборка может быть неполной (деталь сняли в 3D) — считаем без падений
+const PART0 = { perf: 0, work: 0, power: 0, specs: {} };
 function buildPower(build) {
-  const cpu = byId(build.parts.cpu), gpu = byId(build.parts.gpu);
-  return (cpu?.power || 0) + (gpu?.power || 0) + 90;
+  const cpu = byId(build.parts.cpu) || PART0, gpu = byId(build.parts.gpu) || PART0;
+  return (cpu.power || 0) + (gpu.power || 0) + 90;
 }
 function buildPerf(build) {
-  const cpu = byId(build.parts.cpu), gpu = byId(build.parts.gpu);
-  return Math.round((cpu.perf * 0.35 + gpu.perf * 0.65) * 10) / 10;
+  const cpu = byId(build.parts.cpu) || PART0, gpu = byId(build.parts.gpu) || PART0;
+  return Math.round(((cpu.perf || 0) * 0.35 + (gpu.perf || 0) * 0.65) * 10) / 10;
 }
 function buildWorkPerf(build) {
-  const cpu = byId(build.parts.cpu), gpu = byId(build.parts.gpu);
-  return Math.round((cpu.work * 0.55 + gpu.work * 0.45) * 10) / 10;
+  const cpu = byId(build.parts.cpu) || PART0, gpu = byId(build.parts.gpu) || PART0;
+  return Math.round(((cpu.work || 0) * 0.55 + (gpu.work || 0) * 0.45) * 10) / 10;
 }
 
 // ---------- Гибкий поиск ----------

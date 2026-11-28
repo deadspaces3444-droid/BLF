@@ -892,19 +892,26 @@ function renderBuilder() {
       ${state.onlyCompatible ? '✅ Только совместимые' : '📋 Все комплектующие'}
     </button>`;
 
-  $('#builderSlots').innerHTML = CATEGORIES.map(c => {
+  $('#builderSlots').innerHTML = `<div class="pc3d-side-head">
+      <b>🧰 Комплектующие</b>
+      <span class="small muted">нажмите «Установить» — деталь встанет в корпус на схеме</span>
+    </div>` + CATEGORIES.map(c => {
     const cur = state.builder[c.id];
     const { pool, compatible, allCat } = optionsFor(c.id, state.builder, cur);
     const curObj = byId(cur);
     const hidden = allCat.length - compatible.length;
-    return `<div class="slot"><div class="icon">${c.icon}</div>
-      <div style="flex:1"><label class="small muted">${c.name}
+    const installed = !!curObj;
+    return `<div class="slot ${installed ? 'installed' : 'empty'}">
+      <div class="icon">${c.icon}</div>
+      <div style="flex:1;min-width:0"><label class="small muted">${c.name}
         ${state.onlyCompatible && hidden > 0 ? `<span class="compat-note">· ${compatible.length} из ${allCat.length}, ${hidden} несовместимых скрыто</span>` : ''}</label>
-      <select onchange="setBuilderPart('${c.id}', this.value)">
+      ${installed ? `<div class="slot-name" title="${esc(curObj.name)}">${esc(curObj.name)}</div>` : '<div class="slot-empty">не установлено</div>'}
+      <select onchange="setBuilderPart('${c.id}', this.value)" title="Сменить деталь">
         ${pool.map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)} — от ${fmt(minPrice(x.id, state.region, 'new') ?? x.basePrice)}${x.year < 2020 ? ' · старая' : ''}</option>`).join('')}
       </select></div>
-      <div class="p"><span class="price">${fmt(minPrice(cur, state.region, 'new') ?? curObj?.basePrice ?? 0)}</span><br>
-      <span class="small used-est">${minPrice(cur, state.region, 'used') ? 'БУ ≈ ' + fmt(minPrice(cur, state.region, 'used')) + ' (проверять)' : ''}</span></div>
+      <div class="p"><span class="price">${fmt(minPrice(cur, state.region, 'new') ?? 0)}</span><br>
+      <span class="small used-est">${minPrice(cur, state.region, 'used') ? 'БУ ≈ ' + fmt(minPrice(cur, state.region, 'used')) + ' (проверять)' : ''}</span>
+      <div style="margin-top:6px"><button class="btn small ${installed ? 'ghost' : 'lime'}" onclick="pc3dOpenPicker('${c.id}')">${installed ? 'Заменить' : 'Установить'}</button></div></div>
     </div>`;
   }).join('');
 
@@ -960,6 +967,7 @@ function renderBuilder() {
     </div>
     ${typeof priorityBuilderPanel === 'function' ? priorityBuilderPanel() : ''}
     ${fpsTable(state.builder, state.builderFpsRes)}`;
+  if (typeof pc3dInit === 'function') pc3dInit();
   if (typeof renderSwaps === 'function') renderSwaps();
   if (typeof renderPriorityBars === 'function') renderPriorityBars();
 }

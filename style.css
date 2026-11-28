@@ -593,3 +593,48 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .warn{color:#fbbf24}
 .used-est{color:#fda4af}
 .price-note{line-height:1.55}
+
+/* ===== 3D-сборка ===== */
+.pc3d-wrap{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(320px,.65fr);gap:18px;margin:16px 0}
+.pc3d-stage{position:relative;border:1px solid var(--line);border-radius:18px;overflow:hidden;background:radial-gradient(120% 90% at 30% 0%,#16222e,#0b1016 70%)}
+.pc3d-head{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
+.pc3d-head b{font-size:14px}
+.pc3d-actions{display:flex;gap:6px;flex-wrap:wrap}
+.pc3d-stage-inner{position:relative;height:520px}
+.pc3d-stage-inner canvas{display:block;width:100%;height:100%}
+.pc3d-hint{position:absolute;left:12px;bottom:10px;color:#7d8b9c;pointer-events:none}
+.pc3d-tip{position:absolute;display:none;pointer-events:none;background:rgba(8,14,20,.94);border:1px solid rgba(56,189,248,.5);
+  border-radius:10px;padding:7px 10px;font-size:12px;max-width:260px;z-index:5;box-shadow:0 8px 24px rgba(0,0,0,.45)}
+.pc3d-fit{padding:8px 14px;border-top:1px solid rgba(255,255,255,.07);display:flex;flex-wrap:wrap;gap:10px}
+.pc3d-side{display:flex;flex-direction:column;gap:8px;max-height:640px;overflow:auto;padding-right:4px}
+.pc3d-side-head{display:flex;flex-direction:column;gap:2px;padding:2px 2px 4px}
+.pc3d-side .slot{padding:10px 12px;gap:10px}
+.pc3d-side .slot.empty{border-style:dashed;opacity:.85}
+.pc3d-side .slot.installed{border-color:rgba(134,239,172,.35)}
+.slot-name{font-weight:600;font-size:13px;line-height:1.3;margin:2px 0 4px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.slot-empty{font-size:12px;color:#94a3b8;margin:2px 0 6px}
+.build-sections{display:grid;grid-template-columns:minmax(0,.6fr) minmax(0,1.4fr);gap:18px;align-items:start;margin-top:16px}
+.pc3d-picker-list{display:flex;flex-direction:column;gap:6px;max-height:60vh;overflow:auto}
+.pc3d-pick{display:flex;gap:10px;align-items:center;text-align:left;width:100%;padding:10px 12px;border-radius:12px;
+  border:1px solid var(--line);background:rgba(255,255,255,.03);color:var(--text);cursor:pointer}
+.pc3d-pick:hover{border-color:var(--lime,#b6ff3c);background:rgba(182,255,60,.06)}
+.price-small{font-weight:700;white-space:nowrap}
+.pc3d-fallback{padding:14px}
+.pc3d-fb-case{position:relative;border:2px solid #334155;border-radius:12px;padding:14px;min-height:280px;
+  background:linear-gradient(180deg,rgba(56,189,248,.06),rgba(0,0,0,0));display:flex;flex-wrap:wrap;gap:8px;align-content:flex-start}
+.pc3d-fb-label{position:absolute;right:10px;top:-12px;background:#0b1016;padding:0 6px;font-size:11px;color:#7d8b9c}
+.pc3d-fb-part,.pc3d-fb-slot{display:flex;flex-direction:column;gap:2px;text-align:left;padding:8px 10px;border-radius:10px;cursor:pointer;
+  border:1px solid rgba(134,239,172,.3);background:rgba(134,239,172,.06);color:var(--text);font-size:12px}
+.pc3d-fb-slot{border-style:dashed;border-color:rgba(56,189,248,.5);background:rgba(56,189,248,.05);color:#bae6fd}
+@media(max-width:1080px){.pc3d-wrap{grid-template-columns:1fr}.build-sections{grid-template-columns:1fr}.pc3d-stage-inner{height:420px}}
+@media(max-width:640px){.pc3d-stage-inner{height:340px}}
+
+/* список состава корпуса под 3D-сценой */
+.pc3d-list{border-top:1px solid rgba(255,255,255,.07);max-height:210px;overflow:auto;padding:6px}
+.pc3d-row{display:flex;gap:8px;align-items:center;width:100%;text-align:left;padding:6px 8px;border-radius:9px;border:0;
+  background:transparent;color:var(--text);cursor:pointer;font-size:12px}
+.pc3d-row:hover{background:rgba(56,189,248,.08)}
+.pc3d-row.empty{color:#93c5fd}
+.pc3d-row>span.grow{display:flex;flex-direction:column;min-width:0}
+.pc3d-row b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.pc3d-row-ic{width:18px;text-align:center;opacity:.9}

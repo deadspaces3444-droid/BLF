@@ -394,11 +394,32 @@
   <div id="socketBarBuilder"></div>
   <div id="builderPriority"></div>
   <div class="toolbar compat-bar" id="builderCompatBar"></div>
-  <div class="builder-grid">
-    <div id="builderSlots"></div>
-    <div class="summary" id="builderSummary"></div>
+  <div class="pc3d-wrap">
+    <div class="pc3d-stage">
+      <div class="pc3d-head">
+        <div>
+          <b>🖥️ Сборка в 3D</b>
+          <span class="small muted" id="pc3dCount"></span>
+        </div>
+        <div class="pc3d-actions">
+          <button class="btn small ghost" onclick="pc3dToggleLid()" title="Открыть или закрыть боковую крышку">🚪 Крышка</button>
+          <button class="btn small ghost" onclick="pc3dToggleSpin()" title="Автоматическое вращение">🔄 Вращать</button>
+          <button class="btn small ghost" onclick="pc3dNextRgb()" title="Цвет подсветки">🌈 Подсветка</button>
+        </div>
+      </div>
+      <div id="pc3d" class="pc3d-stage-inner">
+        <div class="pc3d-hint small">Тяните мышью — поворот, колесо — зум. Нажмите на пустое место в корпусе, чтобы поставить деталь.</div>
+      </div>
+      <div class="pc3d-tip" id="pc3dTip"></div>
+      <div class="pc3d-list" id="pc3dList"></div>
+      <div class="pc3d-fit" id="pc3dFit"></div>
+    </div>
+    <div class="pc3d-side" id="builderSlots"></div>
   </div>
-  <div id="builderSwaps"></div>
+  <div class="build-sections">
+    <div class="summary" id="builderSummary"></div>
+    <div id="builderSwaps"></div>
+  </div>
   <div class="summary" id="builderFps" style="margin-top:24px"></div>
 </div></section>
 
@@ -407,6 +428,7 @@
   <span class="small">Цены в каталоге — ориентировочные (минимальные по магазинам города на дату обновления). Актуальные цены и наличие смотрите по ссылкам на сайтах DNS, Citilink, Ozon, Wildberries, Яндекс Маркета, М.Видео, Юлы и Avito. Б/У-комплектующие покупайте с проверкой и гарантией продавца. Расчёт FPS — оценочный.</span>
 </div></footer>
 
+<script src="vendor/three.min.js"></script>
 <script src="data.js"></script>
 <script src="compat.js"></script>
 <script src="compat-ui.js"></script>
@@ -420,6 +442,7 @@
 <script src="servers.js"></script>
 <script src="desktop-os.js"></script>
 <script src="catalog.js"></script>
+<script src="pc3d.js"></script>
 <script src="app.js"></script>
 <div class="toast" id="toast"></div>
 </body>
