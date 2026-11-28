@@ -558,3 +558,12 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .check-form{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
 .check-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
 .check-row input{flex:1;min-width:180px}
+
+/* ===== Диагностика живых цен ===== */
+.live-paste{margin-top:10px}
+.live-paste-body{margin-top:8px}
+.live-paste-area{width:100%;min-height:120px;margin-top:8px;background:var(--bg2);border:1px solid var(--line);color:var(--text);
+  border-radius:10px;padding:10px;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;line-height:1.45;resize:vertical}
+.live-error-box{margin:8px 0;padding:10px 12px;border-radius:10px;border:1px solid rgba(253,164,175,.4);background:rgba(253,164,175,.07);font-size:13px}
+.live-error-box ol{margin:6px 0 6px 18px;padding:0;line-height:1.5}
+.live-error-box code{background:rgba(255,255,255,.08);padding:1px 5px;border-radius:5px;font-size:12px}

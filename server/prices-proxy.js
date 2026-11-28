@@ -55,6 +55,17 @@ async function getText(url, opts = {}) {
   } finally { clearTimeout(t); }
 }
 
+// «fetch failed» ничего не говорит пользователю — переводим на человеческий
+function humanError(e) {
+  const m = String((e && e.message) || e);
+  if (/fetch failed|ENOTFOUND|EAI_AGAIN|ECONNREFUSED|ETIMEDOUT|aborted/i.test(m)) {
+    return 'сайт не отвечает из этой сети (антибот или блокировка провайдера)';
+  }
+  if (/HTTP 40[13]|HTTP 429/.test(m)) return 'сайт закрыл доступ (антибот, ' + m + ')';
+  if (/HTTP 4\d\d/.test(m)) return 'сайт изменил формат ответа (' + m + ')';
+  return m;
+}
+
 const digits = v => Number(String(v == null ? '' : v).replace(/[^\d]/g, '')) || 0;
 
 // ---------- Юла: открытый web-api поиска ----------
@@ -154,7 +165,7 @@ async function collect(q, city, limit, only) {
       result.sources[name] = { ok: true, count: rows.length, ms: Date.now() - started };
       result.offers.push(...rows);
     } catch (e) {
-      result.sources[name] = { ok: false, error: e.message, ms: Date.now() - started };
+      result.sources[name] = { ok: false, error: humanError(e), ms: Date.now() - started };
     }
   }));
   // убираем дубли по «название+цена», сортируем по цене
@@ -169,6 +180,27 @@ async function collect(q, city, limit, only) {
     .sort((a, b) => a.price - b.price)
     .slice(0, limit);
   return result;
+}
+
+// ---------- Статика: этот же сервер отдаёт и сайт, чтобы всё было на одном адресе ----------
+const ROOT = require('path').resolve(__dirname, '..');
+const MIME = {
+  '.html': 'text/html; charset=utf-8', '.js': 'text/javascript; charset=utf-8', '.css': 'text/css; charset=utf-8',
+  '.json': 'application/json; charset=utf-8', '.svg': 'image/svg+xml', '.png': 'image/png', '.jpg': 'image/jpeg',
+  '.ico': 'image/x-icon', '.md': 'text/markdown; charset=utf-8', '.txt': 'text/plain; charset=utf-8',
+};
+function serveStatic(pathname, res, cors) {
+  const path = require('path');
+  const rel = pathname === '/' ? 'index.html' : decodeURIComponent(pathname).replace(/^\/+/, '');
+  const file = path.resolve(ROOT, rel);
+  if (!file.startsWith(ROOT) || rel.startsWith('server/') || rel.startsWith('.git')) {
+    res.writeHead(403, { 'content-type': 'text/plain; charset=utf-8', ...cors }); return res.end('403');
+  }
+  require('fs').readFile(file, (err, buf) => {
+    if (err) { res.writeHead(404, { 'content-type': 'text/plain; charset=utf-8', ...cors }); return res.end('404: ' + rel); }
+    res.writeHead(200, { 'content-type': MIME[path.extname(file).toLowerCase()] || 'application/octet-stream', ...cors, 'cache-control': 'no-cache' });
+    res.end(buf);
+  });
 }
 
 const server = http.createServer(async (req, res) => {
@@ -207,10 +239,12 @@ const server = http.createServer(async (req, res) => {
     }
   }
 
+  if (req.method === 'GET' && !u.pathname.startsWith('/api/')) return serveStatic(u.pathname, res, cors);
   return json(404, { error: 'Неизвестный путь. Используйте /api/prices?q=...&city=...' });
 });
 
 server.listen(PORT, '0.0.0.0', () => {
-  console.log(`BLF prices proxy: http://0.0.0.0:${PORT}/api/prices?q=rtx%204070&city=Новосибирск`);
+  console.log(`BLF: сайт + прокси цен → http://localhost:${PORT}/  (открывайте сайт именно по этому адресу)`);
+  console.log(`API: http://localhost:${PORT}/api/prices?q=rtx%204070&city=Новосибирск`);
   console.log('Источники:', Object.keys(SOURCES).join(', '), '· кэш', CACHE_TTL / 60000, 'мин');
 });

@@ -27,7 +27,8 @@ const state = {
   compareQuery: '',
   compareBuilds: ['build-mid', 'build-high'],
   priceQuery: '', priceCat: 'all', priceCond: 'all', priceSort: 'cheap', priceMin: '', priceMax: '',
-  liveProxy: '', liveOffers: [], liveBusy: false, liveError: '', liveQuery: '', liveAt: '',
+  liveProxy: '', liveOffers: [], liveBusy: false, liveError: '', liveErrorHtml: '', liveQuery: '', liveAt: '',
+  livePing: null, livePasteOpen: false, livePasteRaw: '', liveSources: null,
   builder: { cpu:'cpu-i5-12400f', gpu:'gpu-rtx4070', motherboard:'mb-b660m', ram:'ram-kingston32', ssd:'ssd-nv2-1tb', psu:'psu-rm750', case:'case-matrexx', cooling:'cool-peerless' },
   buildsFilter: 'all',
   // ИИ-подбор сборки (цена, город, во что играть / задачи)
