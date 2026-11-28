@@ -29,6 +29,8 @@ const state = {
   priceQuery: '', priceCat: 'all', priceCond: 'all', priceSort: 'cheap', priceMin: '', priceMax: '',
   liveProxy: '', liveOffers: [], liveBusy: false, liveError: '', liveErrorHtml: '', liveQuery: '', liveAt: '',
   livePing: null, livePasteOpen: false, livePasteRaw: '', liveSources: null,
+  liveSort: 'cheap', liveCond: 'all', liveGateway: 'corsproxy', liveOff: [], liveHistory: [],
+  liveProgress: {}, liveErrors: {}, liveCity: '', liveTook: 0, liveBest: null,
   builder: { cpu:'cpu-i5-12400f', gpu:'gpu-rtx4070', motherboard:'mb-b660m', ram:'ram-kingston32', ssd:'ssd-nv2-1tb', psu:'psu-rm750', case:'case-matrexx', cooling:'cool-peerless' },
   buildsFilter: 'all',
   // ИИ-подбор сборки (цена, город, во что играть / задачи)
@@ -122,6 +124,10 @@ function setRegion(id) {
   if (label) label.textContent = c.name;
   closeRegionModal();
   render();
+  // если открыт живой поиск цен — перезапрашиваем под новый город
+  if (typeof liveSearch === 'function' && state.liveQuery && document.querySelector('#liveSearchBox')) {
+    liveSearch(state.liveQuery);
+  }
 }
 
 // ---------- Модальное окно выбора города ----------
@@ -733,7 +739,9 @@ function setCompareComp(i, id) {
 }
 
 function renderPrices() {
-  if (typeof loadLiveProxy === 'function') loadLiveProxy();
+  if (typeof liveInit === 'function') liveInit();
+  const ls = $('#liveSearchBox');
+  if (ls && typeof liveSearchHtml === 'function') ls.innerHTML = liveSearchHtml();
   const hn = $('#priceHonestNote');
   if (hn && typeof priceHonestyNote === 'function') hn.innerHTML = priceHonestyNote();
   const lo = $('#liveOffers');

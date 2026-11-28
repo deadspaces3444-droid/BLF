@@ -567,3 +567,24 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .live-error-box{margin:8px 0;padding:10px 12px;border-radius:10px;border:1px solid rgba(253,164,175,.4);background:rgba(253,164,175,.07);font-size:13px}
 .live-error-box ol{margin:6px 0 6px 18px;padding:0;line-height:1.5}
 .live-error-box code{background:rgba(255,255,255,.08);padding:1px 5px;border-radius:5px;font-size:12px}
+
+/* ===== Встроенный живой поиск цен ===== */
+.live-search{margin:14px 0;padding:14px;border:1px solid rgba(182,255,60,.28);border-radius:14px;background:rgba(182,255,60,.045)}
+.live-search-head{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;margin-bottom:10px}
+.live-search-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center;margin-bottom:8px}
+.live-search-row input{flex:1;min-width:240px}
+.live-history{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0 10px}
+.live-sources{display:flex;flex-wrap:wrap;gap:10px;align-items:center;padding:8px 0;border-top:1px dashed var(--line);font-size:12px}
+.live-src{display:inline-flex;gap:6px;align-items:center;padding:3px 8px;border-radius:999px;background:rgba(255,255,255,.05)}
+.live-dot{width:8px;height:8px;border-radius:50%;display:inline-block;background:#64748b}
+.live-dot.run{background:#fbbf24;animation:pulse 1s infinite}
+.live-dot.ok{background:#86efac}
+.live-dot.fail{background:#fda4af}
+.live-dot.mid{background:#94a3b8}
+@keyframes pulse{0%,100%{opacity:.35}50%{opacity:1}}
+.live-summary{display:flex;flex-wrap:wrap;gap:14px;align-items:center;padding:10px 0;font-size:13px}
+.live-offer.best{border-color:rgba(182,255,60,.55);background:rgba(182,255,60,.07)}
+.badge.best{background:rgba(182,255,60,.18);color:#d9ff8f;border:1px solid rgba(182,255,60,.5)}
+.live-settings{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
+.live-settings summary{cursor:pointer}
+.live-settings label{display:inline-flex;gap:6px;align-items:center;margin-right:10px}
