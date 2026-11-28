@@ -140,46 +140,46 @@ const CMP_SECTIONS = {
     { title: 'Совместимость', desc: 'Параметры, от которых зависит, встанет ли процессор в вашу плату и какой нужен блок питания.', rows: ['socket', 'tdp', 'pcie'] },
     { title: 'Память', desc: 'Поддерживаемые типы и поколения оперативной памяти.', rows: ['ramType'] },
     { title: 'Возможности для игр', desc: 'Игровой и рабочий индексы и средний FPS по 20 популярным играм.', custom: 'gaming' },
-    { title: 'Цена и доступность', desc: 'Минимальная цена в вашем городе: новые комплектующие и БУ с Avito.', custom: 'price' },
+    { title: 'Цена и доступность', desc: 'Цена новых по официальным магазинам в вашем городе; БУ — примерная оценка (проверять самостоятельно).', custom: 'price' },
   ],
   gpu: [
     { title: 'Базовая информация', desc: 'Место в рейтинге среди моделей этой категории, цена-качество и энергоэффективность.', custom: 'base' },
     { title: 'Подробные характеристики', desc: 'Объём памяти, энергопотребление и габариты.', rows: ['vramGb', 'tdp', 'lengthMm', 'pcie'] },
     { title: 'Совместимость', desc: 'Хватит ли блока питания и влезет ли карта в корпус.', rows: ['recommendedPsu', 'lengthMm'] },
     { title: 'Возможности для игр', desc: 'Игровой и рабочий индексы и средний FPS по 20 играм.', custom: 'gaming' },
-    { title: 'Цена и доступность', desc: 'Минимальная цена в вашем городе: новые и БУ.', custom: 'price' },
+    { title: 'Цена и доступность', desc: 'Цена новых по официальным магазинам; БУ — примерная оценка для сверки.', custom: 'price' },
   ],
   motherboard: [
     { title: 'Базовая информация', desc: 'Место в рейтинге среди моделей этой категории, цена-качество и энергоэффективность.', custom: 'base' },
     { title: 'Подробные характеристики', desc: 'Чипсет, форм-фактор и набор слотов.', rows: ['chipset', 'formFactor', 'm2Slots', 'sataPorts'] },
     { title: 'Совместимость', desc: 'Сокет процессора, тип памяти и версия PCIe.', rows: ['socket', 'ramType', 'pcie'] },
     { title: 'Память', desc: 'Количество слотов и максимальный объём.', rows: ['ramSlots', 'maxRam'] },
-    { title: 'Цена и доступность', desc: 'Минимальная цена в вашем городе: новые и БУ.', custom: 'price' },
+    { title: 'Цена и доступность', desc: 'Цена новых по официальным магазинам; БУ — примерная оценка для сверки.', custom: 'price' },
   ],
   ram: [
     { title: 'Базовая информация', desc: 'Место в рейтинге среди моделей этой категории, цена-качество и энергоэффективность.', custom: 'base' },
     { title: 'Подробные характеристики', desc: 'Объём, частоты и тайминги комплекта.', rows: ['type', 'capacityGb', 'modules', 'freq', 'latency', 'voltage'] },
-    { title: 'Цена и доступность', desc: 'Минимальная цена в вашем городе: новые и БУ.', custom: 'price' },
+    { title: 'Цена и доступность', desc: 'Цена новых по официальным магазинам; БУ — примерная оценка для сверки.', custom: 'price' },
   ],
   ssd: [
     { title: 'Базовая информация', desc: 'Место в рейтинге среди моделей этой категории, цена-качество и энергоэффективность.', custom: 'base' },
     { title: 'Подробные характеристики', desc: 'Тип, объём и скорость.', rows: ['type', 'capacityGb', 'interface', 'readSpeed', 'writeSpeed'] },
-    { title: 'Цена и доступность', desc: 'Минимальная цена в вашем городе: новые и БУ.', custom: 'price' },
+    { title: 'Цена и доступность', desc: 'Цена новых по официальным магазинам; БУ — примерная оценка для сверки.', custom: 'price' },
   ],
   psu: [
     { title: 'Базовая информация', desc: 'Место в рейтинге среди моделей этой категории, цена-качество и энергоэффективность.', custom: 'base' },
     { title: 'Подробные характеристики', desc: 'Мощность, сертификат и разъёмы.', rows: ['wattage', 'certification', 'modular', 'pcie5', 'formFactor'] },
-    { title: 'Цена и доступность', desc: 'Минимальная цена в вашем городе: новые и БУ.', custom: 'price' },
+    { title: 'Цена и доступность', desc: 'Цена новых по официальным магазинам; БУ — примерная оценка для сверки.', custom: 'price' },
   ],
   case: [
     { title: 'Базовая информация', desc: 'Место в рейтинге среди моделей этой категории, цена-качество и энергоэффективность.', custom: 'base' },
     { title: 'Подробные характеристики', desc: 'Что помещается в корпус.', rows: ['motherboardSupport', 'maxGpuLengthMm', 'maxCpuCoolerHeightMm', 'psuSupport', 'fans', 'glass'] },
-    { title: 'Цена и доступность', desc: 'Минимальная цена в вашем городе: новые и БУ.', custom: 'price' },
+    { title: 'Цена и доступность', desc: 'Цена новых по официальным магазинам; БУ — примерная оценка для сверки.', custom: 'price' },
   ],
   cooling: [
     { title: 'Базовая информация', desc: 'Место в рейтинге среди моделей этой категории, цена-качество и энергоэффективность.', custom: 'base' },
     { title: 'Подробные характеристики', desc: 'Тип, рассеиваемая мощность и высота.', rows: ['type', 'tdpSupport', 'heightMm', 'sockets', 'fans'] },
-    { title: 'Цена и доступность', desc: 'Минимальная цена в вашем городе: новые и БУ.', custom: 'price' },
+    { title: 'Цена и доступность', desc: 'Цена новых по официальным магазинам; БУ — примерная оценка для сверки.', custom: 'price' },
   ],
 };
 
@@ -378,7 +378,7 @@ function renderCompareComps() {
       html += `<div class="table-wrap"><table class="cmp-table">
         <tr><th>Показатель</th>${selected.map(c => `<th>${esc(c.name)}</th>`).join('')}</tr>
         <tr><td>Мин. цена, ${esc(regionById(state.region).name)} (новые)</td>${selected.map(c => `<td class="price">${fmt(minPrice(c.id, state.region, 'new') ?? c.basePrice)}</td>`).join('')}</tr>
-        <tr><td>Мин. цена БУ</td>${selected.map(c => { const p = minPrice(c.id, state.region, 'used'); return `<td>${p ? fmt(p) : '<span class="muted">нет предложений</span>'}</td>`; }).join('')}</tr>
+        <tr><td>БУ ≈ <span class="small muted">проверять самому</span></td>${selected.map(c => { const p = minPrice(c.id, state.region, 'used'); return `<td>${p ? fmt(p) + ' <span class="small muted">примерно</span>' : '<span class="muted">—</span>'}</td>`; }).join('')}</tr>
         <tr><td>Цена-качество (баллов на 1000 ₽)</td>${selected.map(c => { const v = cmpValue(c); const bi = cmpBestIndex(selected.map(x => cmpValue(x)), true); return `<td class="${selected.indexOf(c) === bi ? 'win' : ''}">${v}</td>`; }).join('')}</tr>
         <tr><td>Энергоэффективность</td>${selected.map(c => `<td>${cmpEfficiency(c) ?? '—'}</td>`).join('')}</tr>
         <tr><td>Средний FPS / 100 ₽</td>${selected.map(c => { const f = compFps(c, 'all', '1080p'); const p = minPrice(c.id, state.region, 'new') ?? c.basePrice; return `<td>${f && p ? (Math.round(f / p * 10000) / 100) : '—'}</td>`; }).join('')}</tr>

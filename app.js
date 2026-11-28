@@ -27,10 +27,6 @@ const state = {
   compareQuery: '',
   compareBuilds: ['build-mid', 'build-high'],
   priceQuery: '', priceCat: 'all', priceCond: 'all', priceSort: 'cheap', priceMin: '', priceMax: '',
-  liveProxy: '', liveOffers: [], liveBusy: false, liveError: '', liveErrorHtml: '', liveQuery: '', liveAt: '',
-  livePing: null, livePasteOpen: false, livePasteRaw: '', liveSources: null,
-  liveSort: 'cheap', liveCond: 'all', liveGateway: 'corsproxy', liveOff: [], liveHistory: [],
-  liveProgress: {}, liveErrors: {}, liveCity: '', liveTook: 0, liveBest: null,
   builder: { cpu:'cpu-i5-12400f', gpu:'gpu-rtx4070', motherboard:'mb-b660m', ram:'ram-kingston32', ssd:'ssd-nv2-1tb', psu:'psu-rm750', case:'case-matrexx', cooling:'cool-peerless' },
   buildsFilter: 'all',
   // ИИ-подбор сборки (цена, город, во что играть / задачи)
@@ -125,9 +121,6 @@ function setRegion(id) {
   closeRegionModal();
   render();
   // если открыт живой поиск цен — перезапрашиваем под новый город
-  if (typeof liveSearch === 'function' && state.liveQuery && document.querySelector('#liveSearchBox')) {
-    liveSearch(state.liveQuery);
-  }
 }
 
 // ---------- Модальное окно выбора города ----------
@@ -392,7 +385,6 @@ function renderSaved() {
 function compCard(c) {
   const mp = minPrice(c.id, state.region, 'new');
   const mpUsed = minPrice(c.id, state.region, 'used');
-  const chk = typeof priceCheckFor === 'function' ? priceCheckFor(c.id) : null;
   const base = mp ?? c.basePrice;
   const fps = compFps(c);
   const gameName = state.compFpsGame === 'all' ? 'средний по 20 играм' : (GAMES.find(g => g.id === state.compFpsGame)?.name || '');
@@ -405,11 +397,9 @@ function compCard(c) {
     <div class="bar"><i style="width:${c.perf}%"></i></div>
     ${fps ? `<div class="fps-inline">🎯 ${fps} FPS <span class="muted small">· ${gameName} ${state.compFpsRes} ${pair}</span></div>` : ''}
     <div class="row">
-      <div><span class="price">${fmt(base)}</span> <span class="muted small">оценка</span><br>
-      ${mpUsed ? `<span class="small" style="color:#fda4af">БУ ≈ ${fmt(mpUsed)}</span>` : '<span class="small muted">БУ ≈ нет данных</span>'}
-      ${chk ? `<div class="small ${priceVerdict(chk).cls}">✔ ваш факт: ${fmt(chk.price)} (${esc(chk.market)})</div>` : ''}</div>
+      <div><span class="price">${fmt(base)}</span> <span class="muted small">новое · магазины</span><br>
+      ${mpUsed ? `<span class="small used-est">БУ ≈ ${fmt(mpUsed)}</span> <span class="small muted" title="Примерная оценка вторичного рынка: реальная цена зависит от состояния, комплекта и продавца. Проверяйте самостоятельно на Авито и Юле.">⚠ проверять самостоятельно</span>` : '<span class="small muted">БУ ≈ нет данных</span>'}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
-        <button class="btn small ghost" onclick="openPriceCheck('${c.id}')">🔎 Проверить цену</button>
         <button class="btn small ghost" onclick="goPriceId('${c.id}')">Цены →</button>
         <button class="btn small lime" onclick="compareFromCard('${c.id}')">⚖️ Сравнить</button>
       </div>
@@ -432,7 +422,6 @@ function buildCard(b) {
   const perf = buildPerf(b), power = buildPower(b);
   const fps = estimateBuildFps(b.parts, state.compFpsGame === 'all' ? 'cyberpunk' : state.compFpsGame, state.compFpsRes);
   const prioLine = typeof priorityCardLine === 'function' ? priorityCardLine(b) : '';
-  const trust = typeof buildPriceTrust === 'function' ? buildPriceTrust(b) : null;
   return `<article class="card">
     <div class="tag">${b.tag}</div>
     <h3>${esc(b.name)}</h3>
@@ -448,9 +437,8 @@ function buildCard(b) {
     <div class="fps-inline">🎯 <b>${fps} FPS</b> <span class="muted small">· ${state.compFpsGame === 'all' ? 'Cyberpunk 2077' : esc(GAMES.find(g => g.id === state.compFpsGame)?.name || '')} ${state.compFpsRes}</span></div>
     ${prioLine}
     <div class="row">
-      <div><span class="price" style="font-size:1.2rem">${fmt(total)}</span> <span class="muted small">оценка · ${esc(regionById(state.region).name)}</span><br>
-      <span class="small" style="color:#fda4af">БУ ≈ ${fmt(used)}</span> <span class="muted small">· ${power} Вт</span>
-      ${trust ? `<div class="small muted">✓ проверено вручную: ${trust.checked} из ${trust.total} позиций</div>` : ''}</div>
+      <div><span class="price" style="font-size:1.2rem">${fmt(total)}</span> <span class="muted small">новое · ${esc(regionById(state.region).name)}</span><br>
+      <span class="small used-est">БУ ≈ ${fmt(used)}</span> <span class="small muted">⚠ проверять самостоятельно</span> <span class="muted small">· ${power} Вт</span></div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn small ghost" onclick="loadBuilder('${b.id}')">В конструктор</button>
         <button class="btn small" onclick="addCompareBuild('${b.id}')">Сравнить</button>
@@ -646,7 +634,7 @@ function renderCompareBuilds() {
   const prio = typeof priorityInfo === 'function' ? priorityInfo() : null;
   const rows = [
     ['Цена (новые)', b => fmt(buildPrice(b, state.region, 'new').total), b => buildPrice(b, state.region, 'new').total, true],
-    ['Цена (БУ)', b => fmt(buildPrice(b, state.region, 'used').total), b => buildPrice(b, state.region, 'used').total, true],
+    ['Цена БУ ≈ (проверять)', b => fmt(buildPrice(b, state.region, 'used').total), b => buildPrice(b, state.region, 'used').total, true],
     ['Игровой индекс', b => buildPerf(b) + ' / 100', b => buildPerf(b), false],
     ['Рабочий индекс', b => buildWorkPerf(b) + ' / 100', b => buildWorkPerf(b), false],
     ['Потребление', b => buildPower(b) + ' Вт', b => buildPower(b), false],
@@ -738,22 +726,31 @@ function setCompareComp(i, id) {
   render();
 }
 
+// Пояснение к ценам: новые — официальные магазины, БУ — примерная оценка
+function priceNoteHtml() {
+  return `<div class="price-note">
+    <b>ℹ️ Новое — по официальным магазинам, БУ — примерная цифра.</b>
+    Цены новых товаров считаются по магазинам DNS, Citilink, Ozon, Wildberries, Яндекс Маркет, М.Видео, Эльдорадо, Позитроника, Regard и XCOM с поправкой на город — это расчётная витрина для сравнения сборок, а точную цену и наличие смотрите по кнопке «Открыть на …».
+    <b class="warn">БУ — только ориентир</b>: вторичный рынок зависит от состояния, комплекта и продавца, поэтому цену нужно проверять самостоятельно на Авито и Юле.
+  </div>`;
+}
+
 function renderPrices() {
-  if (typeof liveInit === 'function') liveInit();
-  const ls = $('#liveSearchBox');
-  if (ls && typeof liveSearchHtml === 'function') ls.innerHTML = liveSearchHtml();
   const hn = $('#priceHonestNote');
-  if (hn && typeof priceHonestyNote === 'function') hn.innerHTML = priceHonestyNote();
-  const lo = $('#liveOffers');
-  if (lo && typeof liveOffersHtml === 'function') lo.innerHTML = liveOffersHtml(state.priceQuery);
+  if (hn) hn.innerHTML = priceNoteHtml();
   const comps = searchComponents(state.priceQuery, { cat: state.priceCat, cityId: state.region });
   const mn = state.priceMin === '' || isNaN(Number(state.priceMin)) ? null : Number(state.priceMin);
   const mx = state.priceMax === '' || isNaN(Number(state.priceMax)) ? null : Number(state.priceMax);
 
   let offers = [];
   comps.forEach(c => {
-    offersFor(c.id, { regionId: state.region, condition: state.priceCond === 'all' ? null : state.priceCond })
-      .forEach(o => offers.push({ ...o, comp: c }));
+    const list = offersFor(c.id, { regionId: state.region, condition: 'new' });
+    list.forEach(o => offers.push({ ...o, comp: c }));
+    if (state.priceCond === 'used' || state.priceCond === 'all') {
+      const est = usedEstimate(c.id, state.region);
+      if (est) offers.push({ componentId: c.id, storeId: 'used_est', regionId: state.region, price: est.price, oldPrice: null,
+        condition: 'used', estimate: true, deliveryDays: null, deliveryPrice: 0, comp: c });
+    }
   });
   // Фильтр по цене — на уровне конкретных предложений (новые и БУ стоят по-разному)
   if (mn !== null) offers = offers.filter(o => o.price >= mn);
@@ -764,7 +761,7 @@ function renderPrices() {
   else offers.sort((a, b) => a.comp.name.localeCompare(b.comp.name, 'ru'));
 
   $('#priceCount').textContent = offers.length
-    ? `Оценок цен: ${offers.length.toLocaleString('ru-RU')} · город: ${regionById(state.region).name} · новые и БУ (расчёт, не данные магазинов)`
+    ? `${offers.length.toLocaleString('ru-RU')} позиций · ${regionById(state.region).name} · новые — официальные магазины · БУ — примерная оценка`
     : `Предложений не найдено · город: ${regionById(state.region).name}`;
 
   // Внешние ссылки: открытый поиск по всем сайтам, включая Авито и Юлу
@@ -782,9 +779,6 @@ function renderPrices() {
       <a class="strong-link" href="https://market.yandex.ru/search?text=${encodeURIComponent(searchTerm)}" target="_blank" rel="noopener">🔎 Яндекс Маркет — все предложения ↗</a>
     </div>`;
 
-  const live2 = $('#liveSearchLinks');
-  if (live2 && typeof liveLinksHtml === 'function') live2.innerHTML = liveLinksHtml(searchTerm);
-
   if (!offers.length) {
     $('#priceResults').innerHTML = `<div class="empty">По запросу «${esc(state.priceQuery)}» в городе ${esc(regionById(state.region).name)} предложений нет.<br>
       Попробуйте другой город (кнопка в шапке), сбросьте фильтры или откройте живой поиск по ссылкам выше — на Авито, Юле, DNS, Ozon цены обновляются в реальном времени.</div>`;
@@ -792,19 +786,23 @@ function renderPrices() {
   }
   const shown = offers.slice(0, 80);
   $('#priceResults').innerHTML = shown.map(o => {
-    const store = storeById(o.storeId);
+    const store = storeById(o.storeId) || { name: 'Ориентир БУ' };
     const city = regionById(o.regionId);
     return `<div class="offer">
       <div class="grow">
         <b>${esc(o.comp.name)}</b> <span class="badge ${o.condition}">${o.condition === 'new' ? 'Новое' : 'Б/У'}</span>
         <span class="badge region">${city.icon} ${esc(city.name)}</span>
-        <div class="small muted">${catById(o.comp.cat).name} · ${esc(store.name)} · <b>расчётная оценка</b> · ${o.deliveryDays === 0 ? 'самовывоз' : 'доставка ' + o.deliveryDays + ' дн.'}${o.deliveryPrice ? ' · ' + fmt(o.deliveryPrice) : ' · бесплатно'}</div>
+        <div class="small muted">${catById(o.comp.cat).name} · ${o.estimate
+          ? '<b class="warn">примерная БУ-цена · проверить самостоятельно (Авито, Юла)</b>'
+          : esc(store.name) + ' · <b>новое · официальный магазин</b> · ' + (o.deliveryDays === 0 ? 'самовывоз' : 'доставка ' + o.deliveryDays + ' дн.') + (o.deliveryPrice ? ' · ' + fmt(o.deliveryPrice) : ' · бесплатно')}</div>
       </div>
       <div style="text-align:right">
         <div class="price-big">${fmt(o.price)}</div>
         ${o.oldPrice ? `<div class="old">${fmt(o.oldPrice)}</div>` : ''}
-        <a class="btn small ghost" href="${(store.id === 'avito' || store.id === 'avito_new') ? avitoUrl(o.comp.name, state.region) : store.searchUrl(o.comp.name)}" target="_blank" rel="noopener">Проверить на ${esc(store.name)} ↗</a>
-        <button class="btn small lime" onclick="openPriceCheck('${o.comp.id}')">Я нашёл за…</button>
+        ${o.estimate
+          ? `<a class="btn small ghost" href="${avitoUrl(o.comp.name, state.region)}" target="_blank" rel="noopener">Проверить на Авито ↗</a>
+             <a class="btn small ghost" href="https://youla.ru/search?q=${encodeURIComponent(o.comp.name)}" target="_blank" rel="noopener">Юла ↗</a>`
+          : `<a class="btn small ghost" href="${store.searchUrl(o.comp.name)}" target="_blank" rel="noopener">Открыть на ${esc(store.name)} ↗</a>`}
       </div>
     </div>`;
   }).join('') + (offers.length > 80 ? `<p class="muted small">Показаны первые 80 из ${offers.length}. Уточните запрос или фильтры.</p>` : '');
@@ -906,7 +904,7 @@ function renderBuilder() {
         ${pool.map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)} — от ${fmt(minPrice(x.id, state.region, 'new') ?? x.basePrice)}${x.year < 2020 ? ' · старая' : ''}</option>`).join('')}
       </select></div>
       <div class="p"><span class="price">${fmt(minPrice(cur, state.region, 'new') ?? curObj?.basePrice ?? 0)}</span><br>
-      <span class="small" style="color:#fda4af">${minPrice(cur, state.region, 'used') ? 'БУ ' + fmt(minPrice(cur, state.region, 'used')) : ''}</span></div>
+      <span class="small used-est">${minPrice(cur, state.region, 'used') ? 'БУ ≈ ' + fmt(minPrice(cur, state.region, 'used')) + ' (проверять)' : ''}</span></div>
     </div>`;
   }).join('');
 
@@ -920,10 +918,8 @@ function renderBuilder() {
   $('#builderSummary').innerHTML = `
     <h3 style="margin-top:0">🧮 Ваша сборка</h3>
     <div class="total">${fmt(totalNew)}</div>
-    <div class="small muted"><b>расчётная оценка</b> · ${esc(regionById(state.region).name)} · БУ ≈ ${fmt(totalUsed)}</div>
-    ${(() => { const tr = typeof buildPriceTrust === 'function' ? buildPriceTrust(fakeBuild) : null; if (!tr) return '';
-      if (!tr.checked) return `<button class="btn small ghost" style="margin-top:6px" onclick="openPriceCheck(state.builder.gpu)">🔎 Проверить реальные цены (Авито, Юла, DNS…)</button>`;
-      return `<div class="small ${tr.diff > 0 ? 'bad' : 'good'}">✔ проверено ${tr.checked} из ${tr.total} позиций · факт ${tr.diff > 0 ? '+' : ''}${tr.diff}% к оценке</div>`; })()}
+    <div class="small muted"><b>новое · официальные магазины</b> · ${esc(regionById(state.region).name)}</div>
+    <div class="small muted">БУ ≈ <span class="used-est">${fmt(totalUsed)}</span> · <b class="warn">примерная оценка, проверяйте самостоятельно</b></div>
     <div class="meter-label"><span>Игровой индекс</span><b>${perf}/100</b></div><div class="bar"><i style="width:${perf}%"></i></div>
     <div class="meter-label"><span>Рабочий индекс</span><b>${work}/100</b></div><div class="bar"><i style="width:${work}%"></i></div>
     <div class="small muted" style="margin-top:10px">Потребление ≈ ${power} Вт · БП: ${byId(state.builder.psu)?.specs.wattage ?? '—'} Вт</div>

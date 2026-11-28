@@ -588,3 +588,8 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .live-settings{margin-top:12px;padding-top:10px;border-top:1px dashed var(--line)}
 .live-settings summary{cursor:pointer}
 .live-settings label{display:inline-flex;gap:6px;align-items:center;margin-right:10px}
+
+/* ===== Пометки о ценах ===== */
+.warn{color:#fbbf24}
+.used-est{color:#fda4af}
+.price-note{line-height:1.55}

@@ -1234,21 +1234,6 @@ function ensureCityOffers(cityId) {
       if (!OFFER_INDEX.has(k)) OFFER_INDEX.set(k, []);
       OFFER_INDEX.get(k).push(o);
     });
-    if (city.id !== 'online' && rnd() > 0.3) {
-      const jitter = 0.9 + rnd() * 0.2;
-      const price = Math.round(c.basePrice * 0.62 * city.coeff * jitter / 10) * 10;
-      const o = {
-        componentId: c.id, storeId: 'avito', regionId: city.id,
-        price, oldPrice: null, condition: 'used',
-        deliveryDays: 1 + Math.floor(rnd() * 3),
-        deliveryPrice: 300 + Math.floor(rnd() * 5) * 100,
-        updated: `2026-11-${String(18 + Math.floor(rnd() * 8)).padStart(2,'0')}`,
-      };
-      OFFERS.push(o);
-      const k = c.id + '|' + city.id;
-      if (!OFFER_INDEX.has(k)) OFFER_INDEX.set(k, []);
-      OFFER_INDEX.get(k).push(o);
-    }
   });
   OFFER_INDEX.forEach(arr => arr.sort((a, b) => a.price - b.price));
 }
@@ -1264,6 +1249,30 @@ const storeById = id => STORES.find(s => s.id === id);
 const catById = id => CATEGORIES.find(c => c.id === id);
 const fmt = n => n.toLocaleString('ru-RU') + ' ₽';
 
+// Примерная оценка вторичного рынка. Это НЕ данные Авито/Юлы: реальная цена зависит
+// от состояния, комплекта и продавца — пользователь должен проверять сам.
+function usedEstimate(componentId, regionId) {
+  const c = byId(componentId);
+  if (!c) return null;
+  const city = CITIES.find(x => x.id === regionId) || { coeff: 1, id: 'online' };
+  const ci = CITIES.indexOf(city);
+  const compIdx = COMPONENTS.indexOf(c);
+  const rnd = seededRand(7777 + compIdx * 53 + (ci < 0 ? 0 : ci) * 17);
+  const age = Math.max(0, 2026 - (c.year || 2020));
+  // чем старше железо, тем сильнее падение вторички (но не ниже 35% и не выше 78% от новой)
+  const coef = Math.min(0.78, Math.max(0.35, 0.70 - age * 0.035)) * (0.95 + rnd() * 0.1);
+  return {
+    price: Math.round(c.basePrice * coef * city.coeff / 10) * 10,
+    estimate: true,
+    note: 'Примерная цена вторичного рынка — проверяйте на Авито и Юле: состояние, комплект и продавец меняют цену в разы.',
+  };
+}
+
+// Официальные магазины: только новые товары. БУ не выдаётся за предложение магазина.
+function officialStoresFor(componentId, regionId) {
+  return offersFor(componentId, { regionId, condition: 'new' });
+}
+
 function offersFor(componentId, { regionId = null, condition = null } = {}) {
   if (regionId) {
     ensureCityOffers(regionId);
@@ -1275,7 +1284,14 @@ function offersFor(componentId, { regionId = null, condition = null } = {}) {
     .sort((a, b) => a.price - b.price);
 }
 function minPrice(componentId, regionId, condition = 'new') {
-  const list = offersFor(componentId, { regionId, condition });
+  if (condition === 'used' || condition === 'any') {
+    const est = usedEstimate(componentId, regionId);
+    if (condition === 'used') return est ? est.price : null;
+    const neu = minPrice(componentId, regionId, 'new');
+    const cand = [neu, est ? est.price : null].filter(Boolean);
+    return cand.length ? Math.min(...cand) : null;
+  }
+  const list = offersFor(componentId, { regionId, condition: 'new' });
   return list.length ? list[0].price : null;
 }
 function buildPrice(build, regionId, condition = 'new') {

@@ -54,10 +54,10 @@
 <section class="page active" id="page-home">
   <div class="hero"><div class="wrap">
     <h1>Соберите ПК <span>без переплат</span><br>и ошибок совместимости</h1>
-    <p>BLF сравнивает готовые сборки и отдельные комплектующие по ценам в вашем городе: оценка считается по базовой цене с коэффициентом города, а реальную цену вы проверяете одной кнопкой — Авито (ваш город), Юла, DNS, Citilink, Ozon, Wildberries, Яндекс Маркет — и сохраняете факт («я нашёл за…»), чтобы видеть переплату. Плюс FPS в 20 играх и проверка совместимости: встанет ли процессор в плату, хватит ли блока питания, поместится ли видеокарта в корпус.</p>
+    <p>BLF сравнивает готовые сборки и отдельные комплектующие по ценам в вашем городе. Новые товары считаются по официальным магазинам — DNS, Citilink, Ozon, Wildberries, Яндекс Маркет, М.Видео, Эльдорадо, Позитроника, Regard, XCOM, у каждой позиции есть кнопка с живым поиском нужной модели. БУ — только примерный ориентир с пометкой «проверять самостоятельно»: вторичный рынок зависит от состояния и продавца. Плюс FPS в 20 играх и проверка совместимости: встанет ли процессор в плату, хватит ли блока питания, поместится ли видеокарта в корпус.</p>
     <div class="hero-search">
       <input id="heroSearch" placeholder="🔍 Что искать: RTX 4070, i5-10400F, 32 ГБ DDR5, бп 750…" onkeydown="if(event.key==='Enter'){goPrice(this.value)}">
-      <button class="btn" onclick="liveGoSearch(document.getElementById('heroSearch').value)">Найти цены</button>
+      <button class="btn" onclick="goPrice(document.getElementById('heroSearch').value)">Найти цены</button>
       <button class="btn ghost" onclick="navigate('fps')">🎮 Рассчитать FPS</button>
       <button class="btn ghost" onclick="navigate('servers')">🗄️ Серверы</button>
     </div>
@@ -216,8 +216,7 @@
 <!-- ПОИСК ЦЕН -->
 <section class="page" id="page-prices"><div class="wrap">
   <h2>💸 Поиск цен по магазинам и объявлениям</h2>
-  <p class="sub">Живой поиск по открытым сайтам: Авито (ваш город) и Юла — объявления и б/у, DNS, Citilink, Ozon, Wildberries, Яндекс Маркет, Regard, XCOM — новое. Цены в каталоге — расчётная оценка для сравнения сборок, а не данные магазинов: точную цену проверяйте по ссылкам и сохраняйте кнопкой «Я нашёл за…».</p>
-  <div id="liveSearchBox"></div>
+  <p class="sub">Цены в каталоге — по официальным магазинам (DNS, Citilink, Ozon, Wildberries, Яндекс Маркет, М.Видео, Эльдорадо, Позитроника, Regard, XCOM), только новые товары и с учётом города. БУ — отдельная примерная оценка с пометкой «проверять самостоятельно»: вторичный рынок зависит от состояния и продавца.</p>
   <div id="priceHonestNote"></div>
   <div class="toolbar">
     <input id="priceQueryInput" placeholder="Название или сленг: RTX 4060, видяха 3070, проц i5-10400, ddr3 16, бп 750…">
@@ -239,8 +238,6 @@
     <input class="price-input" placeholder="до, ₽" inputmode="numeric" oninput="state.priceMax=this.value;render()">
   </div>
   <p class="muted" id="priceCount"></p>
-  <div id="liveOffers"></div>
-  <div id="liveSearchLinks"></div>
   <div class="store-links" id="storeLinks"></div>
   <div style="height:16px"></div>
   <div id="priceResults"></div>
@@ -418,7 +415,6 @@
 <script src="ai-build.js"></script>
 <script src="laptops.js"></script>
 <script src="socket-ui.js"></script>
-<script src="live-prices.js"></script>
 <script src="upgrade-ui.js"></script>
 <script src="server-guide.js"></script>
 <script src="servers.js"></script>

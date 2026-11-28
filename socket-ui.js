@@ -241,7 +241,7 @@ function renderSocketBars() {
 function socketKit(socket) {
   const s = socketNorm(socket);
   if (!s) return null;
-  const price = c => (typeof minPrice === 'function' ? minPrice(c.id, state.region, 'new') : null) ?? c.basePrice ?? 0;
+  const price = c => (typeof minPrice === 'function' ? minPrice(c.id, state.region, 'new') : null) ?? c.basePrice ?? 0;   // только новые, официальные магазины
   const byCat = cat => (COMPONENTS || []).filter(c => c.cat === cat && socketMatchesCategory(c, s))
     .map(c => ({ c, price: price(c) }));
   const cpus = byCat('cpu').sort((a, b) => (b.c.perf / Math.max(b.price, 1)) - (a.c.perf / Math.max(a.price, 1)));

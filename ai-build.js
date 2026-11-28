@@ -1106,20 +1106,16 @@ function aiResultHtml() {
             <div class="small muted">${esc(aiPartWhy(c.id, part, res))}</div>
           </div>
           <div class="ai-part-price">${fmt(price)}${state.aiCondition !== 'new' && usedP && usedP < price ? `<div class="small" style="color:#fda4af">БУ от ${fmt(usedP)}</div>` : ''}
-            <div style="display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end">
-              <button class="btn small ghost" onclick="openPriceCheck('${part.id}')">🔎 Проверить</button>
-              <button class="btn small ghost" onclick="goPriceId('${part.id}')">Цены →</button>
-            </div>
+            <div><button class="btn small ghost" onclick="goPriceId('${part.id}')">Цены →</button></div>
           </div>
         </div>`;
       }).join('')}
     </div>
     <div class="ai-total ${res.over ? 'over' : ''}">
-      <span>Итого — расчётная оценка по ${esc(city)}</span>
+      <span>Итого по официальным магазинам · ${esc(city)}</span>
       <b>${fmt(res.total)}</b>
       <span class="small muted">${res.over ? `выше бюджета на ${fmt(res.total - res.budget)} — можно снизить бюджетные позиции или взять БУ` : `в бюджете ${fmt(res.budget)} — запас ${fmt(res.budget - res.total)}`}</span>
     </div>
-    ${typeof priceHonestyNote === 'function' ? priceHonestyNote() : ''}
     ${res.warn && res.warn.length ? `<div class="ai-warn">⚠️ ${res.warn.map(w => esc(w)).join(' · ')}</div>` : ''}
     <div class="ai-fps">
       <h4 style="margin:0 0 8px">🎯 Ожидаемый FPS ${esc(p.res)}</h4>
