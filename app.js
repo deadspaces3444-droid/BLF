@@ -27,6 +27,7 @@ const state = {
   compareQuery: '',
   compareBuilds: ['build-mid', 'build-high'],
   priceQuery: '', priceCat: 'all', priceCond: 'all', priceSort: 'cheap', priceMin: '', priceMax: '',
+  liveProxy: '', liveOffers: [], liveBusy: false, liveError: '', liveQuery: '', liveAt: '',
   builder: { cpu:'cpu-i5-12400f', gpu:'gpu-rtx4070', motherboard:'mb-b660m', ram:'ram-kingston32', ssd:'ssd-nv2-1tb', psu:'psu-rm750', case:'case-matrexx', cooling:'cool-peerless' },
   buildsFilter: 'all',
   // ИИ-подбор сборки (цена, город, во что играть / задачи)
@@ -384,6 +385,7 @@ function renderSaved() {
 function compCard(c) {
   const mp = minPrice(c.id, state.region, 'new');
   const mpUsed = minPrice(c.id, state.region, 'used');
+  const chk = typeof priceCheckFor === 'function' ? priceCheckFor(c.id) : null;
   const base = mp ?? c.basePrice;
   const fps = compFps(c);
   const gameName = state.compFpsGame === 'all' ? 'средний по 20 играм' : (GAMES.find(g => g.id === state.compFpsGame)?.name || '');
@@ -396,9 +398,11 @@ function compCard(c) {
     <div class="bar"><i style="width:${c.perf}%"></i></div>
     ${fps ? `<div class="fps-inline">🎯 ${fps} FPS <span class="muted small">· ${gameName} ${state.compFpsRes} ${pair}</span></div>` : ''}
     <div class="row">
-      <div><span class="price">${fmt(base)}</span> <span class="muted small">мин. в регионе</span><br>
-      ${mpUsed ? `<span class="small" style="color:#fda4af">БУ от ${fmt(mpUsed)}</span>` : '<span class="small muted">БУ нет в регионе</span>'}</div>
+      <div><span class="price">${fmt(base)}</span> <span class="muted small">оценка</span><br>
+      ${mpUsed ? `<span class="small" style="color:#fda4af">БУ ≈ ${fmt(mpUsed)}</span>` : '<span class="small muted">БУ ≈ нет данных</span>'}
+      ${chk ? `<div class="small ${priceVerdict(chk).cls}">✔ ваш факт: ${fmt(chk.price)} (${esc(chk.market)})</div>` : ''}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap;justify-content:flex-end">
+        <button class="btn small ghost" onclick="openPriceCheck('${c.id}')">🔎 Проверить цену</button>
         <button class="btn small ghost" onclick="goPriceId('${c.id}')">Цены →</button>
         <button class="btn small lime" onclick="compareFromCard('${c.id}')">⚖️ Сравнить</button>
       </div>
@@ -421,6 +425,7 @@ function buildCard(b) {
   const perf = buildPerf(b), power = buildPower(b);
   const fps = estimateBuildFps(b.parts, state.compFpsGame === 'all' ? 'cyberpunk' : state.compFpsGame, state.compFpsRes);
   const prioLine = typeof priorityCardLine === 'function' ? priorityCardLine(b) : '';
+  const trust = typeof buildPriceTrust === 'function' ? buildPriceTrust(b) : null;
   return `<article class="card">
     <div class="tag">${b.tag}</div>
     <h3>${esc(b.name)}</h3>
@@ -436,8 +441,9 @@ function buildCard(b) {
     <div class="fps-inline">🎯 <b>${fps} FPS</b> <span class="muted small">· ${state.compFpsGame === 'all' ? 'Cyberpunk 2077' : esc(GAMES.find(g => g.id === state.compFpsGame)?.name || '')} ${state.compFpsRes}</span></div>
     ${prioLine}
     <div class="row">
-      <div><span class="price" style="font-size:1.2rem">${fmt(total)}</span> <span class="muted small">новые · ${esc(regionById(state.region).name)}</span><br>
-      <span class="small" style="color:#fda4af">БУ ≈ ${fmt(used)}</span> <span class="muted small">· ${power} Вт</span></div>
+      <div><span class="price" style="font-size:1.2rem">${fmt(total)}</span> <span class="muted small">оценка · ${esc(regionById(state.region).name)}</span><br>
+      <span class="small" style="color:#fda4af">БУ ≈ ${fmt(used)}</span> <span class="muted small">· ${power} Вт</span>
+      ${trust ? `<div class="small muted">✓ проверено вручную: ${trust.checked} из ${trust.total} позиций</div>` : ''}</div>
       <div style="display:flex;gap:8px;flex-wrap:wrap">
         <button class="btn small ghost" onclick="loadBuilder('${b.id}')">В конструктор</button>
         <button class="btn small" onclick="addCompareBuild('${b.id}')">Сравнить</button>
@@ -726,6 +732,11 @@ function setCompareComp(i, id) {
 }
 
 function renderPrices() {
+  if (typeof loadLiveProxy === 'function') loadLiveProxy();
+  const hn = $('#priceHonestNote');
+  if (hn && typeof priceHonestyNote === 'function') hn.innerHTML = priceHonestyNote();
+  const lo = $('#liveOffers');
+  if (lo && typeof liveOffersHtml === 'function') lo.innerHTML = liveOffersHtml(state.priceQuery);
   const comps = searchComponents(state.priceQuery, { cat: state.priceCat, cityId: state.region });
   const mn = state.priceMin === '' || isNaN(Number(state.priceMin)) ? null : Number(state.priceMin);
   const mx = state.priceMax === '' || isNaN(Number(state.priceMax)) ? null : Number(state.priceMax);
@@ -744,7 +755,7 @@ function renderPrices() {
   else offers.sort((a, b) => a.comp.name.localeCompare(b.comp.name, 'ru'));
 
   $('#priceCount').textContent = offers.length
-    ? `Найдено предложений: ${offers.length.toLocaleString('ru-RU')} · город: ${regionById(state.region).name} · новых и БУ`
+    ? `Оценок цен: ${offers.length.toLocaleString('ru-RU')} · город: ${regionById(state.region).name} · новые и БУ (расчёт, не данные магазинов)`
     : `Предложений не найдено · город: ${regionById(state.region).name}`;
 
   // Внешние ссылки: открытый поиск по всем сайтам, включая Авито и Юлу
@@ -762,6 +773,9 @@ function renderPrices() {
       <a class="strong-link" href="https://market.yandex.ru/search?text=${encodeURIComponent(searchTerm)}" target="_blank" rel="noopener">🔎 Яндекс Маркет — все предложения ↗</a>
     </div>`;
 
+  const live2 = $('#liveSearchLinks');
+  if (live2 && typeof liveLinksHtml === 'function') live2.innerHTML = liveLinksHtml(searchTerm);
+
   if (!offers.length) {
     $('#priceResults').innerHTML = `<div class="empty">По запросу «${esc(state.priceQuery)}» в городе ${esc(regionById(state.region).name)} предложений нет.<br>
       Попробуйте другой город (кнопка в шапке), сбросьте фильтры или откройте живой поиск по ссылкам выше — на Авито, Юле, DNS, Ozon цены обновляются в реальном времени.</div>`;
@@ -775,12 +789,13 @@ function renderPrices() {
       <div class="grow">
         <b>${esc(o.comp.name)}</b> <span class="badge ${o.condition}">${o.condition === 'new' ? 'Новое' : 'Б/У'}</span>
         <span class="badge region">${city.icon} ${esc(city.name)}</span>
-        <div class="small muted">${catById(o.comp.cat).name} · ${esc(store.name)} · обновлено ${o.updated} · ${o.deliveryDays === 0 ? 'самовывоз' : 'доставка ' + o.deliveryDays + ' дн.'}${o.deliveryPrice ? ' · ' + fmt(o.deliveryPrice) : ' · бесплатно'}</div>
+        <div class="small muted">${catById(o.comp.cat).name} · ${esc(store.name)} · <b>расчётная оценка</b> · ${o.deliveryDays === 0 ? 'самовывоз' : 'доставка ' + o.deliveryDays + ' дн.'}${o.deliveryPrice ? ' · ' + fmt(o.deliveryPrice) : ' · бесплатно'}</div>
       </div>
       <div style="text-align:right">
         <div class="price-big">${fmt(o.price)}</div>
         ${o.oldPrice ? `<div class="old">${fmt(o.oldPrice)}</div>` : ''}
-        <a class="btn small ghost" href="${(store.id === 'avito' || store.id === 'avito_new') ? avitoUrl(o.comp.name, state.region) : store.searchUrl(o.comp.name)}" target="_blank" rel="noopener">${esc(store.name)} ↗</a>
+        <a class="btn small ghost" href="${(store.id === 'avito' || store.id === 'avito_new') ? avitoUrl(o.comp.name, state.region) : store.searchUrl(o.comp.name)}" target="_blank" rel="noopener">Проверить на ${esc(store.name)} ↗</a>
+        <button class="btn small lime" onclick="openPriceCheck('${o.comp.id}')">Я нашёл за…</button>
       </div>
     </div>`;
   }).join('') + (offers.length > 80 ? `<p class="muted small">Показаны первые 80 из ${offers.length}. Уточните запрос или фильтры.</p>` : '');
@@ -896,7 +911,10 @@ function renderBuilder() {
   $('#builderSummary').innerHTML = `
     <h3 style="margin-top:0">🧮 Ваша сборка</h3>
     <div class="total">${fmt(totalNew)}</div>
-    <div class="small muted">новые · ${esc(regionById(state.region).name)} · БУ ≈ ${fmt(totalUsed)}</div>
+    <div class="small muted"><b>расчётная оценка</b> · ${esc(regionById(state.region).name)} · БУ ≈ ${fmt(totalUsed)}</div>
+    ${(() => { const tr = typeof buildPriceTrust === 'function' ? buildPriceTrust(fakeBuild) : null; if (!tr) return '';
+      if (!tr.checked) return `<button class="btn small ghost" style="margin-top:6px" onclick="openPriceCheck(state.builder.gpu)">🔎 Проверить реальные цены (Авито, Юла, DNS…)</button>`;
+      return `<div class="small ${tr.diff > 0 ? 'bad' : 'good'}">✔ проверено ${tr.checked} из ${tr.total} позиций · факт ${tr.diff > 0 ? '+' : ''}${tr.diff}% к оценке</div>`; })()}
     <div class="meter-label"><span>Игровой индекс</span><b>${perf}/100</b></div><div class="bar"><i style="width:${perf}%"></i></div>
     <div class="meter-label"><span>Рабочий индекс</span><b>${work}/100</b></div><div class="bar"><i style="width:${work}%"></i></div>
     <div class="small muted" style="margin-top:10px">Потребление ≈ ${power} Вт · БП: ${byId(state.builder.psu)?.specs.wattage ?? '—'} Вт</div>

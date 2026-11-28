@@ -531,3 +531,30 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .socket-kit-price{color:var(--lime,#b6ff3c);font-weight:700}
 .socket-kit-actions{display:flex;flex-wrap:wrap;gap:10px;align-items:center;margin-top:10px}
 @media(max-width:700px){.socket-fam-name{min-width:100%}.socket-row select{min-width:0;width:100%}}
+
+/* ===== Живые цены и проверка ===== */
+.price-note{margin:10px 0 14px;padding:12px 14px;border-radius:12px;border:1px solid rgba(250,204,21,.35);background:rgba(250,204,21,.07);font-size:13px;line-height:1.5}
+.price-note b{color:#fde68a}
+.live-links-box{margin:10px 0 14px;padding:12px 14px;border-radius:12px;border:1px solid var(--line);background:rgba(255,255,255,.02)}
+.live-links-head{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;margin-bottom:8px}
+.live-links{display:flex;flex-wrap:wrap;gap:6px}
+.live-links.compact{gap:4px}
+.live-link{display:inline-flex;align-items:center;gap:4px;padding:5px 9px;border-radius:999px;font-size:12px;text-decoration:none;
+  border:1px solid var(--line);color:var(--text);background:rgba(255,255,255,.04);white-space:nowrap}
+.live-link:hover{border-color:var(--accent);color:var(--accent)}
+.live-link.used{border-color:rgba(253,164,175,.45);color:#fda4af}
+.live-links-foot{margin-top:8px;line-height:1.5}
+.live-block{margin:12px 0;padding:12px 14px;border-radius:12px;border:1px dashed var(--line);background:rgba(255,255,255,.02)}
+.live-block-head{display:flex;flex-wrap:wrap;gap:8px;align-items:baseline;margin-bottom:8px}
+.live-proxy-row{display:flex;gap:8px;flex-wrap:wrap;margin-bottom:8px}
+.live-proxy-row input{flex:1;min-width:220px;background:var(--bg2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:8px 10px}
+.live-rows{display:flex;flex-direction:column;gap:8px;margin:8px 0}
+.check-est{display:flex;flex-wrap:wrap;gap:18px;padding:10px 0;border-bottom:1px dashed var(--line);margin-bottom:10px}
+.check-est>div{display:flex;flex-direction:column}
+.check-est b{font-size:16px}
+.check-est b.good,.good{color:#86efac}
+.check-est b.bad,.bad{color:#fda4af}
+.check-est b.ok{color:#fde68a}
+.check-form{margin-top:12px;padding-top:12px;border-top:1px dashed var(--line)}
+.check-row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.check-row input{flex:1;min-width:180px}
