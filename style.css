@@ -638,3 +638,59 @@ footer{border-top:1px solid var(--line);padding:28px 0;color:var(--muted);font-s
 .pc3d-row>span.grow{display:flex;flex-direction:column;min-width:0}
 .pc3d-row b{font-weight:600;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .pc3d-row-ic{width:18px;text-align:center;opacity:.9}
+
+/* ===== 3D без WebGL: CSS-трансформации ===== */
+.c3d-scene{position:relative;height:520px;overflow:hidden;perspective:175px;perspective-origin:50% 45%;
+  background:radial-gradient(120% 90% at 30% 0%,#16222e,#0b1016 70%);touch-action:none;cursor:grab}
+.c3d-scene:active{cursor:grabbing}
+.c3d-world{position:absolute;left:50%;top:58%;width:0;height:0;transform-style:preserve-3d;
+  transform:rotateX(16deg) rotateY(-35deg);transition:transform .06s linear}
+.c3d-floor{position:absolute;width:170px;height:170px;left:-85px;top:-85px;transform:rotateX(90deg) translateZ(-2px);
+  background:radial-gradient(circle,rgba(56,189,248,.16),transparent 68%);border-radius:50%}
+.c3d-case,.c3d-parts{position:absolute;left:0;top:0;transform-style:preserve-3d}
+.c3d-case{transform-style:preserve-3d}
+.c3d-box{position:absolute;transform-style:preserve-3d}
+.c3d-face{position:absolute;left:0;top:0;transform-style:preserve-3d;backface-visibility:visible;
+  border:1px solid rgba(120,160,190,.35);background:linear-gradient(160deg,rgba(58,72,88,.92),rgba(28,36,46,.95))}
+.c3d-case-back .c3d-face,.c3d-case-right .c3d-face,.c3d-case-bottom .c3d-face,.c3d-case-top .c3d-face{
+  background:linear-gradient(160deg,rgba(44,56,70,.9),rgba(20,27,35,.95))}
+.c3d-case-front .c3d-face{background:linear-gradient(160deg,rgba(34,44,56,.95),rgba(16,22,29,.97))}
+.c3d-grill{position:absolute;inset:8px;border-radius:6px;
+  background-image:radial-gradient(rgba(125,211,252,.35) 1px,transparent 1.2px);background-size:6px 6px;opacity:.55}
+.c3d-fan{position:absolute;width:34px;height:34px;border-radius:50%;border:1px solid rgba(56,189,248,.5);
+  box-shadow:0 0 12px rgba(56,189,248,.35) inset;animation:c3dSpin 2.4s linear infinite}
+.c3d-fan i{position:absolute;left:50%;top:50%;width:13px;height:3px;background:rgba(148,200,235,.75);border-radius:2px;
+  transform-origin:0 50%;margin:-1.5px 0 0}
+.c3d-fan i:nth-child(1){transform:rotate(0deg) translateX(2px)}
+.c3d-fan i:nth-child(2){transform:rotate(90deg) translateX(2px)}
+.c3d-fan i:nth-child(3){transform:rotate(180deg) translateX(2px)}
+.c3d-fan i:nth-child(4){transform:rotate(270deg) translateX(2px)}
+@keyframes c3dSpin{to{transform:translate(-50%,-50%) rotate(360deg)}}
+.c3d-lid{position:absolute;transform-style:preserve-3d;background:linear-gradient(150deg,rgba(52,66,82,.75),rgba(22,30,40,.9));
+  border:1px solid rgba(148,190,220,.45);box-shadow:0 0 22px rgba(0,0,0,.45);transition:transform .5s ease}
+.c3d-lid.glass{background:linear-gradient(150deg,rgba(125,211,252,.16),rgba(30,41,59,.35));backdrop-filter:blur(1px)}
+.c3d-part{position:absolute;transform-style:preserve-3d;cursor:pointer;transition:transform .55s cubic-bezier(.22,1,.36,1)}
+.c3d-part .c3d-face{transition:box-shadow .2s,filter .2s}
+.c3d-part:hover .c3d-face{filter:brightness(1.25);box-shadow:0 0 10px rgba(182,255,60,.5)}
+.c3d-part.c3d-drop .c3d-face{box-shadow:0 0 16px rgba(56,189,248,.75)}
+.c3d-kind-board .c3d-face{background:linear-gradient(160deg,#1f6b46,#134c31)}
+.c3d-kind-cpu .c3d-face{background:linear-gradient(160deg,#cfd8e3,#8fa0b3)}
+.c3d-kind-tower .c3d-face,.c3d-kind-aio .c3d-face{background:linear-gradient(160deg,#c3ccd8,#7f8d9c)}
+.c3d-kind-ram .c3d-face{background:linear-gradient(160deg,#2f6df6,#1d3f9c)}
+.c3d-kind-gpu .c3d-face{background:linear-gradient(160deg,#243044,#101827)}
+.c3d-kind-psu .c3d-face{background:linear-gradient(160deg,#1a2230,#0a0f16)}
+.c3d-kind-hdd .c3d-face{background:linear-gradient(160deg,#9aa6b4,#6b7684)}
+.c3d-kind-ssd .c3d-face,.c3d-kind-nvme .c3d-face{background:linear-gradient(160deg,#22a3e0,#0d6ea5)}
+.c3d-tag{position:absolute;left:50%;top:-16px;transform:translateX(-50%);white-space:nowrap;font-size:9px;
+  padding:1px 5px;border-radius:5px;background:rgba(8,14,20,.88);border:1px solid rgba(120,160,190,.4);color:#cfe6f7;
+  pointer-events:none}
+.c3d-slot{position:absolute;transform-style:preserve-3d;border:1px dashed rgba(56,189,248,.85);border-radius:3px;
+  background:rgba(56,189,248,.1);display:flex;align-items:center;justify-content:center;cursor:pointer;
+  box-shadow:0 0 10px rgba(56,189,248,.25) inset}
+.c3d-slot span{font-size:9px;color:#bfe6ff;white-space:nowrap;pointer-events:none;background:rgba(8,14,20,.7);
+  padding:1px 4px;border-radius:4px}
+.c3d-slot:hover{background:rgba(182,255,60,.18);border-color:#b6ff3c}
+.c3d-hint{position:absolute;left:12px;bottom:8px;color:#7d8b9c;pointer-events:none;font-size:11px}
+.c3d-badge{position:absolute;right:10px;top:8px;font-size:11px;padding:2px 8px;border-radius:999px;
+  background:rgba(56,189,248,.14);border:1px solid rgba(56,189,248,.45);color:#bae6fd}
+@media(max-width:640px){.c3d-scene{height:360px}}

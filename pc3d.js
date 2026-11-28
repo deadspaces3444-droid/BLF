@@ -198,11 +198,11 @@ function pc3dSupported() {
 function pc3dMount() {
   const host = document.getElementById('pc3d');
   if (!host) return;
-  if (!pc3dSupported()) { pc3dFallback(host); return; }
+  if (!pc3dSupported()) { css3dBuildHost(host); return; }      // нет WebGL — 3D на CSS, плагины не нужны
   try { pc3dMount3d(host); } catch (e) {
-    console.warn('3D недоступно:', e && e.message);
+    console.warn('WebGL-рендер недоступен, переключаюсь на CSS 3D:', e && e.message);
     PC3D.ready = false; PC3D.mode = 'none';
-    pc3dFallback(host);
+    css3dBuildHost(host);
   }
 }
 
@@ -608,6 +608,7 @@ function pc3dSlotMesh(s) {
 // Основная синхронизация сцены с содержимым сборки
 function pc3dSync(build) {
   PC3D.lastBuild = build || {};
+  if (PC3D.mode === 'css') { css3dSync(build); return; }
   if (PC3D.mode !== '3d' || !PC3D.root) { pc3dFallbackParts(build); return; }
   const lay = PC3D_LAYOUT(build);
   const prevIds = new Set((PC3D.parts || []).map(x => x.id + '|' + x.cat));
@@ -636,7 +637,11 @@ function pc3dSync(build) {
   const cnt = document.getElementById('pc3dCount');
   if (cnt) cnt.textContent = `${lay.parts.length} из ${lay.parts.length + lay.slots.length} позиций установлено`;
 
-  // список «что где стоит» — доступный дубль 3D-сцены (и для мобильных, и для чтения скринридером)
+  pc3dRenderList(lay);
+}
+
+// список «что где стоит» — доступный дубль 3D-сцены (и для мобильных, и для чтения скринридером)
+function pc3dRenderList(lay) {
   const list = document.getElementById('pc3dList');
   if (list) {
     const rows = lay.parts.map(p => `<button class="pc3d-row" onclick="pc3dInfoPanel('${p.cat}', '${p.id}')">
@@ -784,9 +789,25 @@ function pc3dRemove(cat) {
 
 // Кнопки панели
 function pc3dToggleLid() {
+  if (PC3D.mode === 'css') { css3dToggleLid(); return; }
   PC3D.lidTarget = PC3D.lidTarget > -0.1 ? -2.0 : 0;
 }
-function pc3dToggleSpin() { PC3D.autoRotate = !PC3D.autoRotate; toast(PC3D.autoRotate ? 'Корпус вращается' : 'Вращение остановлено'); }
+function pc3dToggleSpin() {
+  if (PC3D.mode === 'css') {
+    CSS3D.spin = !CSS3D.spin;
+    if (CSS3D.spin) css3dSpin();
+    toast(CSS3D.spin ? 'Корпус вращается' : 'Вращение остановлено');
+    return;
+  }
+  PC3D.autoRotate = !PC3D.autoRotate;
+  toast(PC3D.autoRotate ? 'Корпус вращается' : 'Вращение остановлено');
+}
+function css3dSpin() {
+  if (!CSS3D.spin) return;
+  CSS3D.cam.rotY += 0.006;
+  css3dApplyCam(CSS3D.world);
+  c3dRAF(css3dSpin);
+}
 function pc3dNextRgb() {
   const colors = [0x22d3ee, 0xa855f7, 0x22c55e, 0xf59e0b, 0xef4444, 0x3b82f6];
   PC3D.rgb = (PC3D.rgb + 1) % colors.length;
@@ -824,7 +845,190 @@ function pc3dLoop() {
   catch (e) { console.warn('render:', e && e.message); }
 }
 
-// ---------- Запасной режим без WebGL ----------
+
+// ================= 3D без WebGL: CSS-трансформации =================
+// Тот же корпус и те же детали, но собраны из div'ов с transform-style: preserve-3d.
+// Работает везде, где есть CSS 3D (все современные браузеры, включая старые и мобильные),
+// не требует WebGL, плагинов и загрузок. Вращение — мышью/пальцем, установка — по клику.
+
+const c3dRAF = fn => (typeof requestAnimationFrame === 'function' ? requestAnimationFrame(fn) : setTimeout(fn, 16));
+
+const CSS3D = window.CSS3D = { mode: 'none', cam: { rotY: -0.62, rotX: 0.28, dist: 175 }, dragging: false, lid: 0, last: null };
+
+function css3dBuildHost(host) {
+  CSS3D.mode = 'css';
+  PC3D.mode = 'css';
+  host.innerHTML = `<div class="c3d-scene">
+    <div class="c3d-world" id="c3dWorld">
+      <div class="c3d-floor"></div>
+      <div class="c3d-case" id="c3dCase"></div>
+      <div class="c3d-parts" id="c3dParts"></div>
+    </div>
+    <div class="c3d-badge">3D · CSS (без WebGL)</div>
+    <div class="c3d-hint small">Тяните мышью или пальцем — поворот, колесо — масштаб. Нажмите на пунктирный слот, чтобы поставить деталь.</div>
+  </div>`;
+  const scene = host.querySelector('.c3d-scene');
+  const world = host.querySelector('.c3d-world');
+  css3dApplyCam(world);
+  const setRot = (dy, dx) => {
+    CSS3D.cam.rotY += dy;
+    CSS3D.cam.rotX = Math.max(-0.35, Math.min(0.95, CSS3D.cam.rotX + dx));
+    css3dApplyCam(world);
+  };
+  let px = 0, py = 0, drag = false;
+  scene.addEventListener('pointerdown', e => { drag = true; px = e.clientX; py = e.clientY; });
+  window.addEventListener('pointerup', () => { drag = false; });
+  window.addEventListener('pointermove', e => {
+    if (!drag) return;
+    setRot((e.clientX - px) * -0.008, (e.clientY - py) * 0.006);
+    px = e.clientX; py = e.clientY;
+  });
+  scene.addEventListener('wheel', e => {
+    e.preventDefault();
+    CSS3D.cam.dist = Math.max(110, Math.min(320, CSS3D.cam.dist + e.deltaY * 0.12));
+    css3dApplyCam(world);
+  }, { passive: false });
+  scene.addEventListener('dblclick', () => { CSS3D.cam = { rotY: -0.62, rotX: 0.28, dist: 175 }; css3dApplyCam(world); });
+  CSS3D.world = world;
+}
+
+function css3dApplyCam(world) {
+  if (!world) world = CSS3D.world;
+  if (!world) return;
+  const { rotY, rotX, dist } = CSS3D.cam;
+  world.style.transform = `rotateX(${rotX * 57.2958}deg) rotateY(${rotY * 57.2958}deg)`;
+  const scene = world.parentElement;
+  if (scene) scene.style.perspective = dist + 'px';
+}
+
+// Коробка из 6 граней
+function css3dBox(el, { w, h, d, cls = '', style = '' }) {
+  const faces = [
+    ['front', `translateZ(${d / 2}px)`],
+    ['back', `rotateY(180deg) translateZ(${d / 2}px)`],
+    ['right', `rotateY(90deg) translateZ(${w / 2}px)`],
+    ['left', `rotateY(-90deg) translateZ(${w / 2}px)`],
+    ['top', `rotateX(90deg) translateZ(${h / 2}px)`],
+    ['bottom', `rotateX(-90deg) translateZ(${h / 2}px)`],
+  ];
+  el.classList.add('c3d-box');
+  String(cls || '').split(/\s+/).filter(Boolean).forEach(x => el.classList.add(x));
+  el.style.width = w + 'px'; el.style.height = h + 'px';
+  el.style.setProperty('--d', d + 'px');
+  el.innerHTML = faces.map(([name, t]) =>
+    `<div class="c3d-face c3d-${name}" style="transform:${t};${name === 'front' || name === 'back' ? `width:${w}px;height:${h}px;` : name === 'left' || name === 'right' ? `width:${d}px;height:${h}px;left:${(w - d) / 2}px;` : `width:${w}px;height:${d}px;top:${(h - d) / 2}px;`}"></div>`).join('');
+  return el;
+}
+
+// Ставим объект в точку (x,y,z) в сантиметрах
+function css3dPlace(el, pos, rot) {
+  el.style.transform = `translate3d(${pos[0]}px, ${-pos[1]}px, ${pos[2]}px)`
+    + (rot ? ` rotateX(${rot[0] * 57.2958}deg) rotateY(${rot[1] * 57.2958}deg) rotateZ(${rot[2] * 57.2958}deg)` : '');
+}
+
+function css3dSync(build) {
+  CSS3D.last = build || {};
+  if (PC3D.mode !== 'css') return;
+  const partsHost = document.getElementById('c3dParts');
+  const caseHost = document.getElementById('c3dCase');
+  if (!partsHost || !caseHost) return;
+  const lay = PC3D_LAYOUT(build);
+  const { size, glass } = lay.case;
+  const [W, H, D] = [size.w, size.h, size.d];
+
+  // корпус: дно, верх, задняя и правая стенки, фронт-сетка, открытая крышка
+  caseHost.innerHTML = '';
+  caseHost.style.transform = `translate3d(0, ${-H}px, 0)`;
+  const add = (cls, opts, pos, rot) => {
+    const el = document.createElement('div');
+    css3dBox(el, opts);
+    el.classList.add(cls);
+    css3dPlace(el, pos, rot);
+    caseHost.appendChild(el);
+    return el;
+  };
+  add('c3d-case-bottom', { w: W, h: 1.2, d: D }, [0, 0.6, 0]);
+  add('c3d-case-top', { w: W, h: 2.4, d: D }, [0, H - 1.2, 0]);
+  add('c3d-case-back', { w: W, h: H, d: 0.8 }, [0, H / 2, -D / 2]);
+  add('c3d-case-right', { w: 0.8, h: H, d: D }, [W / 2, H / 2, 0]);
+  const front = add('c3d-case-front', { w: W, h: H, d: 0.8 }, [0, H / 2, D / 2]);
+  front.innerHTML += `<div class="c3d-grill"></div>`;
+  for (let i = 0; i < 2; i++) {
+    const fan = document.createElement('div');
+    fan.className = 'c3d-fan';
+    fan.style.cssText = `left:50%;top:${i ? 62 : 30}%;transform:translate(-50%,-50%)`;
+    fan.innerHTML = '<i></i><i></i><i></i><i></i>';
+    front.appendChild(fan);
+  }
+
+  // крышка на петле — открыта наружу
+  const lid = document.createElement('div');
+  lid.className = 'c3d-lid' + (glass ? ' glass' : '');
+  lid.style.width = D + 'px';
+  lid.style.height = H + 'px';
+  lid.style.transformOrigin = 'left center';
+  lid.style.transform = 'translate3d(-100%, 0, 0) rotateY(-108deg)';
+  lid.style.left = '0px'; lid.style.top = '0px';
+  caseHost.appendChild(lid);
+
+  // детали
+  partsHost.innerHTML = '';
+  const mk = (p) => {
+    const el = document.createElement('div');
+    el.className = 'c3d-part c3d-kind-' + p.kind;
+    el.dataset.cat = p.cat;
+    el.dataset.id = p.id || '';
+    const [sx, sy, sz] = p.size.map(v => Math.max(0.6, v));
+    css3dBox(el, { w: sx, h: sy, d: sz });
+    el.style.width = sx + 'px'; el.style.height = sy + 'px';
+    el.title = p.name;
+    // «падение» при установке: деталь приходит сверху
+    const finish = () => css3dPlace(el, p.pos, p.rot);
+    if (p.__animate) {
+      css3dPlace(el, [p.pos[0], p.pos[1] + 46, p.pos[2]], p.rot);
+      el.classList.add('c3d-drop');
+      c3dRAF(() => c3dRAF(finish));
+      setTimeout(() => el.classList.remove('c3d-drop'), 700);
+    } else finish();
+    el.innerHTML += `<div class="c3d-tag">${esc(PC3D_PARTS[p.cat]?.icon || '')} ${esc((p.name || '').slice(0, 26))}</div>`;
+    el.onclick = ev => { ev.stopPropagation(); pc3dInfoPanel(p.cat, p.id); };
+    return el;
+  };
+  lay.parts.forEach(p => partsHost.appendChild(mk(p)));
+  lay.slots.forEach(s => {
+    const el = document.createElement('div');
+    el.className = 'c3d-slot';
+    el.style.width = s.size[0] + 'px';
+    el.style.height = s.size[1] + 'px';
+    el.style.transform = `translate3d(${s.pos[0]}px, ${-s.pos[1]}px, ${s.pos[2]}px)`;
+    el.innerHTML = `<span>＋ ${esc(s.label)}</span>`;
+    el.onclick = ev => { ev.stopPropagation(); pc3dOpenPicker(s.cat, s.stick); };
+    partsHost.appendChild(el);
+  });
+
+  const cnt = document.getElementById('pc3dCount');
+  if (cnt) cnt.textContent = `${lay.parts.length} из ${lay.parts.length + lay.slots.length} позиций установлено`;
+  const info = document.getElementById('pc3dFit');
+  if (info) {
+    info.innerHTML = lay.warnings.length
+      ? lay.warnings.map(w => `<div class="small bad">⚠ ${esc(w)}</div>`).join('')
+      : '<div class="small good">✅ Всё установлено и физически влезает в корпус</div>';
+  }
+  pc3dRenderList(lay);
+}
+
+function css3dToggleLid() {
+  const lid = document.querySelector('.c3d-lid');
+  if (!lid) return;
+  const closed = lid.classList.toggle('closed');
+  // петля слева-сзади: открыто — откинута на 108°, закрыто — вплотную к левой стенке
+  lid.style.transform = closed
+    ? 'translate3d(-100%, 0, 0) rotateY(0deg)'
+    : 'translate3d(-100%, 0, 0) rotateY(-108deg)';
+  lid.style.opacity = closed ? '0.92' : '1';
+}
+
+// ---------- Запасной режим: плоская схема (если нет даже CSS 3D) ----------
 function pc3dFallback(host) {
   PC3D.mode = '2d';
   host.innerHTML = `<div class="pc3d-fallback">
@@ -850,7 +1054,7 @@ function pc3dFallbackParts(build) {
 function pc3dInit() {
   const host = document.getElementById('pc3d');
   if (!host) return;
-  if (PC3D.ready) { pc3dSync(state.builder); return; }
+  if (PC3D.ready || PC3D.mode === 'css') { pc3dSync(state.builder); return; }
   pc3dMount();
   if (PC3D.mode === '3d') {
     PC3D.lidTarget = -2.0;                 // крышка сразу открыта
