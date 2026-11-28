@@ -309,6 +309,7 @@ function laptopCard(l) {
   const twin = typeof desktopTwin === 'function' ? desktopTwin(l) : null;
   const diff = twin ? Math.round(((pNew ?? l.basePrice) - twin.total) / Math.max(twin.total, 1) * 100) : null;
   return `<article class="card laptop-card">
+    <div class="laptop-photo">${partImg(l, { alt: l.name })}</div>
     <div class="tag">${laptopBadge(l)} · ${esc(l.brand)} · ${l.year}</div>
     <h3>${esc(l.name)}</h3>
     <div class="specs-mini">
@@ -326,7 +327,7 @@ function laptopCard(l) {
     </div>` : ''}
     <div class="row">
       <div><span class="price">${fmt(pNew)}</span> <span class="muted small">новый</span><br>
-      <span class="small" style="color:#fda4af">БУ от ${fmt(pUsed)}</span></div>
+      <span class="small" style="color:var(--warn)">БУ от ${fmt(pUsed)}</span></div>
       <div class="laptop-actions">
         <button class="btn small ghost" onclick="openLaptop('${l.id}')">Подробнее</button>
         <button class="btn small lime" onclick="compareLaptopWithPc('${l.id}')">⚖️ ПК vs ноутбук</button>
@@ -418,7 +419,7 @@ function renderLaptopsDetail() {
       </div>
       <div style="text-align:right">
         <div class="price" style="font-size:1.4rem">${fmt(pNew)}</div>
-        <div class="small" style="color:#fda4af">БУ от ${fmt(pUsed)}</div>
+        <div class="small" style="color:var(--warn)">БУ от ${fmt(pUsed)}</div>
         <button class="btn small ghost" onclick="state.laptopOpen=null;renderLaptopsDetail()">✕</button>
       </div>
     </div>

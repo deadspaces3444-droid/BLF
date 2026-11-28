@@ -367,6 +367,7 @@ function savedBuildCard(item) {
     <div class="tag">${isServer ? '🗄️ Серверная сборка' : '🖥️ Сборка ПК'} · ${fmtDate(item.created)}</div>
     <h3>${esc(item.name)}</h3>
     ${item.note ? `<p>${esc(item.note)}</p>` : ''}
+    ${buildImgStrip((isServer ? ['servercpu', 'servermb', 'serverram', 'serverstorage'] : ['cpu', 'gpu', 'motherboard', 'ram']).map(k => partById(item.parts[k])))}
     ${summary}
     ${!isServer && typeof priorityCardLine === 'function' ? priorityCardLine(item) : ''}
     <div class="row">
@@ -414,6 +415,7 @@ function compCard(c) {
   const gameName = state.compFpsGame === 'all' ? 'средний по 20 играм' : (GAMES.find(g => g.id === state.compFpsGame)?.name || '');
   const pair = c.cat === 'gpu' ? 'с i5-12400F' : c.cat === 'cpu' ? 'с RTX 4070' : '';
   return `<article class="card">
+    <div class="card-photo">${partImg(c, { size: 'lg' })}<span class="card-photo-cat">${catById(c.cat).name}</span></div>
     <div class="tag">${catById(c.cat).name} · ${esc(c.brand)} · ${c.year}</div>
     <h3>${esc(c.name)}</h3>
     <div class="specs-mini">${specRows(c)}</div>
@@ -450,6 +452,7 @@ function buildCard(b) {
     <div class="tag">${b.tag}</div>
     <h3>${esc(b.name)}</h3>
     <p>${esc(b.desc)}</p>
+    ${buildImgStrip(['cpu', 'gpu', 'motherboard', 'ram'].map(k => byId(b.parts[k])))}
     <div class="specs-mini">
       <div>CPU: <b>${esc(byId(b.parts.cpu).name)}</b></div>
       <div>GPU: <b>${esc(byId(b.parts.gpu).name)}</b></div>
@@ -845,7 +848,8 @@ function renderCompatForm(parts) {
     const sel = parts[c.id];
     const { pool, compatible } = optionsFor(c.id, parts, sel);
     const hidden = totalFor(c.id) - compatible.length;
-    return `<div class="slot"><div class="icon">${c.icon}</div>
+    const selObj = byId(sel);
+    return `<div class="slot"><div class="slot-photo">${selObj ? partImg(selObj, { size: 'md' }) : `<div class="icon">${c.icon}</div>`}</div>
       <div style="flex:1"><label class="small muted">${c.name}${state.onlyCompatible && hidden > 0 ? ` <span class="compat-note">· скрыто несовместимых: ${hidden}</span>` : ''}</label>
       <select id="compat-${c.id}" onchange="onCompatChange('${c.id}', this.value)">
         ${pool.map(x => `<option value="${x.id}" ${x.id === sel ? 'selected' : ''}>${esc(x.name)}${x.year < 2020 ? ' · старая' : ''}</option>`).join('')}
@@ -921,7 +925,7 @@ function renderBuilder() {
     const { pool, compatible, allCat } = optionsFor(c.id, state.builder, cur);
     const curObj = byId(cur);
     const hidden = allCat.length - compatible.length;
-    return `<div class="slot"><div class="icon">${c.icon}</div>
+    return `<div class="slot"><div class="slot-photo">${curObj ? partImg(curObj, { size: 'md' }) : `<div class="icon">${c.icon}</div>`}</div>
       <div style="flex:1"><label class="small muted">${c.name}
         ${state.onlyCompatible && hidden > 0 ? `<span class="compat-note">· ${compatible.length} из ${allCat.length}, ${hidden} несовместимых скрыто</span>` : ''}</label>
       <select onchange="setBuilderPart('${c.id}', this.value)">
@@ -948,6 +952,10 @@ function renderBuilder() {
     <div class="meter-label"><span>Рабочий индекс</span><b>${work}/100</b></div><div class="bar"><i style="width:${work}%"></i></div>
     <div class="small muted" style="margin-top:10px">Потребление ≈ ${power} Вт · БП: ${byId(state.builder.psu)?.specs.wattage ?? '—'} Вт</div>
     <div class="fps-inline" style="margin-top:12px">🎯 Средний FPS по 20 играм (${state.builderFpsRes}): <b>${avg}</b></div>
+    <div class="summary-gallery">${CATEGORIES.map(c => {
+      const part = byId(state.builder[c.id]);
+      return part ? `<figure>${partImg(part, { size: 'sm' })}<figcaption>${esc(shortName(part.name))}</figcaption></figure>` : '';
+    }).join('')}</div>
     ${state.builderOs ? (() => { const o = DESKTOP_OS.find(x => x.id === state.builderOs); return `<div class="fps-inline">💻 ОС: <b>${esc(o.name)}</b> · ${o.price ? fmt(o.price) : 'бесплатно'} <a href="${o.downloadUrl}" target="_blank" rel="noopener">скачать ↗</a></div>`; })() : ''}
     <div class="verdict ${compat.status}" style="margin-top:14px;padding:12px">
       <b>${compat.status === 'ok' ? '✅ Совместимо' : compat.status === 'warn' ? '⚠️ Есть замечания' : '❌ Несовместимо'}</b>
@@ -1079,7 +1087,8 @@ function serverPartPriceLine(part) {
 function serverCompCard(part) {
   const cat = serverCatById(part.cat);
   const wl = serverWorkload({ servercpu: part.cat === 'servercpu' ? part.id : 'sc-xeon-silver4310', serverram: part.cat === 'serverram' ? part.id : 'sram-ddr4ecc64', serverstorage: part.cat === 'serverstorage' ? part.id : 'sst-cd6', ramModules: 2 });
-  return `<article class="card">
+  return `<article class="card srv-card">
+    <div class="srv-photo">${partImg(part)}</div>
     <div class="tag">${cat.icon} ${cat.name} · ${esc(part.brand)} · ${part.year}${part.budget ? ' · 💸 бюджет' : ''}${part.xeon ? ' · Xeon' : ''}${part.chinese ? ' · 🇨🇳 китайская' : ''}</div>
     <h3>${esc(part.name)}</h3>
     <div class="specs-mini">${Object.entries(part.specs).map(([k, v]) => `<div>${k}: <b>${esc(v)}</b></div>`).join('')}</div>
@@ -1109,7 +1118,7 @@ function renderServers() {
     const cur = state.serverBuild[c.id];
     const pool = SERVER_COMPONENTS.filter(x => x.cat === c.id);
     const curPart = serverPartById(cur);
-    return `<div class="slot"><div class="icon">${c.icon}</div>
+    return `<div class="slot"><div class="slot-photo">${curPart ? partImg(curPart, { size: 'md' }) : `<div class="icon">${c.icon}</div>`}</div>
       <div style="flex:1"><label class="small muted">${c.name}</label>
       <select onchange="state.serverBuild['${c.id}']=this.value;render()">
         ${pool.map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)} — ${fmt(serverPrice(x, state.region))}${x.year < 2020 ? ' · Б/У' : ''}</option>`).join('')}
@@ -1506,7 +1515,8 @@ function renderServerCompat() {
   $('#serverCompatForm').innerHTML = SERVER_CATEGORIES.map(c => {
     const cur = state.serverBuild[c.id];
     const pool = SERVER_COMPONENTS.filter(x => x.cat === c.id);
-    return `<div class="slot"><div class="icon">${c.icon}</div>
+    const curPart = serverPartById(cur);
+    return `<div class="slot"><div class="slot-photo">${curPart ? partImg(curPart, { size: 'md' }) : `<div class="icon">${c.icon}</div>`}</div>
       <div style="flex:1"><label class="small muted">${c.name}</label>
       <select onchange="state.serverBuild['${c.id}']=this.value;render()">
         ${pool.map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)}${x.year < 2020 ? ' · Б/У' : ''}</option>`).join('')}

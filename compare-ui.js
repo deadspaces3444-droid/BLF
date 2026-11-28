@@ -300,7 +300,7 @@ function renderCompareComps() {
   html += `<div class="duel">
     ${selected.map((c, i) => `
       <div class="duel-side ${i === winnerIdx && selected.length === 2 ? 'win' : ''}">
-        <div class="duel-icon">${catIcon(c.cat)}</div>
+        <div class="duel-photo">${partImg(c, { size: 'lg' })}</div>
         <div class="duel-name">${esc(c.name)}</div>
         <div class="small muted">${esc(c.brand)} · ${c.year}</div>
         <div class="duel-score">${cmpScore(c)}<span class="small muted">/100</span></div>
@@ -372,7 +372,7 @@ function renderCompareComps() {
         <div class="cmp-bar-block">
           <div class="small"><b>${esc(c.name)}</b></div>
           <div class="meter-label"><span>Игровой индекс</span><b>${c.perf}/100</b></div><div class="bar"><i style="width:${c.perf}%"></i></div>
-          <div class="meter-label"><span>Рабочий индекс</span><b>${c.work}/100</b></div><div class="bar"><i style="width:${c.work}%;background:linear-gradient(90deg,#a3e635,#22d3ee)"></i></div>
+          <div class="meter-label"><span>Рабочий индекс</span><b>${c.work}/100</b></div><div class="bar"><i style="width:${c.work}%;background:linear-gradient(90deg,var(--accent),var(--accent2))"></i></div>
         </div>`).join('')}</div>`;
     } else if (sec.custom === 'price') {
       html += `<div class="table-wrap"><table class="cmp-table">
@@ -390,7 +390,7 @@ function renderCompareComps() {
       cities.forEach(r => {
         html += `<tr><td>${r.icon} ${esc(r.name)}</td>${selected.map(c => {
           const n = minPrice(c.id, r.id, 'new'); const u = minPrice(c.id, r.id, 'used');
-          return `<td>${n ? fmt(n) : '—'}${u ? ` <span class="small" style="color:#fda4af">/ БУ ${fmt(u)}</span>` : ''}</td>`;
+          return `<td>${n ? fmt(n) : '—'}${u ? ` <span class="small" style="color:var(--warn)">/ БУ ${fmt(u)}</span>` : ''}</td>`;
         }).join('')}</tr>`;
       });
       html += `</table></div><p class="small muted" style="margin-top:8px">Другой город — кнопка региона в шапке, таблица пересчитается.</p>`;

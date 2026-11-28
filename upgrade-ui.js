@@ -107,18 +107,21 @@ function swapCardHtml(x, mode) {
   const fpsTxt = Math.abs(x.fpsDelta) >= 1 ? `${x.fpsDelta > 0 ? '+' : '−'}${Math.abs(x.fpsDelta)} FPS` : '';
   const workTxt = Math.abs(x.workDelta) >= 1 ? `${x.workDelta > 0 ? '+' : '−'}${Math.abs(x.workDelta)} инд.` : '';
   return `<div class="swap-card">
-    <div class="swap-card-top">
-      <span class="swap-cat">${catName}</span>
-      <span class="swap-price ${x.delta < 0 ? 'down' : 'up'}">${sign}${fmt(Math.abs(x.delta))}</span>
+    ${partImg(x.c, { size: 'sm' })}
+    <div class="swap-card-body">
+      <div class="swap-card-top">
+        <span class="swap-cat">${catName}</span>
+        <span class="swap-price ${x.delta < 0 ? 'down' : 'up'}">${sign}${fmt(Math.abs(x.delta))}</span>
+      </div>
+      <div class="swap-name">${esc(x.c.name)}</div>
+      <div class="swap-deltas">
+        ${fpsTxt ? `<span class="swap-badge ${x.fpsDelta > 0 ? 'pos' : 'neg'}">${fpsTxt}</span>` : ''}
+        ${workTxt ? `<span class="swap-badge ${x.workDelta > 0 ? 'pos' : 'neg'}">${workTxt}</span>` : ''}
+        <span class="swap-badge neutral">${fmt(x.price)}</span>
+        ${x.status === 'warn' ? '<span class="swap-badge warn">есть замечания</span>' : ''}
+      </div>
+      <button class="btn small ${mode === 'cheaper' ? 'ghost' : 'lime'}" onclick="applySwap('${x.cat}','${x.c.id}')">Заменить</button>
     </div>
-    <div class="swap-name">${esc(x.c.name)}</div>
-    <div class="swap-deltas">
-      ${fpsTxt ? `<span class="swap-badge ${x.fpsDelta > 0 ? 'pos' : 'neg'}">${fpsTxt}</span>` : ''}
-      ${workTxt ? `<span class="swap-badge ${x.workDelta > 0 ? 'pos' : 'neg'}">${workTxt}</span>` : ''}
-      <span class="swap-badge neutral">${fmt(x.price)}</span>
-      ${x.status === 'warn' ? '<span class="swap-badge warn">есть замечания</span>' : ''}
-    </div>
-    <button class="btn small ${mode === 'cheaper' ? 'ghost' : 'lime'}" onclick="applySwap('${x.cat}','${x.c.id}')">Заменить</button>
   </div>`;
 }
 
@@ -209,6 +212,8 @@ function renderServerSwaps() {
         return `<div class="swap-col ${m.cls}">
           <div class="swap-col-head">${icon} ${m.name} <span class="small muted">· ${m.hint}</span></div>
           ${cards.length ? cards.map(x => `<div class="swap-card">
+            ${partImg(x.p, { size: 'sm' })}
+            <div class="swap-card-body">
             <div class="swap-card-top"><span class="swap-cat">${x.icon} ${esc(x.catName)}</span><span class="swap-price ${x.delta < 0 ? 'down' : 'up'}">${x.delta > 0 ? '+' : '−'}${fmt(Math.abs(x.delta))}</span></div>
             <div class="swap-name">${esc(x.p.name)}</div>
             <div class="swap-deltas">
@@ -219,6 +224,7 @@ function renderServerSwaps() {
               <span class="swap-badge neutral">итого ${fmt(x.price)}</span>
             </div>
             <button class="btn small ${mode === 'cheaper' ? 'ghost' : 'lime'}" onclick="applyServerSwap('${x.cat}','${x.p.id}')">Заменить</button>
+            </div>
           </div>`).join('') : `<div class="small muted">Вариантов нет — конфигурация уже оптимальна.</div>`}
         </div>`;
       }).join('')}
@@ -248,13 +254,15 @@ function laptopSwapsHtml(l) {
     <div class="swap-head"><b>🔁 Альтернативы</b></div>
     <div class="swap-cols">
       ${cheaper ? `<div class="swap-col cheap"><div class="swap-col-head">💸 Удешевить</div>
-        <div class="swap-card"><div class="swap-name">${esc(cheaper.x.name)}</div>
+        <div class="swap-card">${partImg(cheaper.x, { alt: cheaper.x.name })}
+        <div class="swap-card-body"><div class="swap-name">${esc(cheaper.x.name)}</div>
         <div class="swap-deltas"><span class="swap-badge neg">−${fmt(price - cheaper.price)}</span><span class="swap-badge neutral">${cheaper.fps} FPS</span></div>
-        <button class="btn small ghost" onclick="openLaptop('${cheaper.x.id}')">Посмотреть</button></div></div>` : ''}
+        <button class="btn small ghost" onclick="openLaptop('${cheaper.x.id}')">Посмотреть</button></div></div></div>` : ''}
       ${faster ? `<div class="swap-col fast"><div class="swap-col-head">🚀 Ускорить</div>
-        <div class="swap-card"><div class="swap-name">${esc(faster.x.name)}</div>
+        <div class="swap-card">${partImg(faster.x, { alt: faster.x.name })}
+        <div class="swap-card-body"><div class="swap-name">${esc(faster.x.name)}</div>
         <div class="swap-deltas"><span class="swap-badge pos">+${fmt(faster.price - price)}</span><span class="swap-badge pos">${faster.fps} FPS</span></div>
-        <button class="btn small lime" onclick="openLaptop('${faster.x.id}')">Посмотреть</button></div></div>` : ''}
+        <button class="btn small lime" onclick="openLaptop('${faster.x.id}')">Посмотреть</button></div></div></div>` : ''}
     </div>
   </div>`;
 }

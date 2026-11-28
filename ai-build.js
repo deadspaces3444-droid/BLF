@@ -1099,13 +1099,13 @@ function aiResultHtml() {
         const price = aiPrice(part.id) ?? part.basePrice;
         const usedP = minPrice(part.id, state.region, 'used');
         return `<div class="ai-part">
-          <div class="ai-part-icon">${c.icon}</div>
+          <div class="ai-part-photo">${partImg(part, { size: 'md' })}</div>
           <div class="ai-part-main">
             <div class="small muted">${c.name}</div>
             <b>${esc(part.name)}</b>
             <div class="small muted">${esc(aiPartWhy(c.id, part, res))}</div>
           </div>
-          <div class="ai-part-price">${fmt(price)}${state.aiCondition !== 'new' && usedP && usedP < price ? `<div class="small" style="color:#fda4af">БУ от ${fmt(usedP)}</div>` : ''}
+          <div class="ai-part-price">${fmt(price)}${state.aiCondition !== 'new' && usedP && usedP < price ? `<div class="small" style="color:var(--warn)">БУ от ${fmt(usedP)}</div>` : ''}
             <div><button class="btn small ghost" onclick="goPriceId('${part.id}')">Цены →</button></div>
           </div>
         </div>`;
