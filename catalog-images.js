@@ -648,19 +648,38 @@ function imgKeyFor(part) {
   return key;
 }
 
+// Есть ли для ключа реальный файл в манифесте PART_IMAGES
+function hasPhoto(key) {
+  return !!(key && Object.prototype.hasOwnProperty.call(PART_IMAGES, key));
+}
+
+// Заглушка «изображения нет» — вместо битой картинки или пустого места.
+// Рисуется рамкой-иконкой на CSS, без эмодзи и без внешних файлов.
+function missingPhotoImg(size = 'md', label = '') {
+  const s = ['sm', 'md', 'lg'].indexOf(size) >= 0 ? size : 'md';
+  const sub = label ? `<span class="pim-sub">${escAttr(label)}</span>` : '';
+  return `<div class="part-img-missing part-img-missing-${s}" role="img" aria-label="изображения нет">`
+    + `<span class="pim-icon" aria-hidden="true"></span>`
+    + `<span class="pim-text">изображения нет</span>${sub}</div>`;
+}
+
 function imgFor(part) {
-  return PART_IMG_DIR + imgKeyFor(part) + '.jpg';
+  if (!part) return '';
+  const key = imgKeyFor(part);
+  return hasPhoto(key) ? PART_IMG_DIR + key + '.jpg' : '';
 }
 
 // Готовая картинка-плитка: белый фон, объект по центру, ленивая загрузка.
 // alt — человеческое название модели: фото реальное, подпись честная.
 function partImg(part, { size = 'md', cls = '', alt = '' } = {}) {
-  if (!part) return '';
+  if (!part) return missingPhotoImg(size);
   const label = alt || part.name || '';
+  const src = imgFor(part);
+  if (!src) return missingPhotoImg(size, label);
   const exact = isExactPhoto(part);
   // честная подпись: у семейного фото прямо сказано, что это типовое фото серии
   const title = exact ? label : `${label} · типовое фото серии`;
-  return `<img class="part-img part-img-${size} ${cls}" src="${imgFor(part)}" alt="${escAttr(label)}" title="${escAttr(title)}" data-photo="${exact ? 'exact' : 'series'}" loading="lazy" decoding="async">`;
+  return `<img class="part-img part-img-${size} ${cls}" src="${src}" alt="${escAttr(label)}" title="${escAttr(title)}" data-photo="${exact ? 'exact' : 'series'}" loading="lazy" decoding="async" onerror="imgFallback(this)">`;
 }
 
 // Нормализация названия для сверки «позиция ↔ что на фото»
@@ -701,6 +720,18 @@ function buildImgStrip(parts, max = 4) {
   const list = (parts || []).filter(Boolean).slice(0, max);
   if (!list.length) return '';
   return `<div class="build-img-strip">${list.map(p => partImg(p, { size: 'sm' })).join('')}</div>`;
+}
+
+// Битая ссылка (файл не загрузился) → подставляем плашку «изображения нет»
+function imgFallback(el) {
+  if (!el || !el.parentNode) return;
+  const cls = String(el.className || '');
+  const size = (cls.match(/part-img-(sm|md|lg)/) || [])[1] || 'md';
+  const label = el.getAttribute('alt') || '';
+  const box = el.ownerDocument.createElement('div');
+  box.innerHTML = missingPhotoImg(size, label);
+  const node = box.firstElementChild;
+  if (node) el.parentNode.replaceChild(node, el);
 }
 
 // Короткое имя для подписи под миниатюрой: «NVIDIA GeForce RTX 4070 12GB» → «RTX 4070»

@@ -837,6 +837,35 @@ footer a{color:var(--accent-deep)}
 .part-img-md{width:112px;height:112px;padding:8px;border-radius:16px}
 .part-img-lg{width:100%;height:210px;padding:14px;border-radius:var(--radius)}
 
+/* плашка «изображения нет»: рисунок рамки на CSS, без эмодзи и внешних файлов */
+.part-img-missing{display:flex;flex-direction:column;align-items:center;justify-content:center;gap:6px;
+  background:repeating-linear-gradient(135deg,#f7f9fd 0 10px,#eef2f9 10px 20px);
+  border:1px dashed #c8d3e4;border-radius:14px;color:var(--muted);text-align:center;padding:8px}
+.part-img-missing .pim-icon{position:relative;display:block;width:34%;max-width:52px;aspect-ratio:1/1;
+  border:2px solid #b9c6da;border-radius:6px;background:#fff}
+.part-img-missing .pim-icon::before{content:"";position:absolute;left:14%;bottom:16%;width:72%;height:2px;
+  background:#b9c6da;transform:rotate(-38deg);transform-origin:center}
+.part-img-missing .pim-icon::after{content:"";position:absolute;right:16%;top:16%;width:22%;aspect-ratio:1/1;
+  border-radius:50%;background:#dbe4f2}
+.part-img-missing .pim-text{font-size:.72rem;font-weight:750;letter-spacing:.04em;text-transform:uppercase}
+.part-img-missing .pim-sub{font-size:.68rem;font-weight:600;color:var(--muted);max-width:96%;overflow:hidden;
+  text-overflow:ellipsis;white-space:nowrap;opacity:.85}
+.part-img-missing-sm{width:64px;height:64px;padding:5px;border-radius:12px}
+.part-img-missing-sm .pim-icon{width:38%;max-width:24px}
+.part-img-missing-sm .pim-text,.part-img-missing-sm .pim-sub{display:none}
+.part-img-missing-md{width:112px;height:112px;border-radius:16px}
+.part-img-missing-md .pim-text{font-size:.6rem;letter-spacing:.01em}
+.part-img-missing-md .pim-sub{display:none}
+.part-img-missing-lg{width:100%;height:210px;border-radius:var(--radius)}
+.part-img-missing .pim-text{line-height:1.15}
+/* в карточках плашка занимает ровно то же место, что и фото */
+.card-photo .part-img-missing-lg,.srv-photo .part-img-missing-lg,
+.laptop-photo .part-img-missing-lg{height:196px}
+.srv-card .srv-photo .part-img-missing-lg,.laptop-card .laptop-photo .part-img-missing-lg{height:170px}
+.slot .slot-photo .part-img-missing-md{width:74px;height:74px;border-radius:14px}
+.slot .slot-photo .part-img-missing-md .pim-text{font-size:.52rem}
+.build-img-strip .part-img-missing-sm{width:62px;height:62px;border-radius:12px}
+
 /* карточка каталога: фото сверху, крупно */
 .card-photo{position:relative;margin:-22px -22px 14px;border-radius:var(--radius) var(--radius) 0 0;
   overflow:hidden;background:linear-gradient(180deg,#f8fbff,#eef4fc)}
