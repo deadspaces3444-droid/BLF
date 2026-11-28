@@ -13,7 +13,7 @@ if (typeof EXTRA_BUILDS !== 'undefined') {
 if (typeof prewarmOffers === 'function') prewarmOffers();
 
 const state = {
-  region: 'nsk',
+  region: 'saratov',
   page: 'home',
   compCat: 'all',
   compQuery: '',
@@ -105,11 +105,34 @@ function topCities(n = 12) {
   return list.filter((c, i) => list.findIndex(x => x.id === c.id) === i).slice(0, n);
 }
 
-function navigate(page) {
+// Страница и город запоминаются: после F5 сайт открывается там же, где вы были
+const UI_STATE_KEY = 'blf.ui.v1';
+const APP_PAGES = ['home','builds','compare-builds','components','compare-components','prices','compat','builder','fps','saved','ai','server-guide','laptops','servers','server-os','pc-os','server-compat'];
+function saveUiState() {
+  try {
+    localStorage.setItem(UI_STATE_KEY, JSON.stringify({ page: state.page, region: state.region }));
+    if (location.hash !== '#' + state.page) history.replaceState(null, '', '#' + state.page);
+  } catch (e) {}
+}
+function loadUiState() {
+  try {
+    const raw = localStorage.getItem(UI_STATE_KEY);
+    if (raw) {
+      const cfg = JSON.parse(raw);
+      if (cfg && cityById(cfg.region)) state.region = cfg.region;
+      if (cfg && APP_PAGES.includes(cfg.page)) state.page = cfg.page;
+    }
+  } catch (e) {}
+  const hash = (location.hash || '').replace('#', '');
+  if (APP_PAGES.includes(hash)) state.page = hash;      // ссылка вида …/#builder важнее сохранённого
+}
+
+function navigate(page, opts = {}) {
   state.page = page;
   $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.page === page));
   $$('section.page').forEach(s => s.classList.toggle('active', s.id === 'page-' + page));
-  window.scrollTo({ top: 0, behavior: 'smooth' });
+  if (!opts.keepScroll) window.scrollTo({ top: 0, behavior: 'smooth' });
+  saveUiState();
   render();
 }
 function setRegion(id) {
@@ -119,6 +142,7 @@ function setRegion(id) {
   const label = $('#regionBtnLabel');
   if (label) label.textContent = c.name;
   closeRegionModal();
+  saveUiState();
   render();
   // если открыт живой поиск цен — перезапрашиваем под новый город
 }
@@ -892,26 +916,19 @@ function renderBuilder() {
       ${state.onlyCompatible ? '✅ Только совместимые' : '📋 Все комплектующие'}
     </button>`;
 
-  $('#builderSlots').innerHTML = `<div class="pc3d-side-head">
-      <b>🧰 Комплектующие</b>
-      <span class="small muted">нажмите «Установить» — деталь встанет в корпус на схеме</span>
-    </div>` + CATEGORIES.map(c => {
+  $('#builderSlots').innerHTML = CATEGORIES.map(c => {
     const cur = state.builder[c.id];
     const { pool, compatible, allCat } = optionsFor(c.id, state.builder, cur);
     const curObj = byId(cur);
     const hidden = allCat.length - compatible.length;
-    const installed = !!curObj;
-    return `<div class="slot ${installed ? 'installed' : 'empty'}">
-      <div class="icon">${c.icon}</div>
-      <div style="flex:1;min-width:0"><label class="small muted">${c.name}
+    return `<div class="slot"><div class="icon">${c.icon}</div>
+      <div style="flex:1"><label class="small muted">${c.name}
         ${state.onlyCompatible && hidden > 0 ? `<span class="compat-note">· ${compatible.length} из ${allCat.length}, ${hidden} несовместимых скрыто</span>` : ''}</label>
-      ${installed ? `<div class="slot-name" title="${esc(curObj.name)}">${esc(curObj.name)}</div>` : '<div class="slot-empty">не установлено</div>'}
-      <select onchange="setBuilderPart('${c.id}', this.value)" title="Сменить деталь">
+      <select onchange="setBuilderPart('${c.id}', this.value)">
         ${pool.map(x => `<option value="${x.id}" ${x.id === cur ? 'selected' : ''}>${esc(x.name)} — от ${fmt(minPrice(x.id, state.region, 'new') ?? x.basePrice)}${x.year < 2020 ? ' · старая' : ''}</option>`).join('')}
       </select></div>
-      <div class="p"><span class="price">${fmt(minPrice(cur, state.region, 'new') ?? 0)}</span><br>
-      <span class="small used-est">${minPrice(cur, state.region, 'used') ? 'БУ ≈ ' + fmt(minPrice(cur, state.region, 'used')) + ' (проверять)' : ''}</span>
-      <div style="margin-top:6px"><button class="btn small ${installed ? 'ghost' : 'lime'}" onclick="pc3dOpenPicker('${c.id}')">${installed ? 'Заменить' : 'Установить'}</button></div></div>
+      <div class="p"><span class="price">${fmt(minPrice(cur, state.region, 'new') ?? curObj?.basePrice ?? 0)}</span><br>
+      <span class="small used-est">${minPrice(cur, state.region, 'used') ? 'БУ ≈ ' + fmt(minPrice(cur, state.region, 'used')) + ' (проверять)' : ''}</span></div>
     </div>`;
   }).join('');
 
@@ -967,7 +984,6 @@ function renderBuilder() {
     </div>
     ${typeof priorityBuilderPanel === 'function' ? priorityBuilderPanel() : ''}
     ${fpsTable(state.builder, state.builderFpsRes)}`;
-  if (typeof pc3dInit === 'function') pc3dInit();
   if (typeof renderSwaps === 'function') renderSwaps();
   if (typeof renderPriorityBars === 'function') renderPriorityBars();
 }
@@ -1537,7 +1553,15 @@ function render() {
 
 // ---------- Инициализация ----------
 document.addEventListener('DOMContentLoaded', () => {
+  loadUiState();
+  // показать нужную страницу без прокрутки наверх при восстановлении
+  $$('.tab').forEach(t => t.classList.toggle('active', t.dataset.page === state.page));
+  $$('section.page').forEach(s => s.classList.toggle('active', s.id === 'page-' + state.page));
   render();
+  window.addEventListener('hashchange', () => {
+    const h = (location.hash || '').replace('#', '');
+    if (APP_PAGES.includes(h) && h !== state.page) navigate(h);
+  });
 
   $('#regionModalInput')?.addEventListener('input', e => { state.regionQuery = e.target.value; renderRegionList(); });
   document.addEventListener('keydown', e => { if (e.key === 'Escape') closeRegionModal(); });
