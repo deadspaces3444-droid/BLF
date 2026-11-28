@@ -415,7 +415,7 @@ function compCard(c) {
   const gameName = state.compFpsGame === 'all' ? 'средний по 20 играм' : (GAMES.find(g => g.id === state.compFpsGame)?.name || '');
   const pair = c.cat === 'gpu' ? 'с i5-12400F' : c.cat === 'cpu' ? 'с RTX 4070' : '';
   return `<article class="card">
-    <div class="card-photo">${partImg(c, { size: 'lg' })}<span class="card-photo-cat">${catById(c.cat).name}</span></div>
+    <div class="card-photo">${partImg(c, { size: 'lg' })}<span class="card-photo-cat">${catById(c.cat).name}</span>${photoBadge(c)}</div>
     <div class="tag">${catById(c.cat).name} · ${esc(c.brand)} · ${c.year}</div>
     <h3>${esc(c.name)}</h3>
     <div class="specs-mini">${specRows(c)}</div>
@@ -1088,7 +1088,7 @@ function serverCompCard(part) {
   const cat = serverCatById(part.cat);
   const wl = serverWorkload({ servercpu: part.cat === 'servercpu' ? part.id : 'sc-xeon-silver4310', serverram: part.cat === 'serverram' ? part.id : 'sram-ddr4ecc64', serverstorage: part.cat === 'serverstorage' ? part.id : 'sst-cd6', ramModules: 2 });
   return `<article class="card srv-card">
-    <div class="srv-photo">${partImg(part)}</div>
+    <div class="srv-photo">${partImg(part)}${photoBadge(part)}</div>
     <div class="tag">${cat.icon} ${cat.name} · ${esc(part.brand)} · ${part.year}${part.budget ? ' · 💸 бюджет' : ''}${part.xeon ? ' · Xeon' : ''}${part.chinese ? ' · 🇨🇳 китайская' : ''}</div>
     <h3>${esc(part.name)}</h3>
     <div class="specs-mini">${Object.entries(part.specs).map(([k, v]) => `<div>${k}: <b>${esc(v)}</b></div>`).join('')}</div>
